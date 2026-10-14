@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="brassGradH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8a6729"/>
+      <stop offset="30%" stop-color="#e8cf9b"/>
+      <stop offset="60%" stop-color="#b8863b"/>
+      <stop offset="85%" stop-color="#fdf4df"/>
+      <stop offset="100%" stop-color="#694d1c"/>
+    </linearGradient>
+    <linearGradient id="brassProngL" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#694d1c"/>
+      <stop offset="40%" stop-color="#e8cf9b"/>
+      <stop offset="100%" stop-color="#99702c"/>
+    </linearGradient>
+    <filter id="forkShadow" x="-20%" y="-10%" width="140%" height="120%">
+      <feDropShadow dx="3" dy="8" stdDeviation="5" flood-color="#242622" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#forkShadow)">
+    <!-- Left Prong -->
+    <rect x="42" y="20" width="18" height="210" rx="9" fill="url(#brassProngL)"/>
+    
+    <!-- Right Prong -->
+    <rect x="100" y="20" width="18" height="210" rx="9" fill="url(#brassGradH)"/>
+
+    <!-- Fork Base U-Bend -->
+    <path d="M 42,200 C 42,270 118,270 118,200 L 100,200 C 100,250 60,250 60,200 Z" fill="url(#brassGradH)"/>
+
+    <!-- Stem / Shaft -->
+    <rect x="71" y="248" width="18" height="85" rx="3" fill="url(#brassGradH)"/>
+
+    <!-- Handle Ball End -->
+    <circle cx="80" cy="345" r="16" fill="url(#brassGradH)"/>
+    <circle cx="78" cy="341" r="5" fill="#fdf4df" opacity="0.6"/>
+
+    <!-- Engraving -->
+    <text x="80" y="295" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" fill="#4d3915" text-anchor="middle" transform="rotate(-90 80 295)">A=440 Hz</text>
+  </g>
+</svg>

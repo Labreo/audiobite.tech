@@ -1,0 +1,889 @@
+/* ==============================================================================
+   AUDIOBITE.TECH / STEMNOTE STUDIO - EDITORIAL-TACTILE DESIGN SYSTEM
+   Inspired by 1970s Braun / Nagra Analog Mastering Desks & Parchment Presses
+   Zero Pure Black or Pure White - Strict Tactile Warmth
+   ============================================================================== */
+
+:root {
+  /* Warm Charcoal Darks */
+  --ink-deep: #111312;
+  --ink-charcoal: #171717;
+  --ink-graphite: #282723;
+  --ink-muted: #4a4740;
+
+  /* Parchment / Alabaster Lights */
+  --paper-parchment: #eee9e5;
+  --paper-stone: #d5d2cb;
+  --paper-alabaster: #f4efe9;
+  --paper-card: #f9f6f0;
+
+  /* Tactile Hardware Accents */
+  --accent-amber: #d45d2a;
+  --accent-brass: #b8863b;
+  --accent-brass-light: #e0be7c;
+  --accent-sage: #3d5a45;
+  --accent-copper: #bf6d3b;
+
+  /* Warm Multi-Tier Tinted Shadows */
+  --shadow-warm-sm: #24262226;
+  --shadow-warm-md: #24262220;
+  --shadow-warm-deep: #2c201933;
+
+  /* Typography Stacks */
+  --font-display: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono', Menlo, monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  background-color: var(--paper-alabaster);
+  color: var(--ink-deep);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-display);
+  background: var(--paper-alabaster);
+  color: var(--ink-deep);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------------------------------------
+   STAGE 2: ANALOG 6-FRAME FILM GRAIN & ATMOSPHERE
+   ------------------------------------------------------------------------------ */
+.portfolio-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  contain: strict;
+  overflow: hidden;
+}
+
+.portfolio-grain > div {
+  position: absolute;
+  inset: -20%;
+  opacity: 0.22;
+  background-image: url('/static/textures/live-grain.png');
+  background-repeat: repeat;
+  animation: 0.5s steps(6, end) infinite portfolioGrain;
+  will-change: transform;
+}
+
+@keyframes portfolioGrain {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2%, 3%); }
+  40% { transform: translate(3%, -1%); }
+  60% { transform: translate(-3%, -2%); }
+  80% { transform: translate(2%, 1%); }
+}
+
+/* ------------------------------------------------------------------------------
+   STAGE 4: PHYSICAL CUTOUTS & 3D SPATIAL WORKBENCH
+   ------------------------------------------------------------------------------ */
+.workbench-canvas {
+  position: relative;
+  width: 100%;
+  max-width: 82rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.cutout {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --shift-x: 0rem;
+  --shift-y: 0rem;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: pan-y;
+  user-select: none;
+  position: absolute;
+  z-index: 20;
+  filter: drop-shadow(0.125rem 0.3125rem 0.1875rem var(--shadow-warm-sm))
+          drop-shadow(0.3125rem 0.75rem 0.5rem var(--shadow-warm-md));
+}
+
+.cutout img, .cutout .cutout-visual {
+  display: block;
+  transform: perspective(53rem)
+             translate3d(var(--shift-x), var(--shift-y), 0)
+             rotateX(var(--tilt-x))
+             rotateY(var(--tilt-y));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease;
+  will-change: transform;
+}
+
+.cutout:hover img, .cutout:hover .cutout-visual {
+  filter: brightness(1.08) saturate(1.06);
+  transform: perspective(53rem)
+             translate3d(var(--shift-x), calc(var(--shift-y) - 0.35rem), 1.25rem)
+             rotateX(var(--tilt-x))
+             rotateY(var(--tilt-y))
+             scale(1.035);
+}
+
+.cutout.is-grabbed {
+  cursor: grabbing;
+  z-index: 50;
+}
+
+.cutout.is-grabbed img, .cutout.is-grabbed .cutout-visual {
+  transform: perspective(53rem)
+             translate3d(var(--shift-x), var(--shift-y), 1.75rem)
+             scale(0.98);
+}
+
+/* Desktop absolute placement of cutouts */
+#cutout-vu {
+  top: 7rem;
+  right: 1.5rem;
+  width: 15rem;
+  height: 10.5rem;
+}
+
+#cutout-fork {
+  top: 26rem;
+  left: 0.5rem;
+  width: 7.5rem;
+  height: 18rem;
+}
+
+#cutout-badge {
+  top: 42rem;
+  right: 2rem;
+  width: 14rem;
+  height: 9rem;
+}
+
+@media (max-width: 68rem) {
+  .cutout {
+    position: static;
+    margin: 1.5rem auto;
+    width: 12rem !important;
+    height: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------------------------
+   STAGE 3: TYPOGRAPHIC STAGING & MORPHING REEL SLOTS
+   ------------------------------------------------------------------------------ */
+.site-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--paper-stone);
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--ink-deep);
+}
+
+.brand-logo-disc {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--ink-deep);
+  border: 2px solid var(--accent-brass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-logo-disc::after {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent-amber);
+}
+
+.brand-name {
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.brand-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-amber);
+  background: var(--paper-parchment);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--paper-stone);
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.runtime-badge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-sage);
+  background: #e5ede7;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999rem;
+  border: 1px solid #c2d6c6;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pulse-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--accent-sage);
+  display: inline-block;
+  box-shadow: 0 0 0.35rem var(--accent-sage);
+}
+
+.btn-tactile {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.55rem 1.25rem;
+  background: var(--ink-charcoal);
+  color: var(--paper-parchment);
+  border: 1px solid var(--ink-deep);
+  border-radius: 0.35rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  box-shadow: 0 0.2rem 0.35rem var(--shadow-warm-sm);
+}
+
+.btn-tactile:hover {
+  background: var(--ink-graphite);
+  transform: translateY(-0.1rem);
+  box-shadow: 0 0.4rem 0.6rem var(--shadow-warm-md);
+}
+
+.btn-tactile:active {
+  transform: translateY(0.05rem);
+  box-shadow: 0 0.1rem 0.2rem var(--shadow-warm-sm);
+}
+
+.btn-brass {
+  background: var(--accent-brass);
+  color: var(--ink-deep);
+  border: 1px solid #946927;
+}
+
+.btn-brass:hover {
+  background: var(--accent-brass-light);
+}
+
+.hero-section {
+  padding: 4.5rem 0 3rem;
+  position: relative;
+}
+
+.editorial-hero-title {
+  font-size: clamp(2.5rem, 6.2vw, 5.8rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  color: var(--ink-deep);
+  margin-bottom: 1.5rem;
+}
+
+.hero-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.hero-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(1.2rem) rotate(1.5deg);
+  animation: charStagger 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--char-idx, 0) * 0.035s + 0.1s);
+}
+
+@keyframes charStagger {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Morphing Typographic Reel Slot */
+.morphing-reel-slot {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  vertical-align: middle;
+  cursor: pointer;
+  padding: 0 0.4rem;
+  border-radius: 0.4rem;
+  transition: background 0.3s ease;
+}
+
+.morphing-reel-slot:hover {
+  background: var(--paper-parchment);
+}
+
+.reel-glyph {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15em;
+  color: var(--accent-amber);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.reel-viewport {
+  display: inline-block;
+  height: 2.2rem;
+  overflow: hidden;
+  vertical-align: middle;
+  background: var(--ink-charcoal);
+  color: var(--accent-brass-light);
+  border-radius: 0.35rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--accent-brass);
+  box-shadow: inset 0 0.15rem 0.35rem var(--shadow-warm-sm);
+}
+
+.reel-strip {
+  display: flex;
+  flex-direction: column;
+  animation: reelScroll 9s infinite cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.reel-frame {
+  height: 2.2rem;
+  line-height: 2.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+@keyframes reelScroll {
+  0%, 28% { transform: translateY(0); }
+  33%, 61% { transform: translateY(-2.2rem); }
+  66%, 94% { transform: translateY(-4.4rem); }
+  100% { transform: translateY(0); }
+}
+
+.hero-narrative {
+  font-size: 1.2rem;
+  max-width: 44rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.hero-narrative strong {
+  color: var(--ink-deep);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------------------
+   STAGE 6: CONTINUOUS SVG SIGNAL THREAD
+   ------------------------------------------------------------------------------ */
+.signal-thread {
+  width: 100%;
+  height: 4rem;
+  overflow: visible;
+  margin: 1.5rem 0;
+}
+
+.signal-thread path {
+  fill: none;
+  stroke: var(--accent-copper);
+  stroke-width: 2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: threadDraw 2.4s cubic-bezier(0.25, 0.1, 0.25, 1) 0.2s forwards;
+}
+
+@keyframes threadDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ------------------------------------------------------------------------------
+   STAGE 1 & 5: ANALOG MASTERING DESK & TABPFN FADER
+   ------------------------------------------------------------------------------ */
+.analog-desk {
+  background: var(--paper-parchment);
+  border: 2px solid var(--paper-stone);
+  border-radius: 0.85rem;
+  padding: 2.5rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 0.5rem 1.5rem var(--shadow-warm-sm),
+              inset 0 1px 0 #fefcf980;
+  position: relative;
+}
+
+.desk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--paper-stone);
+}
+
+.desk-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.desk-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.desk-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 58rem) {
+  .desk-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fader Console */
+.fader-panel {
+  background: var(--paper-alabaster);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.6rem;
+  padding: 1.8rem;
+}
+
+.panel-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.track-picker-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.track-pill {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--paper-parchment);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--ink-charcoal);
+}
+
+.track-pill:hover {
+  background: #e2ddd8;
+}
+
+.track-pill.is-active {
+  background: var(--ink-deep);
+  color: var(--paper-parchment);
+  border-color: var(--ink-deep);
+}
+
+.attenuator-slot {
+  margin: 1.8rem 0;
+}
+
+.attenuator-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.slider-val {
+  font-weight: 800;
+  color: var(--accent-amber);
+}
+
+/* Custom Mechanical Slider */
+.fader-track-wrap {
+  position: relative;
+  width: 100%;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.tactile-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 0.55rem;
+  background: var(--ink-deep);
+  border-radius: 0.3rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.tactile-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.6rem;
+  height: 2.2rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(180deg, #d4b47d 0%, #b8863b 60%, #7d5921 100%);
+  border: 1px solid #4a3617;
+  box-shadow: 0 0.25rem 0.5rem var(--shadow-warm-md),
+              inset 0 1px 0 #fff8e8;
+  cursor: ew-resize;
+  transition: transform 0.1s ease;
+}
+
+.tactile-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.08);
+}
+
+.scale-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  margin-top: 0.3rem;
+}
+
+/* Meter & Output Panel */
+.telemetry-display {
+  background: var(--paper-alabaster);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.6rem;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.score-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.score-num {
+  font-size: 3.8rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--accent-amber);
+}
+
+.score-unit {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+
+.score-delta {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent-sage);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.cal-bars {
+  margin: 1.2rem 0;
+}
+
+.bar-row {
+  margin-bottom: 0.8rem;
+}
+
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  margin-bottom: 0.25rem;
+}
+
+.meter-track {
+  width: 100%;
+  height: 0.6rem;
+  background: var(--paper-parchment);
+  border-radius: 0.3rem;
+  overflow: hidden;
+  border: 1px solid var(--paper-stone);
+}
+
+.meter-fill {
+  height: 100%;
+  background: var(--accent-amber);
+  transition: width 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.meter-fill.sage {
+  background: var(--accent-sage);
+}
+
+.btn-generate {
+  width: 100%;
+  padding: 1rem;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------------------------
+   PARCHMENT INDEX CARD & PDF RESULT
+   ------------------------------------------------------------------------------ */
+.parchment-sheet-wrapper {
+  background: var(--paper-card);
+  border: 2px solid var(--paper-stone);
+  border-radius: 0.65rem;
+  padding: 2.5rem;
+  margin: 2.5rem 0 3.5rem;
+  box-shadow: 0 0.75rem 2rem var(--shadow-warm-md);
+  position: relative;
+  display: none; /* revealed on generate */
+}
+
+.parchment-sheet-wrapper.is-active {
+  display: block;
+  animation: cardSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--accent-brass);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stamp-badge {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--accent-amber);
+  border: 1.5px solid var(--accent-amber);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transform: rotate(-1.5deg);
+}
+
+.harmonic-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.harmonic-table th {
+  background: var(--paper-parchment);
+  color: var(--ink-deep);
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--paper-stone);
+}
+
+.harmonic-table td {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--paper-stone);
+  background: var(--paper-card);
+}
+
+.guardrail-audit-box {
+  background: #eef3f0;
+  border: 1px solid #c2d6c6;
+  border-radius: 0.4rem;
+  padding: 0.8rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-sage);
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ------------------------------------------------------------------------------
+   BACKTEST EVIDENCE SECTION
+   ------------------------------------------------------------------------------ */
+.backtest-section {
+  padding: 3rem 0 4rem;
+  border-top: 1px solid var(--paper-stone);
+}
+
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--accent-brass);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 1rem;
+}
+
+.backtest-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+.backtest-table th {
+  background: var(--ink-deep);
+  color: var(--paper-parchment);
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ink-graphite);
+}
+
+.backtest-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--paper-stone);
+  background: var(--paper-card);
+}
+
+.backtest-table tr.winner-row td {
+  background: #fbf5ee;
+  border-left: 3px solid var(--accent-amber);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------------------
+   MONETIZATION PRO MODAL ($4.99 SIDE HUSTLE)
+   ------------------------------------------------------------------------------ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: #11131290;
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.modal-overlay.is-open {
+  display: flex;
+}
+
+.modal-box {
+  background: var(--paper-alabaster);
+  border: 2px solid var(--accent-brass);
+  border-radius: 0.75rem;
+  max-width: 32rem;
+  width: 100%;
+  padding: 2.5rem;
+  box-shadow: 0 1rem 3rem var(--shadow-warm-deep);
+  position: relative;
+  text-align: center;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.modal-price-tag {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--accent-amber);
+  margin: 1rem 0 0.5rem;
+}
+
+.modal-features {
+  text-align: left;
+  margin: 1.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-charcoal);
+  line-height: 1.8;
+}
+
+/* ------------------------------------------------------------------------------
+   STAGE 7: ACCESSIBILITY & PREFERS-REDUCED-MOTION
+   ------------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-grain > div {
+    animation: none !important;
+  }
+  .cutout img, .cutout .cutout-visual, .hero-char {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .signal-thread path {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+  .reel-strip {
+    animation: none !important;
+  }
+}

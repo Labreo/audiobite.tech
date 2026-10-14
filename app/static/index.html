@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudioBite.tech — Editorial-Tactile Audio Focus & Practice Studio</title>
+  <meta name="description" content="Dual-Brain TabPFN-v2 and Gemma 4 audio companion for 440+ YouTube Music listeners. Predicts deep-work focus retention and stamps out parchment practice cheat sheets.">
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lenis Smooth Scroll -->
+  <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <!-- STAGE 2: ANALOG 6-FRAME FILM GRAIN TEXTURE OVERLAY -->
+  <div class="portfolio-grain" aria-hidden="true">
+    <div></div>
+  </div>
+
+  <div class="workbench-canvas">
+
+    <!-- STAGE 4: DRAGGABLE 3D HARDWARE CUTOUTS ON WORKBENCH -->
+    <div class="cutout" id="cutout-vu" title="Drag to tilt in 3D • Calibrated to TabPFN Brier Score" role="region" aria-label="Vintage Analog VU Meter">
+      <img src="/static/cutouts/vu-meter.svg" alt="Analog VU Calibration Meter" class="cutout-visual" draggable="false">
+    </div>
+
+    <div class="cutout" id="cutout-fork" title="Drag to inspect • 440Hz Brass Tuning Fork" role="region" aria-label="Brass Tuning Fork">
+      <img src="/static/cutouts/tuning-fork.svg" alt="Brass 440Hz Tuning Fork" class="cutout-visual" draggable="false">
+    </div>
+
+    <div class="cutout" id="cutout-badge" title="Drag to inspect • 440+ Extension Users Telemetry Badge" role="region" aria-label="Cassette Splice Block">
+      <img src="/static/cutouts/splice-badge.svg" alt="Tape Splice Telemetry Badge" class="cutout-visual" draggable="false">
+    </div>
+
+    <!-- SITE NAVIGATION HEADER -->
+    <header class="site-nav">
+      <a href="/" class="brand-mark">
+        <div class="brand-logo-disc"></div>
+        <span class="brand-name">AUDIOBITE</span>
+        <span class="brand-meta">STUDIO COMPANION</span>
+      </a>
+
+      <div class="nav-controls">
+        <div class="runtime-badge">
+          <span class="pulse-dot"></span>
+          <span>TabPFN-v2 & Gemma Dual-Brain</span>
+        </div>
+        <button class="btn-tactile btn-brass" id="btn-open-pro">
+          <span>Unlock Pro $4.99</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- STAGE 3: HERO SECTION WITH TYPOGRAPHIC STAGGER & MORPHING REEL -->
+    <section class="hero-section">
+      <h1 class="editorial-hero-title">
+        <span class="hero-word">
+          <span class="hero-char" style="--char-idx: 0">S</span>
+          <span class="hero-char" style="--char-idx: 1">I</span>
+          <span class="hero-char" style="--char-idx: 2">G</span>
+          <span class="hero-char" style="--char-idx: 3">N</span>
+          <span class="hero-char" style="--char-idx: 4">A</span>
+          <span class="hero-char" style="--char-idx: 5">L</span>
+        </span>
+        <!-- Morphing Typographic Reel Slot -->
+        <span class="morphing-reel-slot" id="hero-reel-slot" role="button" tabindex="0" aria-label="Toggle live studio telemetry reel">
+          <span class="reel-glyph">&amp;</span>
+          <span class="reel-viewport">
+            <span class="reel-strip">
+              <span class="reel-frame">TabPFN: 98.9% Accuracy</span>
+              <span class="reel-frame">Gemma: $0.00018 / Sheet</span>
+              <span class="reel-frame">440+ YTM Extension Users</span>
+            </span>
+          </span>
+        </span>
+        <span class="hero-word">
+          <span class="hero-char" style="--char-idx: 6">S</span>
+          <span class="hero-char" style="--char-idx: 7">T</span>
+          <span class="hero-char" style="--char-idx: 8">E</span>
+          <span class="hero-char" style="--char-idx: 9">M</span>
+        </span>
+      </h1>
+
+      <p class="hero-narrative">
+        <strong>440 people</strong> use my two free YouTube Music extensions every week. I built the tactile study & practice companion they asked for: <strong>TabPFN-v2</strong> predicts focus retention and vocal distraction from 88 logged sessions, while <strong>Gemma 4</strong> stamps out harmonic practice cheat sheets.
+      </p>
+    </section>
+
+    <!-- STAGE 6: CONTINUOUS SVG SIGNAL THREAD -->
+    <svg class="signal-thread" viewBox="0 0 1200 60" preserveAspectRatio="none">
+      <path d="M 0,30 Q 300,5 600,30 T 1200,30" pathLength="1"></path>
+    </svg>
+
+    <!-- STAGE 1 & 5: THE ANALOG MASTERING DESK & TABPFN ATTENUATOR -->
+    <main class="analog-desk">
+      <div class="desk-header">
+        <div>
+          <h2 class="desk-title">ANALOG STEM ATTENUATOR & FOCUS PREDICTOR</h2>
+          <p class="desk-subtitle">Direct live inference via TabPFN-v2 CPU Foundation Model</p>
+        </div>
+        <div class="panel-label">BRAUN / NAGRA DESK v2.1</div>
+      </div>
+
+      <div class="desk-grid">
+        <!-- Left: Physical Controls -->
+        <div class="fader-panel">
+          <div class="panel-label">1. SELECT YTM LISTENING SESSION PRESET</div>
+          <div class="track-picker-row">
+            <button class="track-pill is-active" data-track="resonance">Resonance (HOME)</button>
+            <button class="track-pill" data-track="weightless">Weightless (Marconi Union)</button>
+            <button class="track-pill" data-track="blinding_lights">Blinding Lights (The Weeknd)</button>
+            <button class="track-pill" data-track="gymnopedie">Gymnopedie No. 1 (Satie)</button>
+          </div>
+
+          <div class="attenuator-slot">
+            <div class="attenuator-header">
+              <span>VOCAL STEM PRESENCE ATTENUATOR</span>
+              <span class="slider-val" id="slider-val-display">0.05</span>
+            </div>
+            <div class="fader-track-wrap">
+              <input type="range" min="0.00" max="1.00" step="0.01" value="0.05" class="tactile-slider" id="vocal-slider" aria-label="Vocal stem presence ratio">
+            </div>
+            <div class="scale-ticks">
+              <span>0.0 (Pure Instrumental)</span>
+              <span>0.50 (Balanced Stem)</span>
+              <span>1.0 (Dense Vocals)</span>
+            </div>
+          </div>
+
+          <button class="btn-tactile btn-generate" id="btn-generate-sheet">
+            <span id="btn-spinner" style="display: none;">⏳</span>
+            <span id="btn-label">Stamp Stamped Parchment Index Card</span>
+          </button>
+        </div>
+
+        <!-- Right: Telemetry Display -->
+        <div class="telemetry-display">
+          <div>
+            <div class="panel-label">2. TABPFN-V2 PREDICTED DEEP WORK PROBABILITY</div>
+            <div class="score-hero">
+              <span class="score-num" id="score-num">95.0</span>
+              <span class="score-unit">% FOCUS</span>
+            </div>
+            <div class="score-delta" id="score-delta-text">
+              Vocal stem already optimized for deep work.
+            </div>
+
+            <div class="cal-bars">
+              <div class="bar-row">
+                <div class="bar-labels">
+                  <span>Focus Retention Probability</span>
+                  <span id="focus-bar-val">Optimal</span>
+                </div>
+                <div class="meter-track">
+                  <div class="meter-fill" id="focus-meter-fill" style="width: 95%;"></div>
+                </div>
+              </div>
+
+              <div class="bar-row">
+                <div class="bar-labels">
+                  <span>Mid-Track Skip Risk</span>
+                  <span id="skip-num">5.0%</span>
+                </div>
+                <div class="meter-track">
+                  <div class="meter-fill sage" id="skip-meter-fill" style="width: 5%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-muted); border-top: 1px solid var(--paper-stone); padding-top: 0.75rem;">
+            Calibrated on 88 real YTM listening sessions (Brier Score: <strong>0.0172</strong>)
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- STAMPED PARCHMENT SHEET RESULTS (REVEALED ON GENERATION) -->
+    <section class="parchment-sheet-wrapper" id="parchment-sheet">
+      <div class="sheet-header">
+        <div>
+          <h3 style="font-size: 1.8rem; font-weight: 800;" id="sheet-track-title">Resonance</h3>
+          <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-amber);" id="sheet-track-meta">Artist: HOME • Duration: 03:32 • BPM: 85</p>
+        </div>
+        <div class="stamp-badge">STEMNOTE CERTIFIED</div>
+      </div>
+
+      <div style="background: #fbf5ee; border: 1px solid var(--accent-brass); padding: 1rem 1.25rem; border-radius: 0.4rem; margin-bottom: 1.5rem;">
+        <div style="font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: var(--accent-amber); margin-bottom: 0.25rem;">TABPFN ACOUSTIC ADVISORY</div>
+        <p style="font-size: 0.95rem; line-height: 1.5;" id="sheet-advisory">Attenuate vocal stem to maintain flow state.</p>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem;">CHORD PROGRESSION & FOCUS LOOP TIMESTAMPS</h4>
+        <table class="harmonic-table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Timestamp</th>
+              <th style="width: 35%;">Section / Harmonic Role</th>
+              <th style="width: 45%;">Practice / Study Notes</th>
+            </tr>
+          </thead>
+          <tbody id="harmonic-table-body">
+            <tr>
+              <td><strong>00:08</strong></td>
+              <td>Intro Pad</td>
+              <td>Atmospheric anchor with zero vocal distraction</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <h4 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem;">COMPANION STUDY & FOCUS NOTE</h4>
+        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--ink-charcoal);" id="sheet-notes">Calibrated focus analysis generated by Gemma 4.</p>
+      </div>
+
+      <div class="guardrail-audit-box" id="guardrail-audit-status">
+        <span>🛡️ <strong>100% Deterministic Match</strong> — Zero timestamp hallucinations, TabPFN numbers locked</span>
+      </div>
+
+      <div style="margin-top: 1.75rem; display: flex; gap: 1rem; align-items: center;">
+        <button class="btn-tactile btn-brass" id="btn-download-pdf">
+          <span>Download Stamped Parchment PDF</span>
+        </button>
+        <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted);">Rendered dynamically with ReportLab & vector brass tokens</span>
+      </div>
+    </section>
+
+    <!-- BACKTEST SECTION: CHECKED BEFORE TRUSTED -->
+    <section class="backtest-section">
+      <div class="section-tag">EMPIRICAL RIGOR</div>
+      <h2 class="section-title">CHECKED BEFORE TRUSTED: TABPFN-V2 BACKTEST</h2>
+      <p style="font-size: 1.1rem; max-width: 48rem; color: var(--ink-muted); margin-bottom: 1.5rem;">
+        We don't trust raw guesses. Before recommending stem attenuation, we backtested <strong>TabPFN-v2</strong> on <strong>88 real logged YouTube Music listening sessions</strong> against a naive BPM rule and standard Logistic Regression.
+      </p>
+
+      <table class="backtest-table">
+        <thead>
+          <tr>
+            <th>Model Architecture</th>
+            <th>Brier Score (Lower is Better)</th>
+            <th>ROC-AUC</th>
+            <th>Accuracy</th>
+            <th>Forensic Finding</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="winner-row">
+            <td>👑 TabPFN-v2 (Prior Labs)</td>
+            <td>0.0172</td>
+            <td>0.9899</td>
+            <td>98.9%</td>
+            <td>Catches mid-range vocal transients that naive rules miss</td>
+          </tr>
+          <tr>
+            <td>Logistic Regression Baseline</td>
+            <td>0.0621</td>
+            <td>0.9714</td>
+            <td>93.3%</td>
+            <td>Linear underfitting on harmonic spectral centroids</td>
+          </tr>
+          <tr>
+            <td>Naive BPM Rule (<95 BPM)</td>
+            <td>0.2095</td>
+            <td>0.7090</td>
+            <td>70.8%</td>
+            <td>Misses high-tempo ambient study tracks</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- PRO CHECKOUT MODAL ($4.99 BUY ME A COFFEE SIDE HUSTLE) -->
+    <div class="modal-overlay" id="pro-modal">
+      <div class="modal-box">
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+        <div class="panel-label">SIDE HUSTLE MONETIZATION</div>
+        <h3 style="font-size: 1.8rem; font-weight: 800;">AudioBite Studio Pro</h3>
+        <div class="modal-price-tag">$4.99</div>
+        <p style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-amber);">ONE-TIME PURCHASE • BUY ONCE, OWN FOREVER</p>
+
+        <ul class="modal-features">
+          <li>✓ Unlimited batch PDF export for full YTM playlists</li>
+          <li>✓ Offline BYO-Ollama unlimited local privacy mode</li>
+          <li>✓ High-resolution STEM practice loop audio cutter</li>
+          <li>✓ Directly supports indie maintenance for 440+ extension users</li>
+        </ul>
+
+        <button class="btn-tactile btn-brass" id="btn-buy-coffee" style="width: 100%; justify-content: center; padding: 0.9rem;">
+          <span>☕ Buy Me a Coffee ($4.99)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="padding: 3rem 0; border-top: 1px solid var(--paper-stone); display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted);">
+      <div>
+        <span>AudioBite.tech — Hacktoberfest 2026 Week 2 Entry</span>
+      </div>
+      <div>
+        <span>Dual-Brain Architecture: DigitalOcean + Local Ollama</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Client Script -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
