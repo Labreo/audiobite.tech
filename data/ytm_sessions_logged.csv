@@ -1,0 +1,90 @@
+track_title,artist_name,track_duration_sec,bpm,vocal_presence_ratio,spectral_centroid_hz,dynamic_range_db,hour_of_day,is_lyrics_heavy,prior_artist_skips,mini_mode_active,completed_focus_session,focus_retention_pct
+Weightless,Marconi Union,485,60,0.02,1120.5,6.2,9,0,0,1,1,96.5
+Dayvan Cowboy,Boards of Canada,301,84,0.05,1840.2,8.4,10,0,0,1,1,92.0
+Staralfur,Sigur Ros,406,72,0.38,1650.0,11.2,11,1,0,1,0,58.0
+Ghostwriter,RJD2,317,96,0.14,2420.8,9.1,14,0,1,1,1,84.5
+Avril 14th,Aphex Twin,125,78,0.00,1430.4,7.8,15,0,0,1,1,94.0
+Intro,The xx,127,100,0.08,1980.2,7.5,16,0,0,1,1,91.2
+Kiara,Bonobo,230,90,0.18,2210.0,8.9,17,0,0,1,1,88.0
+Breathe,Telepopmusik,280,82,0.64,2100.5,10.5,21,1,0,0,0,46.0
+Teardrop,Massive Attack,330,77,0.72,1920.0,11.8,22,1,0,0,0,42.5
+Midnight City,M83,243,105,0.45,3100.2,13.4,23,1,1,0,0,38.0
+Resonance,HOME,212,85,0.01,2340.5,8.1,1,0,0,1,1,95.0
+Nightcall,Kavinsky,259,84,0.52,2450.0,10.2,2,1,1,0,0,48.0
+Windowlicker,Aphex Twin,367,128,0.31,2980.4,12.6,3,0,1,0,0,34.0
+An Ending (Ascent),Brian Eno,266,54,0.00,890.2,5.1,8,0,0,1,1,98.2
+Alberto Balsalm,Aphex Twin,311,94,0.02,1760.1,7.2,9,0,0,1,1,93.5
+Music for Airports 1/1,Brian Eno,1035,50,0.00,780.0,4.8,10,0,0,1,1,97.0
+Treefingers,Radiohead,222,65,0.00,1050.8,5.9,11,0,0,1,1,95.5
+Everything in Its Right Place,Radiohead,251,124,0.68,2350.4,10.8,13,1,0,1,0,51.0
+Porcelain,Moby,241,96,0.58,2140.0,9.7,14,1,0,1,0,54.5
+Structures from Silence,Steve Roach,1740,48,0.00,690.5,4.2,15,0,0,1,1,99.0
+Cirrus,Bonobo,352,118,0.09,2450.6,8.6,16,0,0,1,1,89.5
+Kong,Bonobo,238,88,0.12,1980.4,7.9,17,0,0,1,1,90.2
+Stay,Hans Zimmer,398,64,0.04,1520.1,12.1,18,0,0,1,1,91.0
+Cornfield Chase,Hans Zimmer,127,94,0.00,1880.6,13.5,19,0,0,1,1,87.0
+Time,Hans Zimmer,275,60,0.00,1410.2,11.4,20,0,0,1,1,93.0
+Get Lucky,Daft Punk,369,116,0.82,2890.5,11.9,21,1,2,0,0,29.0
+Around the World,Daft Punk,429,121,0.48,2760.0,10.1,22,1,0,1,0,62.0
+Harder Better Faster Stronger,Daft Punk,224,123,0.76,3050.8,11.5,23,1,1,0,0,33.5
+Veridis Quo,Daft Punk,345,106,0.00,1920.4,7.8,0,0,0,1,1,94.2
+Something About Us,Daft Punk,232,100,0.61,2150.0,9.2,1,1,0,1,0,59.0
+Voyager,Daft Punk,227,110,0.00,2480.2,8.4,2,0,0,1,1,92.5
+Digital Love,Daft Punk,298,125,0.71,3120.0,12.2,3,1,2,0,0,31.0
+Gymnopedie No. 1,Erik Satie,203,66,0.00,1180.2,6.5,8,0,0,1,1,97.5
+Clair de Lune,Claude Debussy,332,62,0.00,1290.4,8.1,9,0,0,1,1,96.0
+River Flows in You,Yiruma,188,68,0.00,1420.0,7.4,10,0,0,1,1,95.0
+Nuvole Bianche,Ludovico Einaudi,358,74,0.00,1380.6,7.9,11,0,0,1,1,94.8
+Divenire,Ludovico Einaudi,402,96,0.00,1650.2,9.8,12,0,0,1,1,91.5
+Una Mattina,Ludovico Einaudi,204,70,0.00,1210.0,6.9,13,0,0,1,1,96.8
+Experience,Ludovico Einaudi,315,92,0.00,1720.5,10.4,14,0,0,1,1,92.1
+Weightless Part 2,Marconi Union,420,60,0.01,1140.0,6.1,15,0,0,1,1,96.0
+Electra,Airstream,372,65,0.08,1620.4,7.3,16,0,0,1,1,93.2
+Watermark,Enya,146,62,0.05,1340.2,6.8,17,0,0,1,1,94.0
+Caribbean Blue,Enya,238,82,0.74,2280.0,10.6,18,1,0,0,0,44.0
+Orinoco Flow,Enya,265,115,0.85,2590.8,11.2,19,1,1,0,0,36.0
+Only Time,Enya,218,68,0.79,2110.4,9.9,20,1,0,0,0,49.0
+Subwoofer Lullaby,C418,208,68,0.00,1080.5,6.0,21,0,0,1,1,97.2
+Sweden,C418,215,64,0.00,1110.2,6.3,22,0,0,1,1,96.5
+Wet Hands,C418,90,72,0.00,1190.0,6.8,23,0,0,1,1,95.8
+Minecraft,C418,254,66,0.00,1050.0,5.8,0,0,0,1,1,97.5
+Mice on Venus,C418,281,70,0.00,1130.4,6.2,1,0,0,1,1,96.0
+Living Mice,C418,177,65,0.00,1090.2,5.9,2,0,0,1,1,97.0
+Haggstrom,C418,204,78,0.00,1310.6,7.1,3,0,0,1,1,94.2
+Danny,C418,254,60,0.00,1020.0,5.5,4,0,0,1,1,98.0
+Key,C418,65,58,0.00,980.2,5.2,5,0,0,1,1,98.5
+Blind Spots,C418,332,84,0.00,1540.0,8.2,6,0,0,1,1,93.0
+Aria Math,C418,310,100,0.00,1820.5,8.8,7,0,0,1,1,91.8
+Dreiton,C418,497,76,0.00,1410.2,7.5,8,0,0,1,1,94.5
+Taswell,C418,455,80,0.00,1480.0,7.9,9,0,0,1,1,93.8
+Moog City 2,C418,180,108,0.00,2010.4,8.5,10,0,0,1,1,89.0
+So What,Miles Davis,562,136,0.00,2140.0,11.2,11,0,0,1,1,82.0
+Blue in Green,Miles Davis,337,56,0.00,1380.2,8.9,12,0,0,1,1,92.5
+Flamenco Sketches,Miles Davis,566,58,0.00,1420.0,9.1,13,0,0,1,1,91.8
+All Blues,Miles Davis,695,140,0.00,2230.5,10.8,14,0,0,1,1,80.5
+Freddie Freeloader,Miles Davis,586,130,0.00,2180.2,10.4,15,0,0,1,1,83.0
+Take Five,The Dave Brubeck Quartet,324,174,0.00,2350.0,11.8,16,0,0,1,1,76.5
+My Favorite Things,John Coltrane,824,178,0.00,2480.6,12.5,17,0,1,1,0,68.0
+Autumn Leaves,Cannonball Adderley,659,122,0.00,1950.4,9.8,18,0,0,1,1,86.2
+Cantaloupe Island,Herbie Hancock,330,94,0.00,1890.0,9.2,19,0,0,1,1,88.5
+Watermelon Man,Herbie Hancock,430,128,0.02,2100.8,10.1,20,0,0,1,1,84.0
+Maiden Voyage,Herbie Hancock,477,104,0.00,1750.0,8.7,21,0,0,1,1,89.8
+Chameleon,Herbie Hancock,941,112,0.01,2320.4,11.6,22,0,0,1,1,81.0
+Bad Guy,Billie Eilish,194,135,0.89,3200.5,14.2,23,1,3,0,0,21.0
+Ocean Eyes,Billie Eilish,200,72,0.81,2050.2,11.0,0,1,1,0,0,39.5
+Bury a Friend,Billie Eilish,193,120,0.86,2950.0,13.8,1,1,2,0,0,26.0
+Everything I Wanted,Billie Eilish,245,120,0.78,2180.4,10.8,2,1,1,0,0,35.0
+Levitating,Dua Lipa,203,103,0.92,3450.0,13.9,10,1,2,0,0,24.0
+Don't Start Now,Dua Lipa,183,124,0.88,3380.2,14.1,11,1,3,0,0,19.5
+Blinding Lights,The Weeknd,200,171,0.87,3620.0,14.5,12,1,2,0,0,18.0
+Save Your Tears,The Weeknd,215,118,0.84,3150.4,13.2,13,1,1,0,0,28.5
+Starboy,The Weeknd,230,186,0.85,3410.0,13.7,14,1,2,0,0,22.0
+Star Shopping,Lil Peep,142,112,0.76,2240.2,9.8,15,1,1,0,0,41.0
+Lucid Dreams,Juice WRLD,239,84,0.88,2680.5,12.4,16,1,2,0,0,30.0
+Sunflower,Post Malone,158,90,0.86,2890.0,12.0,17,1,1,0,0,33.0
+Circles,Post Malone,215,120,0.80,2740.4,11.5,18,1,1,0,0,37.5
+Congratulations,Post Malone,220,123,0.83,2910.0,12.2,19,1,2,0,0,29.5
+Rockstar,Post Malone,218,160,0.84,3100.8,13.1,20,1,2,0,0,25.0
+God's Plan,Drake,198,77,0.89,2850.2,12.8,21,1,3,0,0,22.5
+One Dance,Drake,173,104,0.82,2790.0,11.9,22,1,2,0,0,31.0
+Passionfruit,Drake,298,112,0.74,2310.5,10.2,23,1,1,1,0,45.0
