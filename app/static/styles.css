@@ -868,6 +868,387 @@ body {
 }
 
 /* ------------------------------------------------------------------------------
+   AUDIOBITE VOICE NOTE & CASSETTE AUDIO STUDIO STYLES
+   ------------------------------------------------------------------------------ */
+.cassette-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.cassette-card {
+  text-align: left;
+  background: var(--paper-parchment);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cassette-card:hover {
+  background: #fbf7f2;
+  border-color: var(--accent-brass);
+}
+
+.cassette-card.is-active {
+  background: #fbf5ee;
+  border: 1.5px solid var(--accent-amber);
+  box-shadow: 0 2px 6px var(--shadow-warm-sm);
+}
+
+.cassette-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  letter-spacing: 0.05em;
+}
+
+.cassette-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ink-deep);
+}
+
+.cassette-desc {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+
+/* Mic Recorder Box */
+.mic-recorder-box {
+  background: #fcf9f5;
+  border: 1.5px dashed var(--accent-brass);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.mic-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mic-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #999388;
+  display: inline-block;
+  transition: background 0.2s ease;
+}
+
+.mic-led.is-recording {
+  background: #d45d2a;
+  box-shadow: 0 0 8px #d45d2a;
+  animation: pulseLed 1s infinite alternate;
+}
+
+@keyframes pulseLed {
+  from { opacity: 0.4; }
+  to { opacity: 1.0; }
+}
+
+.mic-timer {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  margin-left: auto;
+}
+
+.btn-rec {
+  background: var(--ink-deep);
+  color: var(--paper-alabaster);
+  border: 1px solid var(--accent-brass);
+}
+
+.btn-rec.is-recording {
+  background: var(--accent-amber);
+  color: #fbf5ee;
+}
+
+/* Upload Dropzone */
+.upload-dropzone {
+  background: #fcfaf6;
+  border: 1.5px dashed var(--accent-brass);
+  border-radius: 0.5rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-dropzone:hover {
+  background: #f5ede2;
+  border-color: var(--accent-amber);
+}
+
+/* Audio Player Module */
+.audio-player-module {
+  background: var(--ink-deep);
+  color: var(--paper-alabaster);
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--accent-brass);
+  box-shadow: inset 0 2px 8px #080a09;
+}
+
+.player-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.player-tag {
+  color: var(--accent-brass-light);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.player-time {
+  color: var(--paper-stone);
+}
+
+.player-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-play {
+  background: var(--accent-amber);
+  color: #fcf9f5;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.seek-bar-wrap {
+  flex-grow: 1;
+}
+
+.seek-slider {
+  width: 100%;
+}
+
+/* TabPFN Scope Quote Box */
+.quote-preview-box {
+  background: #fbf5ee;
+  border: 1px solid var(--accent-brass);
+  border-radius: 0.4rem;
+  padding: 0.85rem 1rem;
+  margin-top: 1.25rem;
+}
+
+.quote-title {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--accent-amber);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.quote-numbers {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.quote-metric {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink-deep);
+}
+
+.quote-sub {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--ink-muted);
+}
+
+/* Timestamp Jump Buttons */
+.ts-jump-btn {
+  background: var(--paper-parchment);
+  border: 1px solid var(--accent-amber);
+  color: var(--accent-amber);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ts-jump-btn:hover {
+  background: var(--accent-amber);
+  color: #fbf5ee;
+}
+
+.badge-p0 {
+  display: inline-block;
+  background: #d45d2a20;
+  color: var(--accent-amber);
+  border: 1px solid var(--accent-amber);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.2rem;
+}
+
+.badge-p1 {
+  display: inline-block;
+  background: #b8863b20;
+  color: var(--accent-brass);
+  border: 1px solid var(--accent-brass);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.2rem;
+}
+
+/* Deliverables Grid */
+.deliverables-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 48rem) {
+  .deliverables-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.deliverable-box {
+  background: #fdfaf6;
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.deliverable-header {
+  background: var(--paper-parchment);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--paper-stone);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-charcoal);
+}
+
+.btn-copy {
+  background: none;
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  cursor: pointer;
+  color: var(--ink-deep);
+  transition: all 0.15s ease;
+}
+
+.btn-copy:hover {
+  background: var(--accent-amber);
+  color: #fbf5ee;
+  border-color: var(--accent-amber);
+}
+
+.deliverable-content {
+  padding: 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ink-charcoal);
+}
+
+.deliverable-code {
+  padding: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--ink-deep);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Feedback Poll Section */
+.feedback-poll-section {
+  background: #fbf7f2;
+  border: 1.5px solid var(--accent-brass);
+  border-radius: 0.5rem;
+  padding: 1.75rem;
+  margin: 2.5rem 0;
+  box-shadow: 0 4px 12px var(--shadow-warm-sm);
+}
+
+.poll-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.poll-btn {
+  background: var(--paper-card);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.4rem;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.poll-btn:hover {
+  background: #fbf5ee;
+  border-color: var(--accent-amber);
+  transform: translateY(-1px);
+}
+
+.poll-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.poll-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--ink-deep);
+}
+
+/* ------------------------------------------------------------------------------
    STAGE 7: ACCESSIBILITY & PREFERS-REDUCED-MOTION
    ------------------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
@@ -887,3 +1268,4 @@ body {
     animation: none !important;
   }
 }
+

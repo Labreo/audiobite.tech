@@ -1,4 +1,4 @@
-# Production Multi-Stage Dockerfile for Render & DigitalOcean
+# Production Multi-Stage Dockerfile for Render ($0.00 Free Tier)
 FROM python:3.12-slim AS builder
 
 WORKDIR /app

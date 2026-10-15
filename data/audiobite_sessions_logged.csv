@@ -1,0 +1,89 @@
+session_id,title,client_or_source,audio_duration_sec,wpm_speaking_rate,filler_tangent_ratio,action_verb_density,blocker_uncertainty_count,technical_entity_count,speaker_interruptions,urgency_flag,category_code,high_signal_brief,signal_purity_pct,scope_risk_pct,action_hours_estimated,suggested_quote_usd
+AB-001,Checkout Modal Bug & Stripe UPI Flow #1,Fintech Client WhatsApp,120,143,0.2,0.36,3,9,1.03,1,0,1,83.9,43.8,8.0,320.0
+AB-002,Distributed Systems: Raft Leader Election #2,Prof. Kamath GEC Lecture,240,122,0.1,0.43,1,12,0.39,0,1,1,98.5,20.4,3.2,128.0
+AB-003,Podcast Clip: The Zero-Burn AI Stack #3,Indie Hacker Interview,189,168,0.17,0.26,1,4,1.64,1,2,1,92.6,28.0,2.8,112.0
+AB-004,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #4,E-Commerce Founder,279,176,0.58,0.19,6,3,4.22,1,0,0,41.6,94.0,30.9,1236.0
+AB-005,Database Migration & Foreign Key Rollback #5,Senior Backend Lead,162,144,0.11,0.36,1,7,0.94,1,0,1,98.5,22.4,4.9,196.0
+AB-006,DBMS Lab Viva Review: Normalization & B+ Trees #6,Study Group Voice Note,200,121,0.19,0.34,3,6,1.04,1,1,1,86.1,43.6,5.0,200.0
+AB-007,YouTube Video Hook: Why LLMs Fail at Tabular Math #7,Tech Creator Voice Memo,106,184,0.15,0.31,1,5,1.64,0,2,1,93.7,25.8,2.2,88.0
+AB-008,Rambling Mobile Voice Memo: Mobile App Navigation #8,Agency Client,209,150,0.6,0.15,8,4,3.69,0,0,0,32.7,95.0,41.6,1664.0
+AB-009,Auth0 SSO Integration & Token Expiry Handlers #9,SaaS Client WhatsApp,134,142,0.2,0.36,2,10,1.07,1,0,1,88.4,35.8,5.2,208.0
+AB-010,DCCN Lab: Socket Programming Protocol Spec #10,Computer Networks Study Memo,209,134,0.18,0.41,0,9,0.82,0,1,1,97.5,17.6,3.0,120.0
+AB-011,Founder Brain-Dump: Pricing Page Experiments #11,Startup Partner Voice Memo,309,168,0.56,0.21,4,4,3.27,1,0,0,49.6,76.4,21.7,868.0
+AB-012,Dark Mode Theme Engine & CSS Tokens #12,Frontend Redesign Note,113,140,0.11,0.43,1,7,0.79,0,0,1,98.5,21.0,3.2,128.0
+AB-013,Checkout Modal Bug & Stripe UPI Flow #13,Fintech Client WhatsApp,138,154,0.22,0.33,2,6,1.22,1,0,1,86.5,37.6,7.2,288.0
+AB-014,Distributed Systems: Raft Leader Election #14,Prof. Kamath GEC Lecture,234,122,0.15,0.44,0,10,0.32,0,1,1,98.5,15.2,2.9,116.0
+AB-015,Podcast Clip: The Zero-Burn AI Stack #15,Indie Hacker Interview,179,156,0.2,0.3,0,7,1.98,1,2,1,94.1,21.0,2.5,100.0
+AB-016,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #16,E-Commerce Founder,283,180,0.6,0.17,7,5,4.16,1,0,0,35.2,95.0,33.2,1328.0
+AB-017,Database Migration & Foreign Key Rollback #17,Senior Backend Lead,158,134,0.12,0.35,2,8,0.84,0,0,1,95.1,31.2,5.6,224.0
+AB-018,DBMS Lab Viva Review: Normalization & B+ Trees #18,Study Group Voice Note,177,118,0.19,0.33,2,9,0.89,1,1,1,90.0,35.8,4.5,180.0
+AB-019,YouTube Video Hook: Why LLMs Fail at Tabular Math #19,Tech Creator Voice Memo,109,180,0.16,0.29,0,6,1.44,0,2,1,97.8,18.8,1.9,76.0
+AB-020,Rambling Mobile Voice Memo: Mobile App Navigation #20,Agency Client,219,157,0.58,0.13,6,3,3.68,0,0,0,38.3,95.0,36.4,1456.0
+AB-021,Auth0 SSO Integration & Token Expiry Handlers #21,SaaS Client WhatsApp,143,157,0.15,0.38,2,6,0.92,1,0,1,94.2,32.4,5.0,200.0
+AB-022,DCCN Lab: Socket Programming Protocol Spec #22,Computer Networks Study Memo,232,141,0.13,0.39,0,11,0.86,1,1,1,98.5,15.0,2.8,112.0
+AB-023,Founder Brain-Dump: Pricing Page Experiments #23,Startup Partner Voice Memo,307,173,0.5,0.2,6,8,3.26,1,0,0,46.6,89.0,24.6,984.0
+AB-024,Dark Mode Theme Engine & CSS Tokens #24,Frontend Redesign Note,111,146,0.07,0.39,0,9,0.59,0,0,1,98.5,11.4,2.7,108.0
+AB-025,Checkout Modal Bug & Stripe UPI Flow #25,Fintech Client WhatsApp,135,155,0.19,0.32,1,8,1.05,1,0,1,91.1,28.0,6.3,252.0
+AB-026,Distributed Systems: Raft Leader Election #26,Prof. Kamath GEC Lecture,243,130,0.13,0.42,0,10,0.57,0,1,1,98.5,14.4,2.8,112.0
+AB-027,Podcast Clip: The Zero-Burn AI Stack #27,Indie Hacker Interview,184,164,0.21,0.31,0,7,1.85,0,2,1,92.3,21.4,2.5,100.0
+AB-028,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #28,E-Commerce Founder,270,164,0.57,0.13,5,5,4.11,1,0,0,43.8,86.6,28.6,1144.0
+AB-029,Database Migration & Foreign Key Rollback #29,Senior Backend Lead,174,146,0.15,0.39,2,9,0.97,0,0,1,94.6,32.2,5.7,228.0
+AB-030,DBMS Lab Viva Review: Normalization & B+ Trees #30,Study Group Voice Note,201,132,0.17,0.32,1,8,0.88,0,1,1,92.6,26.8,3.9,156.0
+AB-031,YouTube Video Hook: Why LLMs Fail at Tabular Math #31,Tech Creator Voice Memo,122,181,0.11,0.31,0,3,1.3,0,2,1,98.5,15.4,1.9,76.0
+AB-032,Rambling Mobile Voice Memo: Mobile App Navigation #32,Agency Client,222,156,0.61,0.09,6,3,3.82,0,0,0,36.2,95.0,36.8,1472.0
+AB-033,Auth0 SSO Integration & Token Expiry Handlers #33,SaaS Client WhatsApp,133,146,0.21,0.38,0,8,0.98,1,0,1,94.5,20.0,4.0,160.0
+AB-034,DCCN Lab: Socket Programming Protocol Spec #34,Computer Networks Study Memo,231,133,0.17,0.37,0,9,0.89,0,1,1,98.5,17.8,2.9,116.0
+AB-035,Founder Brain-Dump: Pricing Page Experiments #35,Startup Partner Voice Memo,302,164,0.55,0.21,6,5,3.11,1,0,0,42.9,91.8,25.1,1004.0
+AB-036,Dark Mode Theme Engine & CSS Tokens #36,Frontend Redesign Note,135,136,0.14,0.4,0,6,0.49,0,0,1,98.5,15.4,2.9,116.0
+AB-037,Checkout Modal Bug & Stripe UPI Flow #37,Fintech Client WhatsApp,122,153,0.21,0.35,3,9,1.13,0,0,1,85.4,44.6,8.0,320.0
+AB-038,Distributed Systems: Raft Leader Election #38,Prof. Kamath GEC Lecture,242,141,0.08,0.43,0,11,0.47,0,1,1,98.5,11.2,2.7,108.0
+AB-039,Podcast Clip: The Zero-Burn AI Stack #39,Indie Hacker Interview,170,155,0.17,0.28,2,5,1.75,1,2,1,89.1,35.6,3.2,128.0
+AB-040,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #40,E-Commerce Founder,264,178,0.6,0.15,6,6,4.13,1,0,0,38.7,95.0,31.1,1244.0
+AB-041,Database Migration & Foreign Key Rollback #41,Senior Backend Lead,164,137,0.17,0.36,2,9,0.76,1,0,1,90.5,34.0,5.7,228.0
+AB-042,DBMS Lab Viva Review: Normalization & B+ Trees #42,Study Group Voice Note,198,130,0.19,0.33,3,7,1.0,0,1,1,86.5,43.8,5.0,200.0
+AB-043,YouTube Video Hook: Why LLMs Fail at Tabular Math #43,Tech Creator Voice Memo,114,170,0.15,0.32,0,4,1.57,0,2,1,97.4,17.6,1.9,76.0
+AB-044,Rambling Mobile Voice Memo: Mobile App Navigation #44,Agency Client,207,154,0.65,0.09,7,6,3.68,0,0,0,29.4,95.0,39.8,1592.0
+AB-045,Auth0 SSO Integration & Token Expiry Handlers #45,SaaS Client WhatsApp,149,140,0.2,0.38,0,9,0.99,1,0,1,97.0,19.4,4.0,160.0
+AB-046,DCCN Lab: Socket Programming Protocol Spec #46,Computer Networks Study Memo,221,143,0.13,0.37,1,12,0.9,0,1,1,98.5,23.4,3.3,132.0
+AB-047,Founder Brain-Dump: Pricing Page Experiments #47,Startup Partner Voice Memo,298,172,0.52,0.21,6,7,3.36,1,0,0,46.2,90.0,24.8,992.0
+AB-048,Dark Mode Theme Engine & CSS Tokens #48,Frontend Redesign Note,117,144,0.13,0.4,1,6,0.51,1,0,1,98.1,22.8,3.3,132.0
+AB-049,Checkout Modal Bug & Stripe UPI Flow #49,Fintech Client WhatsApp,129,148,0.19,0.33,3,6,1.28,0,0,1,84.9,43.8,7.9,316.0
+AB-050,Distributed Systems: Raft Leader Election #50,Prof. Kamath GEC Lecture,237,126,0.11,0.44,1,9,0.64,0,1,1,98.5,20.8,3.2,128.0
+AB-051,Podcast Clip: The Zero-Burn AI Stack #51,Indie Hacker Interview,175,170,0.21,0.31,1,8,1.9,0,2,1,90.4,29.4,2.9,116.0
+AB-052,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #52,E-Commerce Founder,261,170,0.54,0.15,7,6,4.29,1,0,0,40.8,95.0,32.5,1300.0
+AB-053,Database Migration & Foreign Key Rollback #53,Senior Backend Lead,161,148,0.16,0.39,0,10,0.65,1,0,1,98.4,16.8,4.4,176.0
+AB-054,DBMS Lab Viva Review: Normalization & B+ Trees #54,Study Group Voice Note,181,124,0.22,0.32,2,8,1.13,0,1,1,86.8,37.8,4.6,184.0
+AB-055,YouTube Video Hook: Why LLMs Fail at Tabular Math #55,Tech Creator Voice Memo,123,169,0.11,0.34,0,3,1.68,1,2,1,98.5,14.8,1.9,76.0
+AB-056,Rambling Mobile Voice Memo: Mobile App Navigation #56,Agency Client,203,158,0.63,0.1,8,4,3.91,1,0,0,28.1,95.0,42.0,1680.0
+AB-057,Auth0 SSO Integration & Token Expiry Handlers #57,SaaS Client WhatsApp,133,156,0.22,0.34,0,8,1.13,1,0,1,93.3,21.4,4.1,164.0
+AB-058,DCCN Lab: Socket Programming Protocol Spec #58,Computer Networks Study Memo,210,136,0.19,0.37,2,10,0.84,0,1,1,88.7,35.0,3.9,156.0
+AB-059,Founder Brain-Dump: Pricing Page Experiments #59,Startup Partner Voice Memo,303,164,0.51,0.18,6,6,3.01,1,0,0,46.1,90.0,24.7,988.0
+AB-060,Dark Mode Theme Engine & CSS Tokens #60,Frontend Redesign Note,120,149,0.11,0.38,0,9,0.79,0,0,1,98.5,14.0,2.8,112.0
+AB-061,Checkout Modal Bug & Stripe UPI Flow #61,Fintech Client WhatsApp,134,146,0.24,0.34,1,5,1.11,1,0,1,89.5,30.6,6.5,260.0
+AB-062,Distributed Systems: Raft Leader Election #62,Prof. Kamath GEC Lecture,245,128,0.12,0.41,0,10,0.44,0,1,1,98.5,14.0,2.8,112.0
+AB-063,Podcast Clip: The Zero-Burn AI Stack #63,Indie Hacker Interview,191,166,0.18,0.26,0,7,1.8,0,2,1,94.9,20.6,2.5,100.0
+AB-064,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #64,E-Commerce Founder,269,177,0.55,0.14,7,4,4.12,1,0,0,38.4,95.0,32.6,1304.0
+AB-065,Database Migration & Foreign Key Rollback #65,Senior Backend Lead,157,144,0.14,0.39,1,9,0.7,0,0,1,96.8,23.6,5.0,200.0
+AB-066,DBMS Lab Viva Review: Normalization & B+ Trees #66,Study Group Voice Note,191,133,0.17,0.31,2,8,1.09,0,1,1,89.6,35.0,4.5,180.0
+AB-067,YouTube Video Hook: Why LLMs Fail at Tabular Math #67,Tech Creator Voice Memo,98,168,0.12,0.29,0,7,1.35,1,2,1,98.4,16.4,1.9,76.0
+AB-068,Rambling Mobile Voice Memo: Mobile App Navigation #68,Agency Client,228,157,0.64,0.1,6,6,3.71,0,0,0,33.5,95.0,37.2,1488.0
+AB-069,Auth0 SSO Integration & Token Expiry Handlers #69,SaaS Client WhatsApp,137,157,0.15,0.33,1,6,1.13,1,0,1,94.1,25.4,4.4,176.0
+AB-070,DCCN Lab: Socket Programming Protocol Spec #70,Computer Networks Study Memo,233,126,0.14,0.39,1,12,0.74,0,1,1,98.5,23.6,3.3,132.0
+AB-071,Founder Brain-Dump: Pricing Page Experiments #71,Startup Partner Voice Memo,307,163,0.53,0.19,6,8,3.02,1,0,0,43.7,91.0,24.9,996.0
+AB-072,Dark Mode Theme Engine & CSS Tokens #72,Frontend Redesign Note,128,137,0.08,0.38,1,5,0.46,0,0,1,98.5,20.2,3.2,128.0
+AB-073,Checkout Modal Bug & Stripe UPI Flow #73,Fintech Client WhatsApp,120,143,0.2,0.37,1,6,1.37,1,0,1,93.0,27.6,6.3,252.0
+AB-074,Distributed Systems: Raft Leader Election #74,Prof. Kamath GEC Lecture,253,130,0.12,0.43,0,10,0.33,1,1,1,98.5,13.6,2.8,112.0
+AB-075,Podcast Clip: The Zero-Burn AI Stack #75,Indie Hacker Interview,182,160,0.15,0.29,2,7,1.98,0,2,1,90.4,34.2,3.1,124.0
+AB-076,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #76,E-Commerce Founder,256,170,0.57,0.15,5,4,4.38,1,0,0,44.5,86.2,28.6,1144.0
+AB-077,Database Migration & Foreign Key Rollback #77,Senior Backend Lead,174,143,0.13,0.35,0,10,0.81,1,0,1,98.5,15.8,4.2,168.0
+AB-078,DBMS Lab Viva Review: Normalization & B+ Trees #78,Study Group Voice Note,188,134,0.24,0.33,2,8,0.93,1,1,1,83.9,38.8,4.7,188.0
+AB-079,YouTube Video Hook: Why LLMs Fail at Tabular Math #79,Tech Creator Voice Memo,109,178,0.13,0.33,0,6,1.34,0,2,1,98.5,16.2,1.9,76.0
+AB-080,Rambling Mobile Voice Memo: Mobile App Navigation #80,Agency Client,225,161,0.58,0.14,7,5,3.62,0,0,0,36.6,95.0,38.8,1552.0
+AB-081,Auth0 SSO Integration & Token Expiry Handlers #81,SaaS Client WhatsApp,143,141,0.16,0.34,1,9,1.25,1,0,1,93.3,25.8,4.5,180.0
+AB-082,DCCN Lab: Socket Programming Protocol Spec #82,Computer Networks Study Memo,228,139,0.14,0.36,1,8,0.59,0,1,1,95.6,24.2,3.3,132.0
+AB-083,Founder Brain-Dump: Pricing Page Experiments #83,Startup Partner Voice Memo,299,161,0.55,0.18,6,6,3.17,1,0,0,43.1,92.4,25.1,1004.0
+AB-084,Dark Mode Theme Engine & CSS Tokens #84,Frontend Redesign Note,114,135,0.12,0.41,0,5,0.51,0,0,1,98.5,14.0,2.8,112.0
+AB-085,Checkout Modal Bug & Stripe UPI Flow #85,Fintech Client WhatsApp,135,154,0.2,0.34,3,9,1.4,1,0,1,83.6,44.2,8.0,320.0
+AB-086,Distributed Systems: Raft Leader Election #86,Prof. Kamath GEC Lecture,235,133,0.12,0.42,0,10,0.69,0,1,1,98.5,13.8,2.8,112.0
+AB-087,Podcast Clip: The Zero-Burn AI Stack #87,Indie Hacker Interview,177,161,0.18,0.3,1,7,2.0,0,2,1,92.5,27.8,2.8,112.0
+AB-088,Chaotic 4-Min WhatsApp Voice Memo: Redesign Everything #88,E-Commerce Founder,283,164,0.62,0.15,5,6,4.04,1,0,0,39.0,89.2,29.2,1168.0

@@ -80,28 +80,34 @@ class AgentTracer:
 
     def record_gemma_span(
         self,
-        system_type: str,
-        model_id: str,
-        input_tokens: int,
-        output_tokens: int,
-        ttft_ms: float,
-        cost_usd: float
+        system_type: str = "gemma",
+        model_id: Optional[str] = None,
+        input_tokens: Optional[int] = None,
+        output_tokens: Optional[int] = None,
+        ttft_ms: float = 0.0,
+        cost_usd: float = 0.0,
+        **kwargs
     ):
         """Record child span for Gemma LLM inference."""
+        model_name = model_id or kwargs.get("model") or "gemma-4-31b-it"
+        in_tok = input_tokens if input_tokens is not None else kwargs.get("prompt_tokens", 0)
+        out_tok = output_tokens if output_tokens is not None else kwargs.get("completion_tokens", 0)
+        s_type = system_type or kwargs.get("system_type", "gemma_cloud")
+
         self.metrics.update({
-            "gen_ai.system": system_type,
-            "gen_ai.request.model": model_id,
-            "gen_ai.usage.input_tokens": input_tokens,
-            "gen_ai.usage.output_tokens": output_tokens,
+            "gen_ai.system": s_type,
+            "gen_ai.request.model": model_name,
+            "gen_ai.usage.input_tokens": in_tok,
+            "gen_ai.usage.output_tokens": out_tok,
             "gen_ai.response.ttft_ms": ttft_ms,
             "gen_ai.cost_usd": cost_usd,
         })
         if self.transaction:
-            with sentry_sdk.start_span(op="gen_ai.chat", name=f"Gemma Chat Completion ({model_id})") as span:
-                span.set_data("gen_ai.system", system_type)
-                span.set_data("gen_ai.request.model", model_id)
-                span.set_data("gen_ai.usage.input_tokens", input_tokens)
-                span.set_data("gen_ai.usage.output_tokens", output_tokens)
+            with sentry_sdk.start_span(op="gen_ai.chat", name=f"Gemma Chat Completion ({model_name})") as span:
+                span.set_data("gen_ai.system", s_type)
+                span.set_data("gen_ai.request.model", model_name)
+                span.set_data("gen_ai.usage.input_tokens", in_tok)
+                span.set_data("gen_ai.usage.output_tokens", out_tok)
                 span.set_data("gen_ai.response.ttft_ms", ttft_ms)
                 span.set_data("gen_ai.cost_usd", cost_usd)
 
