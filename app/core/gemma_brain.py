@@ -1,14 +1,16 @@
 """
 Dual-Brain Gemma 4 / Gemma 2 Engine for AudioBite.tech / StemNote Studio.
-Supports:
-1. Cloud Mode: DigitalOcean Serverless Inference (gemma-4-31B-it or gemma-2-9b-it)
-2. Local Offline Mode: Local Ollama (gemma2:2b / gemma4:e2b) at $0.00 cost
+Provides 100% genuine, open-weight model inference at $0.00 cost (zero credit card required):
+1. Primary Cloud Route: Google AI Studio Free Tier (gemma-4-26b-a4b-it / gemma-4-31b-it) via OpenAI-compatible endpoint
+2. Secondary Cloud Route: OpenRouter Free Tier (google/gemma-4-31b-it:free)
+3. Local Offline Route: Local Ollama (gemma4:e2b / gemma2:2b) at $0.00 cost
 Passes model output through app.core.guardrails to guarantee zero hallucinated timestamps,
 zero drifted numbers, and zero leaked directives.
 """
 
 import time
 import json
+import re
 import httpx
 from typing import Dict, Any, List, Optional
 from app.config import settings
@@ -38,9 +40,14 @@ Rules:
 class GemmaBrain:
     def __init__(self):
         self.mode = settings.ai_runtime_mode
-        self.do_api_key = settings.do_inference_api_key
-        self.do_endpoint = settings.do_model_endpoint
-        self.do_model = settings.do_model_id
+        self.gemini_key = settings.gemini_api_key
+        self.gemma_cloud_endpoint = settings.gemma_cloud_endpoint
+        self.gemma_cloud_model = settings.gemma_cloud_model
+
+        self.openrouter_key = settings.openrouter_api_key
+        self.openrouter_endpoint = settings.openrouter_endpoint
+        self.openrouter_model = settings.openrouter_model
+
         self.ollama_url = settings.ollama_base_url
         self.ollama_model = settings.ollama_model_id
 
@@ -56,7 +63,8 @@ class GemmaBrain:
         tracer: Optional[AgentTracer] = None
     ) -> Dict[str, Any]:
         """
-        Query Gemma (Cloud DO or Local Ollama) and enforce deterministic guardrails on output.
+        Query Gemma 4 (Google AI Studio Free Tier, OpenRouter Free Tier, or Local Ollama)
+        and enforce deterministic guardrails on output.
         """
         user_prompt = f"""Analyze this track for deep-work focus and instrumental practice:
 - Track: {track_title} by {artist_name}
@@ -66,41 +74,104 @@ class GemmaBrain:
 - TabPFN Predicted Base Focus Retention: {tabpfn_focus_pct:.1f}%
 - TabPFN Predicted Vocal-Stripped Focus Retention: {tabpfn_stripped_pct:.1f}%
 
-Respond with the required JSON structure only."""
+Return ONLY a valid JSON object matching this structure:
+{{
+  "key_signature": "D Minor",
+  "optimal_stem_mix": "Attenuate vocal stem",
+  "summary_notes": "Concise 2-sentence note...",
+  "practice_markers": [
+    {{"timestamp": "00:45", "chords": "Verse", "notes": "Gentle acoustic entry"}}
+  ]
+}}"""
 
         t0 = time.perf_counter()
         raw_text = ""
         input_tokens = len(user_prompt.split()) + 180
         output_tokens = 0
-        system_type = "digitalocean_gemma" if self.mode == "cloud" else "ollama_local"
-        model_id = self.do_model if self.mode == "cloud" else self.ollama_model
+        system_type = "gemma_cloud"
+        model_id = self.gemma_cloud_model
+        errors = []
 
-        try:
-            if self.mode == "cloud" and self.do_api_key:
-                # DigitalOcean Serverless Inference
+        # Route 1: Google AI Studio Free Tier (Gemma 4 MoE / Gemma 4 31B - $0.00, No Credit Card)
+        if self.gemini_key:
+            models_to_try = [self.gemma_cloud_model, "gemma-4-31b-it"]
+            # Deduplicate while preserving order
+            seen = set()
+            models_to_try = [m for m in models_to_try if not (m in seen or seen.add(m))]
+
+            for candidate_model in models_to_try:
+                try:
+                    headers = {
+                        "Authorization": f"Bearer {self.gemini_key}",
+                        "Content-Type": "application/json"
+                    }
+                    payload = {
+                        "model": candidate_model,
+                        "messages": [
+                            {"role": "user", "content": f"{STUDIO_SYSTEM_PROMPT}\n\n{user_prompt}"}
+                        ],
+                        "temperature": 0.2,
+                        "max_tokens": 2400
+                    }
+                    async with httpx.AsyncClient(timeout=60.0) as client:
+                        resp = await client.post(
+                            f"{self.gemma_cloud_endpoint}/chat/completions",
+                            headers=headers,
+                            json=payload
+                        )
+                        if resp.status_code == 200:
+                            data = resp.json()
+                            raw_text = data["choices"][0]["message"]["content"]
+                            system_type = "google_ai_studio_gemma4"
+                            model_id = candidate_model
+                            usage = data.get("usage", {})
+                            input_tokens = usage.get("prompt_tokens", input_tokens)
+                            output_tokens = usage.get("completion_tokens", len(raw_text.split()))
+                            break
+                        else:
+                            errors.append(f"Google AI Studio ({candidate_model}) error {resp.status_code}: {resp.text[:120]}")
+                except Exception as e:
+                    errors.append(f"Google AI Studio ({candidate_model}) exception: {repr(e)}")
+
+        # Route 2: OpenRouter Free Tier (Gemma 4 31B Free - $0.00, No Credit Card)
+        if not raw_text and self.openrouter_key:
+            try:
                 headers = {
-                    "Authorization": f"Bearer {self.do_api_key}",
-                    "Content-Type": "application/json"
+                    "Authorization": f"Bearer {self.openrouter_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://audiobite.tech",
+                    "X-Title": "AudioBite Studio Companion"
                 }
                 payload = {
-                    "model": self.do_model,
+                    "model": self.openrouter_model,
                     "messages": [
-                        {"role": "system", "content": STUDIO_SYSTEM_PROMPT},
-                        {"role": "user", "content": user_prompt}
+                        {"role": "user", "content": f"{STUDIO_SYSTEM_PROMPT}\n\n{user_prompt}"}
                     ],
-                    "temperature": 0.3,
-                    "max_tokens": 800
+                    "temperature": 0.2,
+                    "max_tokens": 2400
                 }
-                async with httpx.AsyncClient(timeout=30.0) as client:
-                    resp = await client.post(f"{self.do_endpoint}/chat/completions", headers=headers, json=payload)
-                    resp.raise_for_status()
-                    data = resp.json()
-                    raw_text = data["choices"][0]["message"]["content"]
-                    usage = data.get("usage", {})
-                    input_tokens = usage.get("prompt_tokens", input_tokens)
-                    output_tokens = usage.get("completion_tokens", len(raw_text.split()))
-            else:
-                # Local Ollama Mode
+                async with httpx.AsyncClient(timeout=45.0) as client:
+                    resp = await client.post(
+                        f"{self.openrouter_endpoint}/chat/completions",
+                        headers=headers,
+                        json=payload
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        raw_text = data["choices"][0]["message"]["content"]
+                        system_type = "openrouter_gemma4_free"
+                        model_id = self.openrouter_model
+                        usage = data.get("usage", {})
+                        input_tokens = usage.get("prompt_tokens", input_tokens)
+                        output_tokens = usage.get("completion_tokens", len(raw_text.split()))
+                    else:
+                        errors.append(f"OpenRouter error {resp.status_code}: {resp.text[:120]}")
+            except Exception as e:
+                errors.append(f"OpenRouter exception: {e}")
+
+        # Route 3: Local Offline Ollama Mode ($0.00)
+        if not raw_text:
+            try:
                 payload = {
                     "model": self.ollama_model,
                     "messages": [
@@ -108,34 +179,41 @@ Respond with the required JSON structure only."""
                         {"role": "user", "content": user_prompt}
                     ],
                     "stream": False,
-                    "options": {"temperature": 0.2, "num_predict": 600}
+                    "options": {"temperature": 0.2, "num_predict": 800}
                 }
                 async with httpx.AsyncClient(timeout=45.0) as client:
                     resp = await client.post(f"{self.ollama_url}/api/chat", json=payload)
                     if resp.status_code == 200:
                         data = resp.json()
                         raw_text = data.get("message", {}).get("content", "")
+                        system_type = "ollama_local_gemma"
+                        model_id = self.ollama_model
                         output_tokens = len(raw_text.split())
                     else:
-                        raise RuntimeError(f"Ollama returned status {resp.status_code}: {resp.text}")
+                        errors.append(f"Ollama error {resp.status_code}: {resp.text[:120]}")
+            except Exception as e:
+                errors.append(f"Ollama exception: {e}")
 
-        except Exception as e:
-            # Deterministic, rich fallback for offline development without crashing
-            print(f"⚠️ Gemma execution encountered: {e}. Generating clean rule-grounded response.")
-            raw_text = json.dumps({
-                "key_signature": "D Minor / Ambient",
-                "optimal_stem_mix": f"Attenuate vocal stem by {int(vocal_presence_ratio * 80)}% to elevate focus retention from {tabpfn_focus_pct:.1f}% to {tabpfn_stripped_pct:.1f}%.",
-                "summary_notes": f"At {bpm} BPM with a vocal presence of {vocal_presence_ratio:.2f}, {track_title} offers an acoustic profile calibrated by TabPFN at {tabpfn_focus_pct:.1f}% focus retention. Attenuating the vocal transients reduces cognitive distraction while retaining melodic grounding.",
-                "practice_markers": [
-                    {"timestamp": "00:08", "chords": "Intro / Atmospheric Pad", "notes": "Low cognitive friction opening"},
-                    {"timestamp": "01:15", "chords": "Verse Progression", "notes": "Steady rhythmic cadence ideal for deep work"},
-                    {"timestamp": "02:30", "chords": "Bridge / Harmonic Peak", "notes": "Prime loop marker for instrumental rehearsal"}
-                ]
-            })
-            output_tokens = len(raw_text.split())
+        if not raw_text:
+            raise RuntimeError(
+                f"Gemma 4 inference failed across all free open-weight routes. Errors: {'; '.join(errors)}"
+            )
+
+        # Strip internal thought tags from Gemma 4 reasoning output
+        cleaned_text = re.sub(r'<thought>[\s\S]*?</thought>', '', raw_text).strip()
+        cleaned_text = re.sub(r'```(?:json)?', '', cleaned_text)
+        cleaned_text = re.sub(r'```', '', cleaned_text).strip()
+
+        # Extract JSON substring between the first '{' and the last '}'
+        first_brace = cleaned_text.find('{')
+        last_brace = cleaned_text.rfind('}')
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            json_str = cleaned_text[first_brace:last_brace + 1].strip()
+        else:
+            json_str = cleaned_text
 
         ttft_ms = round((time.perf_counter() - t0) * 1000, 2)
-        cost_usd = calculate_cost(input_tokens, output_tokens, mode=self.mode)
+        cost_usd = 0.0  # Open-weight free tiers are $0.00
 
         if tracer:
             tracer.record_gemma_span(
@@ -148,28 +226,10 @@ Respond with the required JSON structure only."""
             )
 
         # Parse JSON from model response
-        parsed = {}
         try:
-            # Strip markdown fences if present
-            clean_json = raw_text.strip()
-            if clean_json.startswith("```"):
-                clean_json = clean_json.split("\n", 1)[1]
-            if clean_json.endswith("```"):
-                clean_json = clean_json.rsplit("\n", 1)[0]
-            clean_json = clean_json.strip()
-            if clean_json.startswith("json"):
-                clean_json = clean_json[4:].strip()
-            parsed = json.loads(clean_json)
-        except Exception:
-            parsed = {
-                "key_signature": "Acoustic Minor",
-                "optimal_stem_mix": f"Attenuate vocal stem by {int(vocal_presence_ratio * 75)}%",
-                "summary_notes": raw_text[:300] if raw_text else f"Acoustic focus analysis for {track_title}.",
-                "practice_markers": [
-                    {"timestamp": "00:10", "chords": "Theme A", "notes": "Focus anchor"},
-                    {"timestamp": "01:45", "chords": "Theme B", "notes": "Repetitive practice loop"}
-                ]
-            }
+            parsed = json.loads(json_str)
+        except Exception as err:
+            raise ValueError(f"Could not parse valid JSON from Gemma response ({err}): {json_str[:250]}")
 
         # Apply deterministic guardrails to summary notes and timestamps
         notes_guardrail = apply_guardrails(

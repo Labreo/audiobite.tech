@@ -11,12 +11,18 @@ services:
         value: "0.0.0.0"
       - key: AI_RUNTIME_MODE
         value: "cloud"
-      - key: DO_INFERENCE_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: DO_MODEL_ENDPOINT
-        value: "https://inference.do-ai.run/v1"
-      - key: DO_MODEL_ID
-        value: "google-gemma-4-31b-it"
+      - key: GEMMA_CLOUD_ENDPOINT
+        value: "https://generativelanguage.googleapis.com/v1beta/openai"
+      - key: GEMMA_CLOUD_MODEL
+        value: "gemma-4-31b-it"
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_ENDPOINT
+        value: "https://openrouter.ai/api/v1"
+      - key: OPENROUTER_MODEL
+        value: "google/gemma-4-31b-it:free"
       - key: SENTRY_DSN
         sync: false
       - key: SENTRY_TRACES_SAMPLE_RATE
@@ -25,3 +31,5 @@ services:
         value: "audiobite.tech"
       - key: TABPFN_MODE
         value: "local"
+      - key: CHECKOUT_OR_WAITLIST_URL
+        value: "https://www.buymeacoffee.com/kakeroth"

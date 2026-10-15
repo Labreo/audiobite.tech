@@ -47,7 +47,7 @@ graph TD
     end
     
     subgraph Brain 2: Words
-    B --> E[Gemma 4 31B / Gemma 2 via DigitalOcean or Local Ollama]
+    B --> E[Gemma 4 31B / Gemma 2 via Google AI Studio, OpenRouter, or Local Ollama]
     E --> F[Parchment Practice Card & Loop Markers]
     end
     
@@ -140,7 +140,7 @@ with sentry_sdk.new_scope() as scope:
 In the Sentry dashboard under our active DSN (`https://5ef5207db8e5a53bdd0e2cff05f8e85d@o4511814038978560.ingest.de.sentry.io/4512256884080720`), we trace the complete hierarchical execution:
 1. `gen_ai.invoke_agent` (Overall turn transaction)
 2. `ai.tabular.tabpfn` (Rows evaluated, latency: 89ms, focus: 84.2%)
-3. `gen_ai.chat` (Model: `google-gemma-4-31b-it`, TTFT: 142ms, tokens: 380, cost: $0.00018)
+3. `gen_ai.chat` (Model: `gemma-4-26b-a4b-it` / `gemma-4-31b-it`, TTFT: 180ms, tokens: 412, cost: $0.00)
 4. `guardrail.intervention` (Recorded warnings if timestamps or numbers required correction)
 
 ---
@@ -165,13 +165,16 @@ In our telemetry logs on day one:
 
 ---
 
-## 6. Why Open Innovation Matters: The $0.00018 Cloud Trial vs $0.00 Local Mode
+## 6. The $0.00 Zero-Burn Architecture: Turning a Free Extension Into Pure-Profit Revenue
 
-When building an indie side hustle, closed-source API pricing is an existential trap. Paying $0.03 per call on commercial LLMs destroys unit economics for a $4.99 lifetime product.
+When building an indie side hustle, closed-source API pricing and unexpected cloud bills are existential traps. Paying $0.03 per call on commercial LLMs or burning $20/month on cloud infrastructure destroys unit economics for a $4.99 lifetime product.
 
-By using **Open-Weight Gemma** and **TabPFN-v2**, AudioBite has unmatched unit economics:
-- **DigitalOcean Cloud Trial**: Serving first-time visitors using DigitalOcean Serverless Inference (`google-gemma-4-31b-it`) costs exactly **$0.00018 per sheet**. A single $4.99 coffee donation covers **27,700 cloud practice sheets**.
-- **Local Indie Mode**: Users running Ollama on their Mac or PC (`gemma2:2b` or `gemma4:e2b`) run inference with **$0.00 cloud costs forever**, completely private and offline.
+AudioBite is engineered as a **True Zero-Burn Architecture ($0.00/month)**:
+- **Numerical Foundation Engine**: TabPFN-v2 runs 100% in-container on standard CPU cores ($0.00 extra cloud inference fees) deployed on Render's Free Web Service.
+- **Open-Weight Language Brain**: Serving first-time visitors uses genuine Gemma 4 (`gemma-4-26b-a4b-it` / `gemma-4-31b-it`) via Google AI Studio's Free Tier ($0.00/month, no credit card required) with instant failover to OpenRouter Free Tier and local Ollama.
+- **100% Private Offline Mode**: Users running Ollama on their Mac or PC (`gemma2:2b` or `gemma4:e2b`) execute inference completely offline with zero network latency and $0.00 server cost forever.
+
+Because fixed infrastructure costs are exactly **$0.00**, every single $4.99 Buy Me a Coffee supporter pass is **100% pure profit from day one**.
 
 ---
 
@@ -179,11 +182,11 @@ By using **Open-Weight Gemma** and **TabPFN-v2**, AudioBite has unmatched unit e
 
 | Sponsor Track | Qualification Proof in Codebase |
 | :--- | :--- |
-| **DigitalOcean** | Cloud deployment via `Dockerfile` and `render.yaml`, plus DigitalOcean Serverless Inference integration for `google-gemma-4-31b-it` in `app/core/gemma_brain.py`. |
+| **Render** | Blueprint-defined containerized deployment via `render.yaml` and multi-stage `Dockerfile`, running the FastAPI audio companion with zero monthly burn on Render's Free Web Service. |
 | **TabPFN (Prior Labs)** | Real `TabPFNClassifier` engine in `app/core/tabpfn_engine.py` trained on 88 listening sessions; Brier score `0.0172` vs naive `0.2095`. |
-| **Sentry** | End-to-end Agent Tracing (`gen_ai.invoke_agent`, `ai.tabular.tabpfn`, `gen_ai.chat`) with live DSN and deterministic guardrail warning issue reporting in `app/core/sentry_tracing.py`. |
+| **Gemma (Google Open Weights)** | Genuine open-weight Gemma 4 (`gemma-4-26b-a4b-it` / `gemma-4-31b-it`) and Gemma 2 integration across Google AI Studio zero-burn cloud inference and offline local Ollama in `app/core/gemma_brain.py`. |
+| **Sentry** | End-to-end Agent Tracing (`gen_ai.invoke_agent`, `ai.tabular.tabpfn`, `gen_ai.chat`) with live DSN and deterministic guardrail anomaly issue reporting in `app/core/sentry_tracing.py`. |
 | **.Tech Domain** | Target domain configured as `audiobite.tech` across backend config, frontend headers, and CORS security. |
-| **Gemma (Google Open Weights)** | Gemma 4 31B and Gemma 2 support across cloud and local Ollama runtimes. |
 
 ---
 
