@@ -92,3 +92,41 @@ def test_backtest_execution_and_metrics(engine):
     naive_row = backtest["comparison"][2]
     assert tabpfn_row["brier_score"] < naive_row["brier_score"]
     assert tabpfn_row["roc_auc"] > naive_row["roc_auc"]
+
+
+def test_confidence_interval_bounds(engine):
+    features = {
+        'track_duration_sec': 210,
+        'bpm': 92,
+        'vocal_presence_ratio': 0.30,
+        'spectral_centroid_hz': 2100.0,
+        'dynamic_range_db': 7.5,
+        'hour_of_day': 11,
+        'is_lyrics_heavy': 0,
+        'prior_artist_skips': 0,
+        'mini_mode_active': 1
+    }
+    res = engine.predict_focus(features)
+    ci = res["confidence_interval_80"]
+    assert 0.0 <= ci["lower"] <= 100.0
+    assert 0.0 <= ci["upper"] <= 100.0
+    assert ci["lower"] <= ci["upper"]
+
+
+def test_predict_focus_preserves_latency_measurement(engine):
+    features = {
+        'track_duration_sec': 180,
+        'bpm': 100,
+        'vocal_presence_ratio': 0.20,
+        'spectral_centroid_hz': 2200.0,
+        'dynamic_range_db': 6.0,
+        'hour_of_day': 13,
+        'is_lyrics_heavy': 0,
+        'prior_artist_skips': 0,
+        'mini_mode_active': 0
+    }
+    res = engine.predict_focus(features)
+    assert "latency_ms" in res
+    assert res["latency_ms"] > 0
+    assert res["skip_risk_pct"] == round(100.0 - res["focus_probability_pct"], 1)
+

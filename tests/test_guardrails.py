@@ -110,3 +110,83 @@ def test_full_guardrail_pipeline_multiple_anomalies_caught():
     assert res["interventions_count"] >= 2
     assert "[upbeat]" not in res["text"]
     assert "07:15" not in res["text"]
+
+
+def test_guardrail_empty_input_returns_safe_dict():
+    res = apply_guardrails(
+        raw_text="",
+        track_duration_sec=200,
+        verified_focus_pct=80.0,
+        verified_vocal_stripped_pct=90.0
+    )
+    assert res["passed_clean"] is True
+    assert res["text"] == ""
+    assert res["interventions_count"] == 0
+
+
+def test_guardrail_exact_boundary_timestamp():
+    # 240 seconds = exactly 04:00
+    valid_text = "Loop at 04:00 mark."
+    res_valid = apply_guardrails(
+        raw_text=valid_text,
+        track_duration_sec=240,
+        verified_focus_pct=80.0,
+        verified_vocal_stripped_pct=90.0
+    )
+    assert "04:00" in res_valid["text"]
+    assert res_valid["interventions_count"] == 0
+
+    # 04:01 is 241s on 240s track -> must be clamped to 5s before end (03:55)
+    invalid_text = "Loop at 04:01 mark."
+    res_clamped = apply_guardrails(
+        raw_text=invalid_text,
+        track_duration_sec=240,
+        verified_focus_pct=80.0,
+        verified_vocal_stripped_pct=90.0
+    )
+    assert "04:01" not in res_clamped["text"]
+    assert "03:55" in res_clamped["text"]
+    assert res_clamped["passed_clean"] is False
+
+
+def test_guardrail_handles_subminute_track():
+    # Track is only 45 seconds long -> clamp to 40s (00:40)
+    bad_text = "Solo enters at 01:10 and ends at 01:25."
+    res = apply_guardrails(
+        raw_text=bad_text,
+        track_duration_sec=45,
+        verified_focus_pct=75.0,
+        verified_vocal_stripped_pct=85.0
+    )
+    assert res["passed_clean"] is False
+    assert "01:10" not in res["text"]
+    assert "00:40" in res["text"]
+
+
+def test_guardrail_handles_multiple_stage_directives():
+    dirty_text = "This [softly] acoustic passage has (whisper) dynamic decay [Allegro]."
+    res = apply_guardrails(
+        raw_text=dirty_text,
+        track_duration_sec=300,
+        verified_focus_pct=75.0,
+        verified_vocal_stripped_pct=85.0
+    )
+    assert "[softly]" not in res["text"]
+    assert "[Allegro]" not in res["text"]
+    assert "acoustic passage" in res["text"]
+
+
+def test_guardrail_preserves_unrelated_numbers():
+    # Frequencies and BPM must not be touched or corrupted
+    text = "Tuned to 440Hz at 120 BPM with 1970s hardware saturation. Focus score is 82.0%."
+    res = apply_guardrails(
+        raw_text=text,
+        track_duration_sec=240,
+        verified_focus_pct=82.0,
+        verified_vocal_stripped_pct=90.0
+    )
+    assert "440Hz" in res["text"] or "440" in res["text"]
+    assert "120 BPM" in res["text"] or "120" in res["text"]
+    assert "1970s" in res["text"]
+    assert res["passed_clean"] is True
+

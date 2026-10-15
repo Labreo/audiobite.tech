@@ -15,8 +15,8 @@ from app.core.sentry_tracing import log_guardrail_anomaly
 # Regex to match timestamps like 03:45, 12:08, 1:24
 TIMESTAMP_REGEX = re.compile(r'\b(?:(\d{1,2}):(\d{2}))\b')
 
-# Regex to find leaked stage tags like [calm], [pause], [upbeat], [applause]
-STAGE_TAG_REGEX = re.compile(r'\[(calm|pause|upbeat|applause|laughter|whisper|sigh|silence|audio|music|fast|slow)\]', re.IGNORECASE)
+# Regex to find leaked stage tags like [calm], [pause], [upbeat], [applause], [softly]
+STAGE_TAG_REGEX = re.compile(r'\[(calm|pause|upbeat|applause|laughter|whisper|sigh|silence|audio|music|fast|slow|softly|loud|allegro|andante)\]', re.IGNORECASE)
 
 # Regex to detect percentage numbers like "86%" or "34 percent"
 PERCENTAGE_REGEX = re.compile(r'\b(\d{1,3}(?:\.\d+)?)\s*(?:%|percent\b)', re.IGNORECASE)

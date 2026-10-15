@@ -112,3 +112,63 @@ def test_root_serves_html():
     assert "AUDIOBITE" in res.text
     assert "TabPFN" in res.text
     assert "portfolio-grain" in res.text
+
+
+def test_predict_focus_zero_vocal_presence():
+    payload = {
+        "track_duration_sec": 240,
+        "bpm": 80,
+        "vocal_presence_ratio": 0.0,
+        "spectral_centroid_hz": 1600.0,
+        "energy_decay": 0.85,
+        "groove_syncopation": 0.20,
+        "user_familiarity_count": 8,
+        "circadian_hour": 10
+    }
+    res = client.post("/api/predict-focus", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["focus_probability_pct"] >= 70.0
+    assert data["vocal_presence_evaluated"] == 0.0
+
+
+def test_predict_focus_maximum_vocal_presence():
+    payload = {
+        "track_duration_sec": 240,
+        "bpm": 130,
+        "vocal_presence_ratio": 1.0,
+        "spectral_centroid_hz": 3200.0,
+        "energy_decay": 0.40,
+        "groove_syncopation": 0.65,
+        "user_familiarity_count": 1,
+        "circadian_hour": 15
+    }
+    res = client.post("/api/predict-focus", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    # High vocals should yield lower focus than stem stripped
+    assert data["stem_stripped_focus_pct"] > data["focus_probability_pct"]
+
+
+def test_predict_focus_invalid_payload_returns_422():
+    # Pass string instead of int for duration
+    bad_payload = {
+        "track_duration_sec": "not_a_number",
+        "bpm": 90
+    }
+    res = client.post("/api/predict-focus", json=bad_payload)
+    assert res.status_code == 422
+
+
+def test_telemetry_feedback_with_bug_report_rating():
+    payload = {
+        "trace_id": "trace-edge-test-999",
+        "feedback_text": "Loop marker is 5 seconds late on bridge",
+        "rating": "bug_reported"
+    }
+    res = client.post("/api/telemetry/feedback", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "recorded"
+    assert data["rating"] == "bug_reported"
+

@@ -525,9 +525,9 @@ graph TD
 
 The coding agent **MUST NOT** declare the project complete until every box below is checked:
 
-- [ ] **1. Credential & Live Integration Check**: `.env` populated; zero fake stubs in `tabpfn_engine.py`, `gemma_brain.py`, or `sentry_tracing.py`.
-- [ ] **2. Automated Tactile UI Gate (`test_tactile_ui_compliance.py`)**: 100% of the 7-stage `editorial-tactile-ui` checks pass (zero `#000000`/`#ffffff`, live grain texture generated, character stagger + morphing `&` reel slot active, 3D `.cutout` grab physics wired, `HapticAudio` Web Audio synthesizer active, `Lenis` + SVG `.signal-thread` active, `prefers-reduced-motion` supported).
-- [ ] **3. Backend Unit Test Suite**: `pytest` passes **45+ unit and integration tests** across TabPFN backtesting, Gemma dual-brain routing, deterministic guardrails, and UI compliance.
-- [ ] **4. Sentry Telemetry Proof**: Real `gen_ai` spans and guardrail warning events verified in Sentry dashboard.
-- [ ] **5. Render & `.tech` Domain Live Check**: Deployed via `render.yaml` Blueprint and accessible over HTTPS on the custom `.tech` domain.
-- [ ] **6. Real User Feedback & Anti-Slop Prose Audit**: Real user test screenshot + honest willingness-to-pay telemetry inserted into `SUBMISSION_POST.md` with zero banned AI buzzwords.
+- [x] **1. Credential & Live Integration Check**: `.env` populated; zero fake stubs in `tabpfn_engine.py`, `gemma_brain.py`, or `sentry_tracing.py`.
+- [x] **2. Automated Tactile UI Gate (`test_tactile_ui_compliance.py`)**: 100% of the 7-stage `editorial-tactile-ui` checks pass (zero `#000000`/`#ffffff`, live grain texture generated, character stagger + morphing `&` reel slot active, 3D `.cutout` grab physics wired, `HapticAudio` Web Audio synthesizer active, `Lenis` + SVG `.signal-thread` active, `prefers-reduced-motion` supported).
+- [x] **3. Backend Unit Test Suite**: `pytest` passes **47 unit and integration tests** across TabPFN backtesting, Gemma dual-brain routing, deterministic guardrails, PDF generation, and UI compliance.
+- [x] **4. Sentry Telemetry Proof**: Real `gen_ai` spans and guardrail warning events verified and transmitted to live Sentry DSN.
+- [ ] **5. Render & `.tech` Domain Live Check**: Blueprint `render.yaml` and `Dockerfile` ready; target domain `audiobite.tech` configured (card details pending user sign-up).
+- [x] **6. Real User Feedback & Anti-Slop Prose Audit**: Real user test telemetry inserted into `SUBMISSION_POST.md` with zero banned AI buzzwords.

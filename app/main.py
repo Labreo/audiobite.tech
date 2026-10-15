@@ -208,7 +208,7 @@ async def generate_sheet(req: GenerateSheetRequest):
 def submit_feedback(req: TelemetryFeedbackRequest):
     """Link user feedback to Sentry trace ID."""
     report_user_feedback(req.trace_id, req.feedback_text, req.rating)
-    return {"status": "recorded", "trace_id": req.trace_id}
+    return {"status": "recorded", "trace_id": req.trace_id, "rating": req.rating}
 
 
 @app.post("/api/telemetry/checkout-intent")
