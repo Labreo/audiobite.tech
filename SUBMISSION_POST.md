@@ -1,12 +1,12 @@
 ---
 title: "440 people use my free browser extensions. I used TabPFN v2 and Gemma 4 to build the tactile voice-note-to-action studio they asked for."
 published: true
-tags: hacktoberfest, devchallenge, ai, python
+tags: hf26challenge, devchallenge, tabpfn, render
 canonical_url: https://audiobite.tech
 cover_image: https://raw.githubusercontent.com/Labreo/audiobite.tech/main/app/static/textures/live-grain.png
 ---
 
-> *This article was built for Hacktoberfest 2026 Week 2: "Side Hustle".*
+*This is a submission for the [Hacktoberfest Open-Source AI Challenge: Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)*
 
 ## 1. Visceral Opening Hook: The Voice-Note Chaos Tax
 
