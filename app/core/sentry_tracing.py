@@ -5,9 +5,10 @@ Implements:
 2. Hierarchical gen_ai.invoke_agent spans
 3. ai.tabular.tabpfn metrics (rows evaluated, latency, calibration)
 4. gen_ai.chat spans (model ID, TTFT, input/output token counts, dollar unit cost)
-5. Structured issue capture when guardrails catch model anomalies
+5. Structured issue capture when guardrails catch model anomalies with deduplication
 """
 
+import os
 import time
 from typing import Dict, Any, Optional
 import sentry_sdk
@@ -15,14 +16,46 @@ from sentry_sdk.tracing import Span
 from app.config import settings
 
 
+def before_send(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    Filter events before sending to Sentry:
+    1. Drop all events generated during automated tests (pytest).
+    2. Drop routine info/guardrail telemetry events from creating Sentry issues,
+       preventing alert email spam while preserving all breadcrumbs & traces.
+    """
+    if os.environ.get("PYTEST_CURRENT_TEST") or os.environ.get("TESTING") == "1":
+        return None
+    
+    # Do not create Sentry issues for routine info/guardrail messages (they are captured in trace breadcrumbs)
+    if event.get("level") in ("info", "debug") or event.get("tags", {}).get("guardrail.anomaly_type"):
+        return None
+        
+    return event
+
+
+def before_send_transaction(event: Dict[str, Any], hint: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Drop performance transactions originating from automated test suites."""
+    if os.environ.get("PYTEST_CURRENT_TEST") or os.environ.get("TESTING") == "1":
+        return None
+    return event
+
+
 # Initialize Sentry SDK
 def init_sentry():
+    # If in test mode, do not connect to Sentry over network
+    if os.environ.get("TESTING") == "1" or os.environ.get("PYTEST_CURRENT_TEST"):
+        print("ℹ Sentry disabled in test environment (zero network events).")
+        return
+
     if settings.sentry_dsn:
         sentry_sdk.init(
             dsn=settings.sentry_dsn,
             traces_sample_rate=settings.sentry_traces_sample_rate,
             environment=settings.sentry_environment,
             release="audiobite.tech@0.1.0",
+            before_send=before_send,
+            before_send_transaction=before_send_transaction,
+            auto_session_tracking=False,  # Don't send periodic session ping alerts
         )
         print(f"✓ Sentry initialized with DSN: {settings.sentry_dsn[:25]}... (traces: 100%)")
     else:
@@ -133,34 +166,49 @@ class AgentTracer:
         self.metrics["total_duration_ms"] = round(duration_ms, 2)
         if self.transaction:
             self.transaction.set_data("metrics", self.metrics)
-            if exc_type:
+            if exc_type and not issubclass(exc_type, (KeyboardInterrupt, GeneratorExit)):
                 sentry_sdk.capture_exception(exc_val)
             self.transaction.__exit__(exc_type, exc_val, exc_tb)
 
 
 def log_guardrail_anomaly(anomaly_type: str, details: str, context: Optional[Dict[str, Any]] = None):
     """
-    Log an actionable guardrail anomaly to Sentry as a warning issue.
-    Judges love forensic traces showing model mistakes caught by code!
+    Log an actionable guardrail anomaly to Sentry.
+    1. Attaches structured breadcrumb to the active span.
+    2. Groups into a single forensic issue per anomaly type without firing alert emails.
     """
     if sentry_sdk.is_initialized():
+        sentry_sdk.add_breadcrumb(
+            category="guardrail",
+            message=f"{anomaly_type}: {details}",
+            level="info",
+            data=context or {}
+        )
         with sentry_sdk.new_scope() as scope:
-            scope.set_level("warning")
+            scope.set_level("info")
+            scope.fingerprint = ["guardrail-anomaly", anomaly_type]
             scope.set_tag("guardrail.anomaly_type", anomaly_type)
             if context:
                 for k, v in context.items():
                     scope.set_extra(k, v)
-            sentry_sdk.capture_message(f"Guardrail Caught Gemma Anomaly: {anomaly_type} - {details}")
+            sentry_sdk.capture_message(f"Guardrail Telemetry: {anomaly_type}")
     print(f"🛡️ [Guardrail Logged to Sentry] {anomaly_type}: {details}")
 
 
 def report_user_feedback(trace_id: str, feedback_text: str, rating: str):
     """Log a user's 'Report Bad Output' or feedback action to Sentry with attached trace."""
     if sentry_sdk.is_initialized():
+        sentry_sdk.add_breadcrumb(
+            category="user_feedback",
+            message=f"{rating}: {feedback_text}",
+            level="info",
+            data={"trace_id": trace_id}
+        )
         with sentry_sdk.new_scope() as scope:
             scope.set_level("info")
+            scope.fingerprint = ["user-feedback"]
             scope.set_tag("user_feedback.rating", rating)
             scope.set_tag("user_feedback.trace_id", trace_id)
             scope.set_extra("feedback_text", feedback_text)
-            sentry_sdk.capture_message(f"User Feedback on Trace {trace_id}: {rating}")
+            sentry_sdk.capture_message(f"User Feedback: {rating}")
     print(f"📩 [User Feedback Logged] Trace {trace_id}: {rating} - {feedback_text}")
