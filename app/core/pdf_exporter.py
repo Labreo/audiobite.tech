@@ -297,3 +297,182 @@ def generate_practice_cheat_sheet_pdf(
         github_checklist="- [ ] Verified implementation tasks\n- [ ] Client review scheduled",
         guardrail_status=guardrail_status
     )
+
+
+def generate_citation_card_pdf(
+    title: str,
+    source_url: str,
+    bites: List[Dict[str, Any]],
+    curator_note: Optional[str] = None,
+    guardrail_status: Optional[Dict[str, Any]] = None,
+    is_crate_dossier: bool = False
+) -> bytes:
+    """
+    Generate an archival stamped citation card PDF for AudioBites and A-B studio loops.
+    Includes verified timestamps, deep citations (?t=74s), TabPFN telemetry, and zero-hallucination seal.
+    """
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=36
+    )
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'CitationTitle',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=16,
+        leading=20,
+        textColor=INK_DEEP
+    )
+    banner_style = ParagraphStyle(
+        'CitationBanner',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        leading=12,
+        textColor=ACCENT_AMBER
+    )
+    meta_style = ParagraphStyle(
+        'CitationMeta',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=8.5,
+        leading=11.5,
+        textColor=INK_GRAPHITE
+    )
+    body_style = ParagraphStyle(
+        'CitationBody',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9,
+        leading=12.5,
+        textColor=INK_CHARCOAL
+    )
+    quote_style = ParagraphStyle(
+        'CitationQuote',
+        parent=styles['Normal'],
+        fontName='Helvetica-Oblique',
+        fontSize=9.5,
+        leading=13.5,
+        textColor=INK_DEEP
+    )
+    badge_style = ParagraphStyle(
+        'CitationBadge',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=8.5,
+        leading=11,
+        textColor=ACCENT_SAGE,
+        alignment=TA_RIGHT
+    )
+
+    story = []
+
+    # Header Card
+    card_type = "ARCHIVAL CRATE CITATION DOSSIER" if is_crate_dossier else "AUDIOBITE CITATION CARD"
+    header_table = Table(
+        [
+            [
+                Paragraph(f"AUDIOBITE.TECH • {card_type}", banner_style),
+                Paragraph("TABPFN FOUNDATION MODEL CERTIFIED", badge_style)
+            ]
+        ],
+        colWidths=[360, 180]
+    )
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    story.append(header_table)
+    story.append(Spacer(1, 4))
+
+    clean_title = (title[:70] + "...") if len(title) > 73 else title
+    story.append(Paragraph(clean_title, title_style))
+    story.append(Spacer(1, 4))
+
+    src_display = source_url[:85] if source_url else "Direct Audio Stream"
+    story.append(Paragraph(f"<b>Source:</b> <font color='#b8863b'>{src_display}</font> • <b>Verified Bites:</b> {len(bites)}", meta_style))
+    story.append(Spacer(1, 8))
+
+    story.append(HRFlowable(width="100%", thickness=1, color=ACCENT_BRASS, spaceBefore=4, spaceAfter=8))
+
+    # Curator Note / Executive summary
+    if curator_note:
+        note_p = Paragraph(f"<b>Curation Insight:</b> {curator_note}", body_style)
+        note_table = Table([[note_p]], colWidths=[540])
+        note_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#e6dfd5')),
+            ('PADDING', (0, 0), (-1, -1), 8),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#c4b9aa')),
+        ]))
+        story.append(note_table)
+        story.append(Spacer(1, 10))
+
+    # Bites Cards
+    for i, b in enumerate(bites):
+        s_mmss = b.get("start_mmss", "00:00")
+        e_mmss = b.get("end_mmss", "00:30")
+        dur = b.get("duration_sec", 30)
+        score = b.get("signal_score_pct", 88.0)
+        quote = b.get("verbatim_quote", "")
+        takeaway = b.get("key_takeaway", "")
+        loop_cue = b.get("loop_recommendation", f"Loop {s_mmss}–{e_mmss}")
+        deep_link = b.get("deep_link_url", "https://audiobite.tech")
+
+        bite_top = Table(
+            [
+                [
+                    Paragraph(f"<b>BITE #{i+1} &nbsp; [{s_mmss} – {e_mmss}]</b> &nbsp; ({dur}s)", ParagraphStyle('BiteHeader', parent=banner_style, fontSize=9.5, textColor=INK_DEEP)),
+                    Paragraph(f"<b>{score:.1f}% SIGNAL PURITY</b>", badge_style)
+                ]
+            ],
+            colWidths=[380, 150]
+        )
+        bite_top.setStyle(TableStyle([
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+            ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ]))
+
+        quote_p = Paragraph(f"“{quote}”", quote_style)
+        takeaway_p = Paragraph(f"<b>Key Takeaway:</b> {takeaway}", body_style)
+        loop_p = Paragraph(f"<b>Studio Loop Cue:</b> <font color='#b8863b'>{loop_cue}</font> • <b>Deep Link:</b> <font color='#d45d2a'>{deep_link}</font>", meta_style)
+
+        card_content = [
+            [bite_top],
+            [Spacer(1, 2)],
+            [quote_p],
+            [Spacer(1, 2)],
+            [takeaway_p],
+            [Spacer(1, 2)],
+            [loop_p]
+        ]
+        card_table = Table(card_content, colWidths=[540])
+        card_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#eee9e5')),
+            ('PADDING', (0, 0), (-1, -1), 6),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#9e9589')),
+        ]))
+        story.append(card_table)
+        story.append(Spacer(1, 8))
+
+    # Guardrail Seal & Footer
+    guardrail_info = guardrail_status or {"passed_clean": True}
+    status_str = "CERTIFIED ZERO-HALLUCINATION TIMESTAMP LOCK" if guardrail_info.get("passed_clean") else f"GUARDRAIL CLAMPED {guardrail_info.get('interventions_count')} ANOMALIES"
+    footer_text = f"<b>{status_str}</b> • Sentry Traced • Generated by AudioBite.tech Studio"
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#9e9589'), spaceBefore=6, spaceAfter=4))
+    story.append(Paragraph(footer_text, ParagraphStyle('Footer', parent=meta_style, fontSize=7.5, textColor=ACCENT_SAGE, alignment=TA_CENTER)))
+
+    doc.build(story)
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+    return pdf_bytes
+

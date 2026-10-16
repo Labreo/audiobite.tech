@@ -172,3 +172,66 @@ def test_telemetry_feedback_with_bug_report_rating():
     assert data["status"] == "recorded"
     assert data["rating"] == "bug_reported"
 
+
+def test_youtube_metadata_endpoint():
+    res = client.post("/api/youtube-metadata", json={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "ready"
+    assert data["youtube_id"] == "dQw4w9WgXcQ"
+    assert "candidate_windows" in data
+    assert len(data["candidate_windows"]) > 0
+    assert "deep_link_url" in data
+
+
+def test_youtube_metadata_invalid_url():
+    res = client.post("/api/youtube-metadata", json={"url": "not_a_valid_youtube_link"})
+    assert res.status_code == 400
+
+
+def test_extract_audiobites_endpoint():
+    payload = {
+        "title": "Huberman Audio Protocol",
+        "total_duration_sec": 180,
+        "source_url": "https://youtu.be/dQw4w9WgXcQ",
+        "youtube_id": "dQw4w9WgXcQ",
+        "transcript_text": "The key to focus is managing dopamine baselines. If you constantly spike dopamine, your motivation drops. Take a ten minute walk outside every morning without sunglasses."
+    }
+    res = client.post("/api/extract-audiobites", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "title" in data
+    assert "bites" in data
+    assert len(data["bites"]) >= 1
+    assert "guardrail_status" in data
+    assert "tabpfn_telemetry" in data
+
+
+def test_stamp_citation_endpoint():
+    payload = {
+        "title": "Huberman Audio Protocol",
+        "source_url": "https://youtu.be/dQw4w9WgXcQ",
+        "curator_note": "Key morning motivation protocols.",
+        "bites": [
+            {
+                "start_sec": 12,
+                "end_sec": 42,
+                "start_mmss": "00:12",
+                "end_mmss": "00:42",
+                "duration_sec": 30,
+                "verbatim_quote": "Take a ten minute walk outside every morning without sunglasses.",
+                "key_takeaway": "Morning photon exposure anchors circadian clock.",
+                "signal_score_pct": 92.4,
+                "loop_recommendation": "Loop 00:12-00:42 for daily reminder.",
+                "deep_link_url": "https://youtu.be/dQw4w9WgXcQ?t=12"
+            }
+        ]
+    }
+    res = client.post("/api/stamp-citation", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "stamped"
+    assert "pdf_base64" in data
+    assert len(data["pdf_base64"]) > 500
+
+

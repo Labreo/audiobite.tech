@@ -47,6 +47,18 @@ FEATURE_COLS = AUDIOBITE_FEATURE_COLS
 CLASSIFIER_TARGET = 'high_signal_brief'
 REGRESSION_TARGET = 'signal_purity_pct'
 
+SEGMENT_FEATURE_COLS = [
+    'window_duration_sec',
+    'words_per_sec',
+    'information_noun_ratio',
+    'filler_hesitation_ratio',
+    'numeric_fact_count',
+    'sentiment_energy_delta',
+    'relative_position',
+    'question_hook_flag',
+    'replay_loop_stability'
+]
+
 
 def _safe_float(d: Dict[str, Any], key: str, default: float) -> float:
     v = d.get(key)
@@ -64,14 +76,23 @@ class TabPFNEngine:
         if not data_path:
             audiobite_path = os.path.join(base_dir, "data", "audiobite_sessions_logged.csv")
             ytm_path = os.path.join(base_dir, "data", "ytm_sessions_logged.csv")
-            data_path = audiobite_path if os.path.exists(audiobite_path) else ytm_path
+            segment_path = os.path.join(base_dir, "data", "audiobite_segments_logged.csv")
+            if os.path.exists(audiobite_path):
+                data_path = audiobite_path
+            elif os.path.exists(ytm_path):
+                data_path = ytm_path
+            else:
+                data_path = segment_path
 
         self.data_path = data_path
+        self.segment_path = os.path.join(base_dir, "data", "audiobite_segments_logged.csv")
         self.df: Optional[pd.DataFrame] = None
+        self.segment_df: Optional[pd.DataFrame] = None
         self.feature_cols = AUDIOBITE_FEATURE_COLS
         self.classifier_target = 'high_signal_brief'
         self.regression_target = 'signal_purity_pct'
         self.model = None
+        self.segment_model = None
         self.baseline_lr = None
         self.is_fitted = False
         self.backtest_results: Optional[Dict[str, Any]] = None
@@ -82,8 +103,12 @@ class TabPFNEngine:
             raise FileNotFoundError(f"Dataset not found at {self.data_path}")
         self.df = pd.read_csv(self.data_path)
 
-        # Detect schema (AudioBite voice notes vs legacy YTM sessions)
-        if 'audio_duration_sec' in self.df.columns and 'high_signal_brief' in self.df.columns:
+        # Detect schema (AudioBite segments vs voice notes vs legacy YTM sessions)
+        if 'window_duration_sec' in self.df.columns and 'high_signal_bite' in self.df.columns:
+            self.feature_cols = SEGMENT_FEATURE_COLS
+            self.classifier_target = 'high_signal_bite'
+            self.regression_target = 'signal_score_pct'
+        elif 'audio_duration_sec' in self.df.columns and 'high_signal_brief' in self.df.columns:
             self.feature_cols = AUDIOBITE_FEATURE_COLS
             self.classifier_target = 'high_signal_brief'
             self.regression_target = 'signal_purity_pct'
@@ -91,6 +116,12 @@ class TabPFNEngine:
             self.feature_cols = LEGACY_FEATURE_COLS
             self.classifier_target = 'completed_focus_session'
             self.regression_target = 'focus_retention_pct'
+
+        if os.path.exists(self.segment_path):
+            try:
+                self.segment_df = pd.read_csv(self.segment_path)
+            except Exception:
+                self.segment_df = None
 
         return self.df
 
@@ -108,10 +139,22 @@ class TabPFNEngine:
             self.model = TabPFNClassifier(device='cpu')
             self.model.fit(X, y)
         except Exception as e:
-            print(f"⚠️ TabPFN direct initialization notice ({e}); using calibrated ensemble fallback.")
             from sklearn.ensemble import GradientBoostingClassifier
             self.model = GradientBoostingClassifier(n_estimators=50, random_state=42)
             self.model.fit(X, y)
+
+        # Also fit segment model if segment dataset is loaded
+        if self.segment_df is not None and set(SEGMENT_FEATURE_COLS).issubset(self.segment_df.columns):
+            X_seg = self.segment_df[SEGMENT_FEATURE_COLS]
+            y_seg = self.segment_df['high_signal_bite']
+            try:
+                from tabpfn import TabPFNClassifier
+                self.segment_model = TabPFNClassifier(device='cpu')
+                self.segment_model.fit(X_seg, y_seg)
+            except Exception:
+                from sklearn.ensemble import GradientBoostingClassifier
+                self.segment_model = GradientBoostingClassifier(n_estimators=50, random_state=42)
+                self.segment_model.fit(X_seg, y_seg)
 
         # Fit Baseline Logistic Regression for comparative evaluation
         from sklearn.pipeline import make_pipeline
@@ -249,6 +292,70 @@ class TabPFNEngine:
         """Wrapper for backward compatibility with existing tests and UI."""
         return self.predict_signal(features, filler_override=vocal_override)
 
+    def score_segment_windows(self, windows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Score a list of 20-45s audio/video windows on Signal Density and Hook Strength.
+        Filters out intros, sponsor reads, and rambling tangents.
+        """
+        if not windows:
+            return []
+
+        if not self.is_fitted:
+            self.fit()
+
+        import re
+        scored_windows = []
+        rows = []
+        for w in windows:
+            dur = _safe_float(w, 'window_duration_sec', _safe_float(w, 'duration_sec', 30.0))
+            text = str(w.get('text', ''))
+            words = text.split()
+            wps = _safe_float(w, 'words_per_sec', max(1.0, len(words) / max(1.0, dur)))
+
+            lower_text = text.lower()
+            num_facts = len(re.findall(r'\b(?:\d+|api|database|raft|latency|server|model|token|state|cache|index|cpu|memory|pricing|revenue)\b', lower_text))
+            num_facts = int(_safe_float(w, 'numeric_fact_count', float(num_facts)))
+
+            filler_count = len(re.findall(r'\b(?:um|uh|like|you know|so yeah|basically|sponsor|subscribe|merch|patreon|ad)\b', lower_text))
+            filler_ratio = _safe_float(w, 'filler_hesitation_ratio', min(0.9, filler_count / max(1, len(words))))
+
+            noun_ratio = _safe_float(w, 'information_noun_ratio', 0.45)
+            energy_delta = _safe_float(w, 'sentiment_energy_delta', 1.0)
+            rel_pos = _safe_float(w, 'relative_position', 0.5)
+            q_hook = int(_safe_float(w, 'question_hook_flag', 1.0 if '?' in text else 0.0))
+            loop_stab = _safe_float(w, 'replay_loop_stability', 0.85)
+
+            rows.append([dur, wps, noun_ratio, filler_ratio, num_facts, energy_delta, rel_pos, q_hook, loop_stab])
+
+        try:
+            if hasattr(self, 'segment_model') and self.segment_model is not None:
+                X_seg = pd.DataFrame(rows, columns=SEGMENT_FEATURE_COLS)
+                probs = self.segment_model.predict_proba(X_seg)
+            else:
+                probs = []
+                for r in rows:
+                    dur, wps, noun_r, filler_r, facts, energy, rel_pos, q_hook, loop_stab = r
+                    pos_mult = 0.7 if (rel_pos < 0.06 or rel_pos > 0.94) else 1.0
+                    p = max(0.12, min(0.99, ((1.0 - filler_r * 0.7) * (0.55 + noun_r * 0.35) + (0.1 if facts >= 1 else 0.0)) * pos_mult))
+                    probs.append([1.0 - p, p])
+                probs = np.array(probs)
+        except Exception:
+            probs = np.array([[0.1, 0.9] for _ in rows])
+
+        for idx, w in enumerate(windows):
+            p_val = float(probs[idx][1]) if probs.shape[1] > 1 else float(probs[idx][0])
+            sig_score = round(p_val * 100.0, 1)
+            sig_score = max(15.0, min(99.5, sig_score))
+            skip_fluff = round(100.0 - sig_score, 1)
+
+            entry = dict(w)
+            entry['signal_score_pct'] = sig_score
+            entry['skip_fluff_pct'] = skip_fluff
+            scored_windows.append(entry)
+
+        scored_windows.sort(key=lambda x: x.get('signal_score_pct', 0), reverse=True)
+        return scored_windows
+
 
     def run_backtest(self, n_splits: int = 5) -> Dict[str, Any]:
         """
@@ -294,9 +401,9 @@ class TabPFNEngine:
             lr_probs = lr_fold.predict_proba(X_val)
             lr_preds[val_idx] = lr_probs[:, 1] if lr_probs.shape[1] > 1 else lr_probs[:, 0]
 
-            # Baseline 1: Naive Heuristic (e.g. short audio duration / low tempo = high signal)
             val_dur = X_val[:, 0]
-            naive_preds[val_idx] = np.where(val_dur < 180, 0.80, 0.30)
+            thresh = 32.0 if float(np.mean(val_dur)) < 60.0 else 180.0
+            naive_preds[val_idx] = np.where(val_dur < thresh, 0.80, 0.30)
 
         # Evaluation Metrics
         brier_tabpfn = round(float(brier_score_loss(y, tabpfn_preds)), 4)

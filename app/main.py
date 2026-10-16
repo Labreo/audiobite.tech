@@ -15,6 +15,7 @@ Exposes:
 """
 
 import os
+import re
 import base64
 import time
 from typing import Dict, Any, Optional, List
@@ -24,13 +25,19 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 
+try:
+    from youtube_transcript_api import YouTubeTranscriptApi
+except ImportError:
+    YouTubeTranscriptApi = None
+
 from app.config import settings
 from app.core.sentry_tracing import init_sentry, AgentTracer, report_user_feedback
 from app.core.tabpfn_engine import tabpfn_engine
 from app.core.gemma_brain import gemma_brain
 from app.core.pdf_exporter import (
     generate_audiobite_action_card_pdf,
-    generate_practice_cheat_sheet_pdf
+    generate_practice_cheat_sheet_pdf,
+    generate_citation_card_pdf
 )
 
 
@@ -141,6 +148,48 @@ class GenerateSheetRequest(BaseModel):
     prior_artist_skips: int = 0
     mini_mode_active: int = 1
     transcript_text: Optional[str] = None
+
+
+class YouTubeMetadataRequest(BaseModel):
+    url: str
+
+
+class ExtractAudiobitesRequest(BaseModel):
+    title: str = "Audio Recording"
+    total_duration_sec: int = 300
+    source_url: Optional[str] = None
+    youtube_id: Optional[str] = None
+    search_query: Optional[str] = None
+    candidate_windows: Optional[List[Dict[str, Any]]] = None
+    transcript_text: Optional[str] = None
+
+
+class StampCitationRequest(BaseModel):
+    title: str = "Audio Recording"
+    source_url: str = "https://audiobite.tech"
+    bites: List[Dict[str, Any]]
+    curator_note: Optional[str] = None
+    guardrail_status: Optional[Dict[str, Any]] = None
+    is_crate_dossier: bool = False
+
+
+def extract_youtube_id(url_or_id: str) -> Optional[str]:
+    """Safely extracts 11-char YouTube ID from various URL patterns."""
+    if not url_or_id:
+        return None
+    cleaned = url_or_id.strip()
+    if re.match(r'^[a-zA-Z0-9_-]{11}$', cleaned):
+        return cleaned
+    patterns = [
+        r'(?:v=|\/v\/|youtu\.be\/|\/embed\/|\/shorts\/)([a-zA-Z0-9_-]{11})',
+        r'youtube\.com\/live\/([a-zA-Z0-9_-]{11})',
+        r'music\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})'
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, cleaned)
+        if match:
+            return match.group(1)
+    return None
 
 
 class TelemetryFeedbackRequest(BaseModel):
@@ -327,6 +376,210 @@ async def generate_sheet(req: GenerateSheetRequest):
             "pdf_base64": pdf_base64,
             "checkout_url": settings.checkout_or_waitlist_url
         }
+
+
+@app.post("/api/youtube-metadata")
+def get_youtube_metadata(req: YouTubeMetadataRequest):
+    """
+    Safely retrieves YouTube metadata & caption transcript chunks without downloading media.
+    Zero server bandwidth used; playback and A-B looping stream directly in the client browser.
+    """
+    yt_id = extract_youtube_id(req.url)
+    if not yt_id:
+        raise HTTPException(status_code=400, detail="Invalid YouTube URL or ID provided.")
+
+    transcript_list = []
+    if YouTubeTranscriptApi is not None:
+        try:
+            transcript_list = YouTubeTranscriptApi.get_transcript(yt_id)
+        except Exception:
+            transcript_list = []
+
+    candidate_windows = []
+    if transcript_list:
+        current_window_text = []
+        current_start = float(transcript_list[0].get("start", 0.0))
+        current_dur = 0.0
+
+        for item in transcript_list:
+            text = item.get("text", "").strip()
+            start = float(item.get("start", 0.0))
+            duration = float(item.get("duration", 0.0))
+
+            current_window_text.append(text)
+            current_dur = (start + duration) - current_start
+
+            if current_dur >= 24.0 or item == transcript_list[-1]:
+                joined_text = " ".join(current_window_text)
+                words = joined_text.split()
+                w_count = len(words)
+                dur_safe = max(1.0, current_dur)
+                wps = round(w_count / dur_safe, 2)
+
+                filler_count = sum(1 for w in words if w.lower().strip(",.!?") in {"um", "uh", "like", "actually", "basically", "literally", "sort", "kind"})
+                filler_ratio = round(min(0.80, filler_count / max(1, w_count)), 3)
+                num_facts = len(re.findall(r'\b\d+(?:\.\d+)?\b', joined_text))
+                q_hook = 1 if "?" in joined_text else 0
+
+                candidate_windows.append({
+                    "start_sec": int(current_start),
+                    "end_sec": int(current_start + current_dur),
+                    "window_duration_sec": int(current_dur),
+                    "words_per_sec": wps,
+                    "filler_hesitation_ratio": filler_ratio,
+                    "numeric_fact_count": num_facts,
+                    "question_hook_flag": q_hook,
+                    "text": joined_text,
+                    "transcript_snippet": joined_text
+                })
+
+                current_window_text = []
+                current_start = start + duration
+                current_dur = 0.0
+
+    if not candidate_windows:
+        default_dur = 300
+        for s in range(0, default_dur, 30):
+            e = min(default_dur, s + 30)
+            candidate_windows.append({
+                "start_sec": s,
+                "end_sec": e,
+                "window_duration_sec": e - s,
+                "words_per_sec": 2.5,
+                "filler_hesitation_ratio": 0.05,
+                "numeric_fact_count": 0,
+                "question_hook_flag": 0,
+                "text": f"Studio audio segment [{s//60:02d}:{s%60:02d} - {e//60:02d}:{e%60:02d}]",
+                "transcript_snippet": f"Studio audio segment [{s//60:02d}:{s%60:02d} - {e//60:02d}:{e%60:02d}]"
+            })
+
+    scored_windows = tabpfn_engine.score_segment_windows(candidate_windows)
+    est_total_duration = max(w["end_sec"] for w in candidate_windows) if candidate_windows else 300
+
+    return {
+        "status": "ready",
+        "youtube_id": yt_id,
+        "title": f"YouTube Audio: {yt_id}",
+        "total_duration_sec": est_total_duration,
+        "transcript_available": bool(transcript_list),
+        "candidate_windows": scored_windows,
+        "deep_link_url": f"https://youtu.be/{yt_id}"
+    }
+
+
+@app.post("/api/extract-audiobites")
+async def extract_audiobites_endpoint(req: ExtractAudiobitesRequest):
+    """
+    Extracts high-signal AudioBites from YouTube or uploaded audio:
+    1. Scores candidate windows with TabPFN foundation model
+    2. Runs Gemma 4 open-weight model with Sentry tracing
+    3. Locks timestamps and scores via deterministic guardrails
+    """
+    with AgentTracer(operation_name="gen_ai.extract_audiobites", description=f"AudioBites: {req.title}") as tracer:
+        windows = req.candidate_windows or []
+        if not windows and req.transcript_text:
+            words = req.transcript_text.split()
+            chunk_size = 65
+            w_start = 0
+            for i in range(0, len(words), chunk_size):
+                chunk = words[i:i + chunk_size]
+                c_text = " ".join(chunk)
+                w_end = min(req.total_duration_sec, w_start + 30)
+                windows.append({
+                    "start_sec": w_start,
+                    "end_sec": w_end,
+                    "window_duration_sec": w_end - w_start,
+                    "words_per_sec": round(len(chunk) / 30.0, 2),
+                    "filler_hesitation_ratio": 0.10,
+                    "numeric_fact_count": len(re.findall(r'\b\d+\b', c_text)),
+                    "question_hook_flag": 1 if "?" in c_text else 0,
+                    "text": c_text,
+                    "transcript_snippet": c_text
+                })
+                w_start = w_end
+
+        if not windows:
+            step = 30
+            for s in range(0, req.total_duration_sec, step):
+                e = min(req.total_duration_sec, s + step)
+                windows.append({
+                    "start_sec": s,
+                    "end_sec": e,
+                    "window_duration_sec": e - s,
+                    "words_per_sec": 2.4,
+                    "filler_hesitation_ratio": 0.08,
+                    "numeric_fact_count": 0,
+                    "question_hook_flag": 0,
+                    "text": f"Audio section {s}s–{e}s",
+                    "transcript_snippet": f"Audio section {s}s–{e}s"
+                })
+
+        scored_windows = tabpfn_engine.score_segment_windows(windows)
+
+        scores = [w.get("signal_score_pct", 80.0) for w in scored_windows]
+        mean_score = round(sum(scores) / max(1, len(scores)), 1)
+        peak_score = round(max(scores), 1) if scores else 88.0
+
+        tracer.record_tabpfn_span(
+            rows_evaluated=len(scored_windows),
+            focus_prob=peak_score,
+            scope_risk=round(100.0 - mean_score, 1),
+            action_hours=3.5,
+            quote_usd=140.0
+        )
+
+        gemma_res = await gemma_brain.extract_audiobites(
+            title=req.title,
+            total_duration_sec=req.total_duration_sec,
+            ranked_windows=scored_windows,
+            search_query=req.search_query,
+            source_url=req.source_url,
+            youtube_id=req.youtube_id,
+            tracer=tracer
+        )
+
+        trace_id = tracer.transaction.trace_id if tracer.transaction else "local-trace"
+
+        return {
+            "title": gemma_res["title"],
+            "total_duration_sec": gemma_res["total_duration_sec"],
+            "curator_note": gemma_res["curator_note"],
+            "bites": gemma_res["bites"],
+            "telemetry": gemma_res["telemetry"],
+            "guardrail_status": gemma_res["guardrail_status"],
+            "tabpfn_telemetry": {
+                "candidate_windows_evaluated": len(scored_windows),
+                "mean_signal_score_pct": mean_score,
+                "peak_signal_score_pct": peak_score
+            },
+            "trace_id": trace_id
+        }
+
+
+@app.post("/api/stamp-citation")
+def stamp_citation_endpoint(req: StampCitationRequest):
+    """
+    Stamps an archival parchment PDF citation card for exported AudioBites and A-B loops.
+    """
+    try:
+        pdf_bytes = generate_citation_card_pdf(
+            title=req.title,
+            source_url=req.source_url,
+            bites=req.bites,
+            curator_note=req.curator_note,
+            guardrail_status=req.guardrail_status,
+            is_crate_dossier=req.is_crate_dossier
+        )
+        pdf_b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+        clean_name = re.sub(r'[^a-zA-Z0-9_-]', '_', req.title[:30])
+        return {
+            "status": "stamped",
+            "pdf_base64": pdf_b64,
+            "filename": f"AudioBite_Citation_{clean_name}.pdf",
+            "size_bytes": len(pdf_bytes)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF Stamping failed: {e}")
 
 
 @app.post("/api/telemetry/feedback")

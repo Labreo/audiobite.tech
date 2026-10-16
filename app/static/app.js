@@ -3,11 +3,14 @@
  * Implements:
  * 1. Procedural HapticAudio Web Audio Synthesizer (Zero MP3s)
  * 2. 3D Spatial Grab & Tilt Physics on Workbench Cutouts
- * 3. Live In-Browser Mic Recorder (MediaRecorder) & Cassette Audio Player
- * 4. Web Audio Voice Clarity Filter (120Hz high-pass + 2.8kHz presence)
- * 5. Real-Time TabPFN-v2 Signal & Scope Estimator (<120ms CPU)
- * 6. Clickable [MM:SS] Audio Proof Seekers & Stamped Parchment PDF Exporter
- * 7. Willingness-to-Pay Poll & Buy Me a Coffee ($4.99) Funnel
+ * 3. YouTube & YTM Soundbite Clipper with IFrame Player & A–B Looper
+ * 4. Client-Side 16-bit PCM WAV Slicer for Local Audio/Voice Notes
+ * 5. Live In-Browser Mic Recorder (MediaRecorder) & Cassette Audio Player
+ * 6. Web Audio Voice Clarity Filter (120Hz high-pass + 2.8kHz presence)
+ * 7. Real-Time TabPFN-v2 Signal & Scope Estimator (<120ms CPU)
+ * 8. Stamped ReportLab Citation PDF Exporter & Clickable [MM:SS] Deep Seekers
+ * 9. Persistent Crate Storage & Dossier Generation
+ * 10. Willingness-to-Pay Poll & Buy Me a Coffee ($4.99) Funnel
  */
 
 // ------------------------------------------------------------------------------
@@ -135,6 +138,79 @@ function initCutoutPhysics() {
 }
 
 // ------------------------------------------------------------------------------
+// CLIENT-SIDE 16-BIT PCM WAV SLICER & ENCODER (ZERO CLOUD OVERHEAD)
+// ------------------------------------------------------------------------------
+function encodeWAV(samples, sampleRate) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  /* RIFF identifier */
+  writeString(view, 0, 'RIFF');
+  /* file length */
+  view.setUint32(4, 36 + samples.length * 2, true);
+  /* RIFF type */
+  writeString(view, 8, 'WAVE');
+  /* format chunk identifier */
+  writeString(view, 12, 'fmt ');
+  /* format chunk length */
+  view.setUint32(16, 16, true);
+  /* sample format (raw) */
+  view.setUint16(20, 1, true);
+  /* channel count (mono) */
+  view.setUint16(22, 1, true);
+  /* sample rate */
+  view.setUint32(24, sampleRate, true);
+  /* byte rate (sample rate * block align) */
+  view.setUint32(28, sampleRate * 2, true);
+  /* block align (channel count * bytes per sample) */
+  view.setUint16(32, 2, true);
+  /* bits per sample */
+  view.setUint16(34, 16, true);
+  /* data chunk identifier */
+  writeString(view, 36, 'data');
+  /* data chunk length */
+  view.setUint32(40, samples.length * 2, true);
+
+  // PCM 16-bit samples
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++, offset += 2) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+
+  return new Blob([view], { type: 'audio/wav' });
+}
+
+function writeString(view, offset, string) {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
+
+async function sliceAudioBuffer(audioUrl, startSec, endSec) {
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) throw new Error('Web Audio not supported');
+  const ctx = new AudioCtx();
+
+  const response = await fetch(audioUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+  const sampleRate = audioBuffer.sampleRate;
+  const startOffset = Math.floor(startSec * sampleRate);
+  const endOffset = Math.min(audioBuffer.length, Math.floor(endSec * sampleRate));
+  const sliceLength = Math.max(0, endOffset - startOffset);
+
+  const channelData = audioBuffer.getChannelData(0);
+  const slicedSamples = new Float32Array(sliceLength);
+  for (let i = 0; i < sliceLength; i++) {
+    slicedSamples[i] = channelData[startOffset + i];
+  }
+
+  return encodeWAV(slicedSamples, sampleRate);
+}
+
+// ------------------------------------------------------------------------------
 // STATE & PRE-LOADED AUDIO SAMPLES
 // ------------------------------------------------------------------------------
 const SAMPLES = {
@@ -171,9 +247,71 @@ const SAMPLES = {
 };
 
 let currentSampleId = 'sample-a';
+let currentInputMode = 'cassette'; // 'cassette' | 'youtube' | 'mic' | 'upload'
 let currentAudioState = { ...SAMPLES['sample-a'] };
 let activePdfBase64 = '';
 let activeTraceId = '';
+let activeAudioBites = [];
+
+// A-B Looper State
+let loopPointA = 0;
+let loopPointB = 30;
+let isLoopEngaged = false;
+let loopCheckInterval = null;
+
+// YouTube IFrame Player State
+let ytPlayer = null;
+let ytPlayerReady = false;
+
+// Format seconds to MM:SS
+function formatSec(sec) {
+  const s = Math.floor(sec || 0);
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m.toString().padStart(2, '0')}:${rem.toString().padStart(2, '0')}`;
+}
+
+// ------------------------------------------------------------------------------
+// YOUTUBE IFRAME PLAYER API INTEGRATION
+// ------------------------------------------------------------------------------
+window.onYouTubeIframeAPIReady = function() {
+  ytPlayer = new YT.Player('youtube-iframe-player', {
+    height: '100%',
+    width: '100%',
+    videoId: 'dQw4w9WgXcQ',
+    playerVars: {
+      playsinline: 1,
+      rel: 0,
+      modestbranding: 1
+    },
+    events: {
+      onReady: () => {
+        ytPlayerReady = true;
+      }
+    }
+  });
+};
+
+function getCurrentPlayheadTime(audioPlayer) {
+  if (currentInputMode === 'youtube' && ytPlayer && ytPlayerReady && typeof ytPlayer.getCurrentTime === 'function') {
+    return ytPlayer.getCurrentTime() || 0;
+  }
+  return audioPlayer.currentTime || 0;
+}
+
+function seekToPlayheadTime(sec, audioPlayer, autoPlay = true) {
+  if (currentInputMode === 'youtube' && ytPlayer && ytPlayerReady) {
+    ytPlayer.seekTo(sec, true);
+    if (autoPlay) {
+      ytPlayer.playVideo();
+    }
+  } else {
+    audioPlayer.currentTime = sec;
+    if (autoPlay) {
+      audioPlayer.play().catch(() => {});
+    }
+  }
+}
 
 // ------------------------------------------------------------------------------
 // WEB AUDIO VOICE CLARITY FILTER ON HTML5 PLAYER
@@ -212,6 +350,34 @@ function setupAudioFilters(audioEl) {
 }
 
 // ------------------------------------------------------------------------------
+// PERSISTENT CRATE (LOCALSTORAGE) STORAGE & MANAGEMENT
+// ------------------------------------------------------------------------------
+const CRATE_STORAGE_KEY = 'audiobite_crate_v1';
+
+function loadCrate() {
+  try {
+    const raw = localStorage.getItem(CRATE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCrate(items) {
+  try {
+    localStorage.setItem(CRATE_STORAGE_KEY, JSON.stringify(items));
+    updateCrateBadgeUI(items.length);
+  } catch (e) {}
+}
+
+function updateCrateBadgeUI(count) {
+  const navCount = document.getElementById('nav-crate-count');
+  const floatingCount = document.getElementById('crate-badge-count');
+  if (navCount) navCount.textContent = count;
+  if (floatingCount) floatingCount.textContent = count;
+}
+
+// ------------------------------------------------------------------------------
 // APP CONTROLLER INITIALIZATION
 // ------------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
@@ -244,23 +410,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLabel = document.getElementById('btn-label');
   const parchmentSheet = document.getElementById('parchment-sheet');
 
+  const btnExtractBites = document.getElementById('btn-extract-bites');
+  const extractSpinner = document.getElementById('extract-spinner');
+  const extractLabel = document.getElementById('extract-label');
+  const audiobitesDeckSection = document.getElementById('audiobites-deck-section');
+  const audiobitesGrid = document.getElementById('audiobites-grid');
+
   const btnDownloadPdf = document.getElementById('btn-download-pdf');
   const btnOpenPro = document.getElementById('btn-open-pro');
   const proModal = document.getElementById('pro-modal');
   const modalCloseBtn = document.getElementById('modal-close-btn');
   const btnBuyCoffee = document.getElementById('btn-buy-coffee');
 
-  // Format seconds to MM:SS
-  function formatSec(sec) {
-    const s = Math.floor(sec || 0);
-    const m = Math.floor(s / 60);
-    const rem = s % 60;
-    return `${m.toString().padStart(2, '0')}:${rem.toString().padStart(2, '0')}`;
-  }
+  // Looper Elements
+  const btnSetA = document.getElementById('btn-set-a');
+  const btnSetB = document.getElementById('btn-set-b');
+  const btnAMinus = document.getElementById('btn-a-minus');
+  const btnAPlus = document.getElementById('btn-a-plus');
+  const btnBMinus = document.getElementById('btn-b-minus');
+  const btnBPlus = document.getElementById('btn-b-plus');
+  const btnToggleLoop = document.getElementById('btn-toggle-loop');
+  const loopBtnIcon = document.getElementById('loop-btn-icon');
+  const loopBtnLabel = document.getElementById('loop-btn-label');
+  const loopPointAVal = document.getElementById('loop-point-a-val');
+  const loopPointBVal = document.getElementById('loop-point-b-val');
+  const loopDurationDisplay = document.getElementById('loop-duration-display');
+  const loopStatusPill = document.getElementById('loop-status-pill');
+
+  // Crate Elements
+  const btnOpenCrate = document.getElementById('btn-open-crate');
+  const btnFloatingCrate = document.getElementById('btn-floating-crate');
+  const crateDrawerOverlay = document.getElementById('crate-drawer-overlay');
+  const btnCloseCrate = document.getElementById('btn-close-crate');
+  const crateItemsList = document.getElementById('crate-items-list');
+  const crateEmptyMsg = document.getElementById('crate-empty-msg');
+  const btnStampCratePdf = document.getElementById('btn-stamp-crate-pdf');
+  const btnCopyCrateMd = document.getElementById('btn-copy-crate-md');
+  const btnClearCrate = document.getElementById('btn-clear-crate');
+
+  // Initialize crate badge
+  updateCrateBadgeUI(loadCrate().length);
 
   // 1. Audio Player Event Listeners
   audioPlayer.addEventListener('timeupdate', () => {
-    if (!audioPlayer.duration) return;
+    if (!audioPlayer.duration || currentInputMode === 'youtube') return;
     const pct = (audioPlayer.currentTime / audioPlayer.duration) * 100;
     seekSlider.value = pct;
     timeDisplay.textContent = `${formatSec(audioPlayer.currentTime)} / ${formatSec(audioPlayer.duration)}`;
@@ -273,6 +466,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnPlayPause.addEventListener('click', () => {
     haptics.playClick(220, 0.03);
+    if (currentInputMode === 'youtube' && ytPlayer && ytPlayerReady) {
+      const state = ytPlayer.getPlayerState();
+      if (state === 1) { // playing
+        ytPlayer.pauseVideo();
+        playIcon.textContent = '▶';
+        playLabel.textContent = 'PLAY YOUTUBE';
+      } else {
+        ytPlayer.playVideo();
+        playIcon.textContent = '⏸';
+        playLabel.textContent = 'PAUSE';
+      }
+      return;
+    }
+
     setupAudioFilters(audioPlayer);
     if (audioPlayer.paused) {
       audioPlayer.play().then(() => {
@@ -287,30 +494,54 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   seekSlider.addEventListener('input', (e) => {
+    if (currentInputMode === 'youtube') return;
     if (!audioPlayer.duration) return;
     const targetSec = (e.target.value / 100) * audioPlayer.duration;
     audioPlayer.currentTime = targetSec;
   });
 
-  // 2. Input Mode Tabs (Cassette, Mic, Upload)
+  // 2. Input Mode Tabs (Cassette, YouTube, Mic, Upload)
   const tabCassette = document.getElementById('tab-cassette');
+  const tabYoutube = document.getElementById('tab-youtube');
   const tabMic = document.getElementById('tab-mic');
   const tabUpload = document.getElementById('tab-upload');
+
   const panelCassettes = document.getElementById('panel-cassettes');
+  const panelYoutube = document.getElementById('panel-youtube');
   const panelMic = document.getElementById('panel-mic');
   const panelUpload = document.getElementById('panel-upload');
 
-  function switchTab(activeBtn, activePanel) {
-    [tabCassette, tabMic, tabUpload].forEach(btn => btn.classList.remove('is-active'));
-    [panelCassettes, panelMic, panelUpload].forEach(panel => panel.style.display = 'none');
+  const ytHousing = document.getElementById('youtube-player-housing');
+  const html5Controls = document.getElementById('html5-player-controls');
+
+  function switchTab(mode, activeBtn, activePanel) {
+    currentInputMode = mode;
+    [tabCassette, tabYoutube, tabMic, tabUpload].forEach(btn => btn && btn.classList.remove('is-active'));
+    [panelCassettes, panelYoutube, panelMic, panelUpload].forEach(panel => panel && (panel.style.display = 'none'));
     activeBtn.classList.add('is-active');
     activePanel.style.display = 'block';
+
+    if (mode === 'youtube') {
+      if (ytHousing) ytHousing.style.display = 'block';
+      audioPlayer.pause();
+      playLabel.textContent = 'PLAY YOUTUBE';
+    } else {
+      if (ytHousing) ytHousing.style.display = 'none';
+      if (ytPlayer && ytPlayerReady && typeof ytPlayer.pauseVideo === 'function') {
+        ytPlayer.pauseVideo();
+      }
+      playLabel.textContent = 'PLAY AUDIO';
+    }
+
     haptics.playClick(190, 0.03);
   }
 
-  tabCassette.addEventListener('click', () => switchTab(tabCassette, panelCassettes));
-  tabMic.addEventListener('click', () => switchTab(tabMic, panelMic));
-  tabUpload.addEventListener('click', () => switchTab(tabUpload, panelUpload));
+  tabCassette.addEventListener('click', () => switchTab('cassette', tabCassette, panelCassettes));
+  if (tabYoutube) {
+    tabYoutube.addEventListener('click', () => switchTab('youtube', tabYoutube, panelYoutube));
+  }
+  tabMic.addEventListener('click', () => switchTab('mic', tabMic, panelMic));
+  tabUpload.addEventListener('click', () => switchTab('upload', tabUpload, panelUpload));
 
   // 3. Pre-loaded Cassette Buttons
   const cassetteCards = document.querySelectorAll('.cassette-card');
@@ -331,12 +562,191 @@ document.addEventListener('DOMContentLoaded', () => {
       vocalSlider.value = currentAudioState.filler_ratio;
       sliderValDisplay.textContent = `${Math.round(currentAudioState.filler_ratio * 100)}%`;
 
+      loopPointA = 0;
+      loopPointB = Math.min(30, currentAudioState.duration_sec);
+      updateLooperUI();
+
       haptics.playClick(210, 0.03);
       triggerSignalPrediction();
     });
   });
 
-  // 4. In-Browser Live Microphone Recorder
+  // 4. A–B Looper Controls
+  function updateLooperUI() {
+    loopPointAVal.textContent = formatSec(loopPointA);
+    loopPointBVal.textContent = formatSec(loopPointB);
+    const span = Math.max(1, loopPointB - loopPointA);
+    loopDurationDisplay.textContent = `Span: ${formatSec(span)}`;
+
+    if (isLoopEngaged) {
+      loopStatusPill.textContent = 'LOOP ENGAGED';
+      loopStatusPill.classList.add('is-active');
+      btnToggleLoop.classList.add('is-looping');
+      loopBtnIcon.textContent = '⏹️';
+      loopBtnLabel.textContent = 'Release Loop';
+    } else {
+      loopStatusPill.textContent = 'LOOP STANDBY';
+      loopStatusPill.classList.remove('is-active');
+      btnToggleLoop.classList.remove('is-looping');
+      loopBtnIcon.textContent = '🔁';
+      loopBtnLabel.textContent = 'Engage A–B Loop';
+    }
+  }
+
+  function startLoopChecker() {
+    stopLoopChecker();
+    loopCheckInterval = setInterval(() => {
+      if (!isLoopEngaged) return;
+      const cur = getCurrentPlayheadTime(audioPlayer);
+      if (cur >= loopPointB || cur < loopPointA) {
+        seekToPlayheadTime(loopPointA, audioPlayer, true);
+      }
+    }, 120);
+  }
+
+  function stopLoopChecker() {
+    if (loopCheckInterval) {
+      clearInterval(loopCheckInterval);
+      loopCheckInterval = null;
+    }
+  }
+
+  btnSetA.addEventListener('click', () => {
+    haptics.playClick(240, 0.03);
+    const cur = getCurrentPlayheadTime(audioPlayer);
+    loopPointA = Math.max(0, Math.min(cur, loopPointB - 1));
+    updateLooperUI();
+  });
+
+  btnSetB.addEventListener('click', () => {
+    haptics.playClick(240, 0.03);
+    const cur = getCurrentPlayheadTime(audioPlayer);
+    const maxDur = currentAudioState.duration_sec || 600;
+    loopPointB = Math.min(maxDur, Math.max(cur, loopPointA + 1));
+    updateLooperUI();
+  });
+
+  btnAMinus.addEventListener('click', () => {
+    haptics.playClick(200, 0.02);
+    loopPointA = Math.max(0, loopPointA - 1);
+    updateLooperUI();
+  });
+
+  btnAPlus.addEventListener('click', () => {
+    haptics.playClick(200, 0.02);
+    loopPointA = Math.min(loopPointB - 1, loopPointA + 1);
+    updateLooperUI();
+  });
+
+  btnBMinus.addEventListener('click', () => {
+    haptics.playClick(200, 0.02);
+    loopPointB = Math.max(loopPointA + 1, loopPointB - 1);
+    updateLooperUI();
+  });
+
+  btnBPlus.addEventListener('click', () => {
+    haptics.playClick(200, 0.02);
+    const maxDur = currentAudioState.duration_sec || 600;
+    loopPointB = Math.min(maxDur, loopPointB + 1);
+    updateLooperUI();
+  });
+
+  btnToggleLoop.addEventListener('click', () => {
+    haptics.playClick(280, 0.04);
+    isLoopEngaged = !isLoopEngaged;
+    updateLooperUI();
+
+    if (isLoopEngaged) {
+      seekToPlayheadTime(loopPointA, audioPlayer, true);
+      startLoopChecker();
+    } else {
+      stopLoopChecker();
+    }
+  });
+
+  // 5. YouTube URL Loading & Presets
+  const youtubeUrlInput = document.getElementById('youtube-url-input');
+  const youtubeQueryInput = document.getElementById('youtube-query-input');
+  const btnLoadYoutube = document.getElementById('btn-load-youtube');
+
+  async function loadYouTubeSource(url, query = '', customTitle = '') {
+    if (!url) return;
+    haptics.playClick(260, 0.04);
+    btnLoadYoutube.disabled = true;
+    btnLoadYoutube.innerHTML = '<span>⏳ Scanning Captions...</span>';
+
+    try {
+      const res = await fetch('/api/youtube-metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: url,
+          focus_query: query || null
+        })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        currentAudioState = {
+          title: customTitle || data.title,
+          source: `YouTube (${data.youtube_id})`,
+          audio_url: data.clean_url,
+          duration_sec: data.duration_sec,
+          wpm: data.estimated_wpm || 160,
+          filler_ratio: data.estimated_filler_ratio || 0.25,
+          category: 'YouTube & Podcast AudioBite',
+          transcript: (data.candidate_windows || []).map(w => w.text).join(' '),
+          youtube_id: data.youtube_id,
+          candidate_windows: data.candidate_windows
+        };
+
+        if (ytPlayer && ytPlayerReady && typeof ytPlayer.loadVideoById === 'function') {
+          ytPlayer.loadVideoById(data.youtube_id);
+        }
+
+        timeDisplay.textContent = `00:00 / ${formatSec(data.duration_sec)}`;
+        loopPointA = 0;
+        loopPointB = Math.min(35, data.duration_sec);
+        updateLooperUI();
+
+        triggerSignalPrediction();
+        alert(`✓ Loaded YouTube Audio: "${currentAudioState.title}" (${formatSec(data.duration_sec)}). Extracted ${data.windows_count} candidate soundbites!`);
+      } else {
+        alert(`Could not load YouTube audio: ${data.detail || 'Caption extraction failed'}`);
+      }
+    } catch (e) {
+      alert(`Error scanning YouTube audio: ${e.message}`);
+    } finally {
+      btnLoadYoutube.disabled = false;
+      btnLoadYoutube.innerHTML = '<span>🔍 Scan &amp; Load</span>';
+    }
+  }
+
+  if (btnLoadYoutube) {
+    btnLoadYoutube.addEventListener('click', () => {
+      loadYouTubeSource(youtubeUrlInput.value, youtubeQueryInput.value);
+    });
+  }
+
+  // Presets
+  const btnPresetHuberman = document.getElementById('btn-preset-huberman');
+  const btnPresetResonance = document.getElementById('btn-preset-resonance');
+  const btnPresetIndie = document.getElementById('btn-preset-indie');
+
+  [btnPresetHuberman, btnPresetResonance, btnPresetIndie].forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const url = btn.dataset.url;
+      const title = btn.dataset.title;
+      const query = btn.dataset.query;
+      youtubeUrlInput.value = url;
+      youtubeQueryInput.value = query;
+      switchTab('youtube', tabYoutube, panelYoutube);
+      loadYouTubeSource(url, query, title);
+    });
+  });
+
+  // 6. In-Browser Live Microphone Recorder
   let mediaRecorder = null;
   let micStream = null;
   let recordedChunks = [];
@@ -389,6 +799,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btnStopRec.style.display = 'none';
         btnToggleRec.querySelector('#rec-label').textContent = 'RE-RECORD VOICE NOTE';
 
+        loopPointA = 0;
+        loopPointB = Math.min(30, currentAudioState.duration_sec);
+        updateLooperUI();
+
         triggerSignalPrediction();
       };
 
@@ -423,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 5. File Upload / Dropzone
+  // 7. File Upload / Dropzone
   const uploadDropzone = document.getElementById('upload-dropzone');
   const fileInput = document.getElementById('file-input');
   const uploadFilename = document.getElementById('upload-filename');
@@ -478,6 +892,11 @@ document.addEventListener('DOMContentLoaded', () => {
         audioPlayer.src = data.audio_url;
         audioPlayer.load();
         timeDisplay.textContent = `00:00 / ${data.duration_formatted}`;
+
+        loopPointA = 0;
+        loopPointB = Math.min(30, data.duration_sec);
+        updateLooperUI();
+
         triggerSignalPrediction();
       } else {
         uploadFilename.textContent = `Error: ${data.detail || 'Upload failed'}`;
@@ -487,7 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 6. Fluff & Tangent Cut Slider Simulation (TabPFN-v2)
+  // 8. Fluff & Tangent Cut Slider Simulation (TabPFN-v2)
   let predictDebounce = null;
   function triggerSignalPrediction() {
     clearTimeout(predictDebounce);
@@ -495,7 +914,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const cutThreshold = parseFloat(vocalSlider.value);
       sliderValDisplay.textContent = `${Math.round(cutThreshold * 100)}%`;
 
-      // Update Web Audio Highpass/Presence if active
       if (highPassFilter && presenceFilter) {
         const hpFreq = 80 + cutThreshold * 160;
         highPassFilter.frequency.setValueAtTime(hpFreq, highPassFilter.context.currentTime);
@@ -548,7 +966,448 @@ document.addEventListener('DOMContentLoaded', () => {
     triggerSignalPrediction();
   });
 
-  // 7. Stamp Stamped AudioBite Card (Dual-Brain Gemma 4 + TabPFN + PDF)
+  // 9. Extract AudioBites & Soundbites (POST /api/extract-audiobites)
+  btnExtractBites.addEventListener('click', async () => {
+    haptics.playClick(320, 0.05);
+    extractSpinner.style.display = 'inline-block';
+    extractLabel.textContent = 'Extracting AudioBites...';
+    btnExtractBites.disabled = true;
+
+    try {
+      const queryVal = youtubeQueryInput ? youtubeQueryInput.value : '';
+      const payload = {
+        title: currentAudioState.title,
+        source_url: currentAudioState.audio_url || 'https://audiobite.tech',
+        total_duration_sec: currentAudioState.duration_sec,
+        candidate_windows: currentAudioState.candidate_windows || [],
+        search_query: queryVal || null,
+        youtube_id: currentAudioState.youtube_id || null
+      };
+
+      const res = await fetch('/api/extract-audiobites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        activeAudioBites = data.audiobites || [];
+        activeTraceId = data.trace_id;
+
+        document.getElementById('deck-track-title').textContent = `AUDIOBITES: ${currentAudioState.title}`;
+        document.getElementById('deck-track-meta').textContent =
+          `Duration: ${formatSec(currentAudioState.duration_sec)} • Extracted: ${activeAudioBites.length} verified soundbites • Sentry Trace: ${activeTraceId.substring(0, 8)}...`;
+
+        renderAudioBitesDeck(activeAudioBites);
+        audiobitesDeckSection.style.display = 'block';
+        audiobitesDeckSection.scrollIntoView({ behavior: 'smooth' });
+        haptics.playClick(380, 0.06);
+      } else {
+        alert(`Extraction failed: ${data.detail || 'Server error'}`);
+      }
+    } catch (err) {
+      alert(`Error extracting soundbites: ${err.message}`);
+    } finally {
+      extractSpinner.style.display = 'none';
+      extractLabel.textContent = '✂️ Extract AudioBites';
+      btnExtractBites.disabled = false;
+    }
+  });
+
+  function renderAudioBitesDeck(bites) {
+    audiobitesGrid.innerHTML = '';
+    if (!bites || bites.length === 0) {
+      audiobitesGrid.innerHTML = '<p style="color: var(--ink-muted); font-family: var(--font-mono);">No soundbites detected. Try adjusting your query or audio source.</p>';
+      return;
+    }
+
+    bites.forEach((bite, idx) => {
+      const card = document.createElement('div');
+      card.className = 'audiobite-card';
+      const timeTag = `[${formatSec(bite.start_sec)} – ${formatSec(bite.end_sec)}]`;
+
+      card.innerHTML = `
+        <div class="bite-card-top">
+          <span class="bite-time-tag">${timeTag} (${bite.duration_sec}s)</span>
+          <span class="bite-purity-tag">TabPFN Signal: ${bite.signal_score_pct.toFixed(1)}%</span>
+        </div>
+        <blockquote class="bite-quote">“${bite.quoted_soundbite}”</blockquote>
+        <div class="bite-takeaway"><strong>Takeaway:</strong> ${bite.takeaway}</div>
+        <div class="bite-cue-row">
+          <span>Stage: <strong>${bite.stage_tag}</strong></span> • 
+          <span>Audio Cue: ${bite.audio_cue || 'Clear voice'}</span>
+        </div>
+        <div class="bite-actions-row">
+          <button class="btn-bite-action btn-bite-primary btn-play-loop-bite" data-idx="${idx}">
+            ▶ Play &amp; Loop Bite
+          </button>
+          <button class="btn-bite-action btn-slice-wav" data-idx="${idx}">
+            ✂️ Slice .WAV
+          </button>
+          <button class="btn-bite-action btn-add-to-crate" data-idx="${idx}">
+            📦 Save to Crate
+          </button>
+          <button class="btn-bite-action btn-stamp-single-pdf" data-idx="${idx}">
+            📄 Citation Card PDF
+          </button>
+        </div>
+      `;
+      audiobitesGrid.appendChild(card);
+    });
+
+    // Wire Card Action Buttons
+    document.querySelectorAll('.btn-play-loop-bite').forEach(btn => {
+      btn.addEventListener('click', () => {
+        haptics.playClick(260, 0.035);
+        const idx = parseInt(btn.dataset.idx, 10);
+        const bite = activeAudioBites[idx];
+        if (!bite) return;
+
+        loopPointA = bite.start_sec;
+        loopPointB = bite.end_sec;
+        isLoopEngaged = true;
+        updateLooperUI();
+        seekToPlayheadTime(loopPointA, audioPlayer, true);
+        startLoopChecker();
+
+        document.querySelector('.analog-desk').scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    document.querySelectorAll('.btn-slice-wav').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        haptics.playClick(240, 0.03);
+        const idx = parseInt(btn.dataset.idx, 10);
+        const bite = activeAudioBites[idx];
+        if (!bite) return;
+
+        if (currentInputMode === 'youtube') {
+          // For YouTube, generate clickable deep-link snippet
+          const deepUrl = bite.deep_link_url || `${currentAudioState.audio_url}&t=${bite.start_sec}s`;
+          navigator.clipboard.writeText(deepUrl).then(() => {
+            alert(`✓ YouTube deep citation copied:\n${deepUrl}\n\n(YouTube terms restrict client-side raw .WAV byte downloads; use deep citation link or local audio/mic mode for .WAV slicing).`);
+          });
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '⏳ Slicing...';
+        try {
+          const wavBlob = await sliceAudioBuffer(currentAudioState.audio_url, bite.start_sec, bite.end_sec);
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(wavBlob);
+          link.download = `AudioBite_${formatSec(bite.start_sec).replace(':', 'm')}s_${formatSec(bite.end_sec).replace(':', 'm')}s.wav`;
+          link.click();
+          btn.textContent = '✓ Downloaded!';
+          setTimeout(() => { btn.textContent = '✂️ Slice .WAV'; btn.disabled = false; }, 2000);
+        } catch (err) {
+          alert(`Could not slice audio buffer: ${err.message}`);
+          btn.textContent = '✂️ Slice .WAV';
+          btn.disabled = false;
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-add-to-crate').forEach(btn => {
+      btn.addEventListener('click', () => {
+        haptics.playClick(290, 0.04);
+        const idx = parseInt(btn.dataset.idx, 10);
+        const bite = activeAudioBites[idx];
+        if (!bite) return;
+
+        const crate = loadCrate();
+        crate.push({
+          ...bite,
+          source_title: currentAudioState.title,
+          source_url: currentAudioState.audio_url,
+          added_at: new Date().toISOString()
+        });
+        saveCrate(crate);
+
+        btn.textContent = '✓ Saved in Crate!';
+        setTimeout(() => { btn.textContent = '📦 Save to Crate'; }, 2000);
+      });
+    });
+
+    document.querySelectorAll('.btn-stamp-single-pdf').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        haptics.playClick(270, 0.035);
+        const idx = parseInt(btn.dataset.idx, 10);
+        const bite = activeAudioBites[idx];
+        if (!bite) return;
+
+        btn.disabled = true;
+        btn.textContent = '⏳ Stamping...';
+        try {
+          const res = await fetch('/api/stamp-citation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: currentAudioState.title,
+              source_url: currentAudioState.audio_url || 'https://audiobite.tech',
+              bites: [bite],
+              curator_note: `Single AudioBite Citation Card [${formatSec(bite.start_sec)} – ${formatSec(bite.end_sec)}]`,
+              is_crate_dossier: false
+            })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            downloadPdfFromBase64(data.pdf_base64, `Citation_${formatSec(bite.start_sec).replace(':', 'm')}s.pdf`);
+          } else {
+            alert(`Stamping failed: ${data.detail}`);
+          }
+        } catch (e) {
+          alert(`Error stamping PDF: ${e.message}`);
+        } finally {
+          btn.textContent = '📄 Citation Card PDF';
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  // 10. Stamp All AudioBites PDF & Markdown
+  const btnStampAllPdf = document.getElementById('btn-stamp-all-pdf');
+  const btnCopyDeckMarkdown = document.getElementById('btn-copy-deck-markdown');
+
+  if (btnStampAllPdf) {
+    btnStampAllPdf.addEventListener('click', async () => {
+      if (!activeAudioBites || activeAudioBites.length === 0) {
+        alert('Please extract AudioBites first!');
+        return;
+      }
+      haptics.playClick(300, 0.04);
+      btnStampAllPdf.disabled = true;
+      btnStampAllPdf.innerHTML = '<span>⏳ Stamping PDF...</span>';
+
+      try {
+        const res = await fetch('/api/stamp-citation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: currentAudioState.title,
+            source_url: currentAudioState.audio_url || 'https://audiobite.tech',
+            bites: activeAudioBites,
+            curator_note: `Complete Session AudioBites (${activeAudioBites.length} verified soundbites)`,
+            is_crate_dossier: false
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          downloadPdfFromBase64(data.pdf_base64, `AudioBites_Citation_${currentAudioState.title.replace(/\s+/g, '_')}.pdf`);
+        } else {
+          alert(`PDF stamping failed: ${data.detail}`);
+        }
+      } catch (e) {
+        alert(`Error stamping PDF: ${e.message}`);
+      } finally {
+        btnStampAllPdf.disabled = false;
+        btnStampAllPdf.innerHTML = '<span>📄 Stamp Citation PDF</span>';
+      }
+    });
+  }
+
+  if (btnCopyDeckMarkdown) {
+    btnCopyDeckMarkdown.addEventListener('click', () => {
+      if (!activeAudioBites || activeAudioBites.length === 0) {
+        alert('Please extract AudioBites first!');
+        return;
+      }
+      haptics.playClick(240, 0.03);
+      let md = `## AudioBites Citation Dossier: ${currentAudioState.title}\n`;
+      md += `**Source**: [${currentAudioState.source}](${currentAudioState.audio_url})\n`;
+      md += `**Duration**: ${formatSec(currentAudioState.duration_sec)}\n\n`;
+
+      activeAudioBites.forEach((b, i) => {
+        md += `### ${i + 1}. [${formatSec(b.start_sec)} – ${formatSec(b.end_sec)}] (${b.stage_tag})\n`;
+        md += `> "${b.quoted_soundbite}"\n\n`;
+        md += `- **Takeaway**: ${b.takeaway}\n`;
+        md += `- **TabPFN Signal Purity**: ${b.signal_score_pct.toFixed(1)}%\n`;
+        if (b.deep_link_url) {
+          md += `- **Deep Audio Citation**: [Listen at ${formatSec(b.start_sec)}](${b.deep_link_url})\n`;
+        }
+        md += `\n`;
+      });
+
+      navigator.clipboard.writeText(md).then(() => {
+        alert('✓ AudioBite Markdown dossier copied to clipboard!');
+      });
+    });
+  }
+
+  function downloadPdfFromBase64(base64Data, filename) {
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  }
+
+  // 11. Crate Drawer Open/Close & Operations
+  function openCrateDrawer() {
+    haptics.playClick(220, 0.03);
+    renderCrateItems();
+    crateDrawerOverlay.classList.add('is-open');
+    crateDrawerOverlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeCrateDrawer() {
+    haptics.playClick(170, 0.02);
+    crateDrawerOverlay.classList.remove('is-open');
+    crateDrawerOverlay.setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnOpenCrate) btnOpenCrate.addEventListener('click', openCrateDrawer);
+  if (btnFloatingCrate) btnFloatingCrate.addEventListener('click', openCrateDrawer);
+  if (btnCloseCrate) btnCloseCrate.addEventListener('click', closeCrateDrawer);
+  crateDrawerOverlay.addEventListener('click', (e) => {
+    if (e.target === crateDrawerOverlay) closeCrateDrawer();
+  });
+
+  function renderCrateItems() {
+    const crate = loadCrate();
+    crateItemsList.innerHTML = '';
+    if (crate.length === 0) {
+      crateItemsList.appendChild(crateEmptyMsg);
+      return;
+    }
+
+    crate.forEach((item, idx) => {
+      const el = document.createElement('div');
+      el.className = 'crate-item';
+      el.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
+          <strong style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-amber);">
+            [${formatSec(item.start_sec)} – ${formatSec(item.end_sec)}]
+          </strong>
+          <button class="btn-tactile-xs btn-delete-crate-item" data-idx="${idx}" style="color: #b33939;">✕ Remove</button>
+        </div>
+        <div style="font-family: var(--font-serif); font-size: 0.95rem; font-style: italic; margin-bottom: 0.35rem;">
+          "${item.quoted_soundbite}"
+        </div>
+        <div style="font-size: 0.75rem; color: var(--ink-graphite); margin-bottom: 0.4rem;">
+          ${item.takeaway}
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-muted);">
+          <span>${item.source_title || 'Audio Source'}</span>
+          <button class="btn-tactile-xs btn-play-crate-item" data-idx="${idx}">▶ Loop</button>
+        </div>
+      `;
+      crateItemsList.appendChild(el);
+    });
+
+    document.querySelectorAll('.btn-delete-crate-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        haptics.playClick(180, 0.02);
+        const idx = parseInt(btn.dataset.idx, 10);
+        const crate = loadCrate();
+        crate.splice(idx, 1);
+        saveCrate(crate);
+        renderCrateItems();
+      });
+    });
+
+    document.querySelectorAll('.btn-play-crate-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        haptics.playClick(240, 0.03);
+        const idx = parseInt(btn.dataset.idx, 10);
+        const crate = loadCrate();
+        const item = crate[idx];
+        if (!item) return;
+
+        loopPointA = item.start_sec;
+        loopPointB = item.end_sec;
+        isLoopEngaged = true;
+        updateLooperUI();
+        seekToPlayheadTime(loopPointA, audioPlayer, true);
+        startLoopChecker();
+        closeCrateDrawer();
+      });
+    });
+  }
+
+  if (btnClearCrate) {
+    btnClearCrate.addEventListener('click', () => {
+      if (confirm('Clear all saved AudioBites from crate?')) {
+        haptics.playClick(180, 0.03);
+        saveCrate([]);
+        renderCrateItems();
+      }
+    });
+  }
+
+  if (btnStampCratePdf) {
+    btnStampCratePdf.addEventListener('click', async () => {
+      const crate = loadCrate();
+      if (crate.length === 0) {
+        alert('Your crate is empty. Save some AudioBites first!');
+        return;
+      }
+      haptics.playClick(320, 0.04);
+      btnStampCratePdf.disabled = true;
+      btnStampCratePdf.innerHTML = '<span>⏳ Stamping Crate Dossier...</span>';
+
+      try {
+        const res = await fetch('/api/stamp-citation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: `AudioBite Crate Dossier (${crate.length} Slices)`,
+            source_url: 'https://audiobite.tech/crate',
+            bites: crate,
+            curator_note: `Curated Crate Dossier containing ${crate.length} soundbites across multiple sessions.`,
+            is_crate_dossier: true
+          })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          downloadPdfFromBase64(data.pdf_base64, `AudioBite_Crate_Dossier_${crate.length}_Slices.pdf`);
+        } else {
+          alert(`Failed to stamp dossier: ${data.detail}`);
+        }
+      } catch (e) {
+        alert(`Error stamping dossier: ${e.message}`);
+      } finally {
+        btnStampCratePdf.disabled = false;
+        btnStampCratePdf.innerHTML = '<span>📄 Stamp Citation Dossier PDF</span>';
+      }
+    });
+  }
+
+  if (btnCopyCrateMd) {
+    btnCopyCrateMd.addEventListener('click', () => {
+      const crate = loadCrate();
+      if (crate.length === 0) {
+        alert('Your crate is empty!');
+        return;
+      }
+      haptics.playClick(240, 0.03);
+      let md = `# AudioBite Curated Crate Dossier\n\n`;
+      md += `*Generated by AudioBite.tech — ${crate.length} Curated Soundbites*\n\n`;
+      crate.forEach((b, i) => {
+        md += `### ${i + 1}. [${formatSec(b.start_sec)} – ${formatSec(b.end_sec)}] from *${b.source_title || 'Audio'}*\n`;
+        md += `> "${b.quoted_soundbite}"\n\n`;
+        md += `- **Takeaway**: ${b.takeaway}\n`;
+        md += `- **Signal Purity**: ${b.signal_score_pct.toFixed(1)}%\n`;
+        if (b.deep_link_url) {
+          md += `- **Link**: [Listen on YouTube](${b.deep_link_url})\n`;
+        }
+        md += `\n`;
+      });
+      navigator.clipboard.writeText(md).then(() => {
+        alert('✓ Crate Markdown dossier copied to clipboard!');
+      });
+    });
+  }
+
+  // 12. Stamp Stamped AudioBite Card (Dual-Brain Gemma 4 + TabPFN + PDF)
   btnGenerateSheet.addEventListener('click', async () => {
     haptics.playClick(320, 0.05);
     btnSpinner.style.display = 'inline-block';
@@ -616,11 +1475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.ts-jump-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const sec = parseFloat(btn.dataset.sec || 0);
-            audioPlayer.currentTime = sec;
-            audioPlayer.play().then(() => {
-              playIcon.textContent = '⏸';
-              playLabel.textContent = 'PAUSE';
-            }).catch(() => {});
+            seekToPlayheadTime(sec, audioPlayer, true);
             haptics.playClick(260, 0.035);
           });
         });
@@ -652,12 +1507,12 @@ document.addEventListener('DOMContentLoaded', () => {
       alert(`Error calling studio engine: ${err.message}`);
     } finally {
       btnSpinner.style.display = 'none';
-      btnLabel.textContent = 'Stamp AudioBite Action Card';
+      btnLabel.textContent = 'Stamp Action Card';
       btnGenerateSheet.disabled = false;
     }
   });
 
-  // 8. Copy Buttons
+  // 13. Copy Buttons
   document.getElementById('btn-copy-reply').addEventListener('click', () => {
     const text = document.getElementById('sheet-client-reply').textContent;
     navigator.clipboard.writeText(text).then(() => {
@@ -674,27 +1529,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 9. Download Stamped Parchment PDF
+  // 14. Download Stamped Parchment PDF
   btnDownloadPdf.addEventListener('click', () => {
     haptics.playClick(260, 0.04);
     if (!activePdfBase64) {
-      alert('Please stamp an AudioBite card first!');
+      alert('Please stamp an action card first!');
       return;
     }
-    const byteCharacters = atob(activePdfBase64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'application/pdf' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `AudioBite_${currentAudioState.title.replace(/\s+/g, '_')}.pdf`;
-    link.click();
+    downloadPdfFromBase64(activePdfBase64, `AudioBite_${currentAudioState.title.replace(/\s+/g, '_')}.pdf`);
   });
 
-  // 10. Willingness-to-Pay Poll Buttons
+  // 15. Willingness-to-Pay Poll Buttons
   const pollBtns = document.querySelectorAll('.poll-btn');
   const pollStatus = document.getElementById('poll-feedback-status');
 
@@ -722,7 +1567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 11. Pro Studio Modal & Buy Me a Coffee Funnel
+  // 16. Pro Studio Modal & Buy Me a Coffee Funnel
   btnOpenPro.addEventListener('click', () => {
     haptics.playClick(200, 0.03);
     proModal.classList.add('is-open');
@@ -748,6 +1593,26 @@ document.addEventListener('DOMContentLoaded', () => {
     window.open('https://www.buymeacoffee.com/kakeroth', '_blank');
   });
 
+  // 17. Extension Bridge Auto-Load (?ref=ytm-mini-mode or ?url=...)
+  const urlParams = new URLSearchParams(window.location.search);
+  const refParam = urlParams.get('ref');
+  const externalUrl = urlParams.get('url');
+  const externalQuery = urlParams.get('query');
+
+  if (externalUrl) {
+    switchTab('youtube', tabYoutube, panelYoutube);
+    youtubeUrlInput.value = externalUrl;
+    if (externalQuery) youtubeQueryInput.value = externalQuery;
+    loadYouTubeSource(externalUrl, externalQuery || '');
+  } else if (refParam === 'ytm-mini-mode' || refParam === 'lettermarkd') {
+    switchTab('youtube', tabYoutube, panelYoutube);
+    const badge = document.querySelector('.runtime-badge span:last-child');
+    if (badge) {
+      badge.textContent = `Extension Bridge: Connected to ${refParam.toUpperCase()}`;
+    }
+  }
+
   // Initial trigger on page load
+  updateLooperUI();
   triggerSignalPrediction();
 });

@@ -8,7 +8,7 @@ Logs catches as custom forensic events to Sentry.
 """
 
 import re
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 from app.core.sentry_tracing import log_guardrail_anomaly
 
 
@@ -182,3 +182,103 @@ def apply_guardrails(
         "numeric_drifts_corrected": num_corrections,
         "passed_clean": total_interventions == 0
     }
+
+
+def enforce_audiobite_guardrails(
+    bites: List[Dict[str, Any]],
+    total_duration_sec: int,
+    verified_scores: Optional[List[float]] = None,
+    youtube_id: Optional[str] = None
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """
+    Validate and clamp extracted AudioBite windows:
+    1. 0 <= start_sec < end_sec <= total_duration_sec
+    2. Overwrite drifted signal_score_pct with TabPFN truth if provided
+    3. Generate verified deep_link_url
+    4. Strip leaked stage tags from quotes and takeaways
+    """
+    corrected_bites = []
+    ts_anomalies = []
+    score_drifts = []
+    leaked_tags = []
+
+    for i, b in enumerate(bites):
+        item = dict(b)
+
+        raw_quote = str(item.get("verbatim_quote", ""))
+        clean_quote, tags1 = sanitize_stage_directives(raw_quote)
+        item["verbatim_quote"] = clean_quote
+        leaked_tags.extend(tags1)
+
+        raw_takeaway = str(item.get("key_takeaway", ""))
+        clean_takeaway, tags2 = sanitize_stage_directives(raw_takeaway)
+        item["key_takeaway"] = clean_takeaway
+        leaked_tags.extend(tags2)
+
+        start_sec = int(item.get("start_sec", 0))
+        end_sec = int(item.get("end_sec", start_sec + 30))
+
+        if start_sec < 0:
+            ts_anomalies.append(f"Clamped negative start_sec {start_sec}s -> 0s")
+            start_sec = 0
+
+        if start_sec >= total_duration_sec:
+            clamped_start = max(0, total_duration_sec - 30)
+            ts_anomalies.append(f"Clamped start_sec {start_sec}s > {total_duration_sec}s -> {clamped_start}s")
+            start_sec = clamped_start
+
+        if end_sec <= start_sec:
+            clamped_end = min(total_duration_sec, start_sec + 30)
+            ts_anomalies.append(f"Fixed inverted window [{start_sec}s - {end_sec}s] -> [{start_sec}s - {clamped_end}s]")
+            end_sec = clamped_end
+
+        if end_sec > total_duration_sec:
+            ts_anomalies.append(f"Clamped end_sec {end_sec}s > {total_duration_sec}s -> {total_duration_sec}s")
+            end_sec = total_duration_sec
+
+        item["start_sec"] = start_sec
+        item["end_sec"] = end_sec
+        item["start_mmss"] = seconds_to_timestamp(start_sec)
+        item["end_mmss"] = seconds_to_timestamp(end_sec)
+        item["duration_sec"] = end_sec - start_sec
+
+        if verified_scores and i < len(verified_scores):
+            tab_score = round(float(verified_scores[i]), 1)
+            model_score = round(float(item.get("signal_score_pct", tab_score)), 1)
+            if abs(model_score - tab_score) > 2.0:
+                score_drifts.append(f"Bite #{i+1} score drift: {model_score}% -> {tab_score}%")
+                item["signal_score_pct"] = tab_score
+        else:
+            item["signal_score_pct"] = round(float(item.get("signal_score_pct", 88.0)), 1)
+
+        if youtube_id:
+            item["deep_link_url"] = f"https://youtu.be/{youtube_id}?t={start_sec}"
+        else:
+            item["deep_link_url"] = f"https://audiobite.tech/?t={start_sec}"
+
+        corrected_bites.append(item)
+
+    if ts_anomalies:
+        log_guardrail_anomaly(
+            anomaly_type="GemmaTimestampOutOfBounds",
+            details=f"AudioBite Guardrail clamped {len(ts_anomalies)} timestamps exceeding duration {total_duration_sec}s",
+            context={"ts_anomalies": ts_anomalies}
+        )
+
+    if score_drifts:
+        log_guardrail_anomaly(
+            anomaly_type="GemmaNumericDrift",
+            details=f"AudioBite Guardrail aligned {len(score_drifts)} drifted TabPFN scores",
+            context={"score_drifts": score_drifts}
+        )
+
+    total_interventions = len(ts_anomalies) + len(score_drifts) + len(leaked_tags)
+
+    status = {
+        "passed_clean": total_interventions == 0,
+        "interventions_count": total_interventions,
+        "timestamps_clamped": ts_anomalies,
+        "numeric_drifts_corrected": score_drifts,
+        "leaked_tags_stripped": leaked_tags
+    }
+    return corrected_bites, status

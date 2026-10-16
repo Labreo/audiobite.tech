@@ -1,0 +1,89 @@
+segment_id,source_title,category,window_duration_sec,words_per_sec,information_noun_ratio,filler_hesitation_ratio,numeric_fact_count,sentiment_energy_delta,relative_position,question_hook_flag,replay_loop_stability,high_signal_bite,signal_score_pct,skip_fluff_pct
+SEG-001,Distributed Systems Raft Consensus #1,Tech Talk,22.5,2.94,0.46,0.11,7,1.54,0.63,1,0.77,1,90.4,9.6
+SEG-002,Why LLMs Fail at Tabular Math #2,Tech Breakdown,26.4,3.31,0.41,0.04,7,1.5,0.08,1,0.8,1,93.0,7.0
+SEG-003,Indie SaaS Zero-Burn Architecture #3,Founder Interview,22.1,2.53,0.3,0.36,0,0.21,0.78,0,0.58,0,25.1,74.9
+SEG-004,Kernel Context Switches & Page Faults #4,CS Lecture,29.2,3.05,0.47,0.03,5,1.34,0.39,1,0.77,1,88.5,11.5
+SEG-005,Database B-Tree Indexing in PostgreSQL #5,Engineering Deep Dive,39.7,3.08,0.45,0.03,7,1.03,0.62,1,0.98,1,97.0,3.0
+SEG-006,Analog Synth Filter Resonance & Harmonics #6,Music Breakdown,29.6,2.03,0.32,0.3,1,0.2,0.83,0,0.43,0,50.1,49.9
+SEG-007,Frontend Performance & INP Optimization #7,Web Dev Talk,34.2,2.77,0.6,0.04,5,1.07,0.63,1,0.91,1,87.3,12.7
+SEG-008,Microservices vs Monoliths Post-Mortem #8,Tech Podcast,37.4,2.59,0.63,0.12,5,1.07,0.34,0,0.96,1,92.6,7.4
+SEG-009,Distributed Systems Raft Consensus #9,Tech Talk,26.3,2.1,0.33,0.46,0,0.23,0.7,0,0.42,0,38.8,61.2
+SEG-010,Why LLMs Fail at Tabular Math #10,Tech Breakdown,33.7,3.94,0.51,0.05,3,1.31,0.29,0,0.92,1,97.1,2.9
+SEG-011,Indie SaaS Zero-Burn Architecture #11,Founder Interview,25.2,3.59,0.57,0.07,6,1.8,0.19,1,0.81,1,92.4,7.6
+SEG-012,Kernel Context Switches & Page Faults #12,CS Lecture,35.6,1.56,0.33,0.5,1,0.16,0.9,0,0.48,0,35.6,64.4
+SEG-013,Database B-Tree Indexing in PostgreSQL #13,Engineering Deep Dive,39.5,2.92,0.54,0.04,2,1.67,0.91,1,0.94,1,91.7,8.3
+SEG-014,Analog Synth Filter Resonance & Harmonics #14,Music Breakdown,29.5,2.76,0.67,0.13,2,1.4,0.23,1,0.75,1,98.1,1.9
+SEG-015,Frontend Performance & INP Optimization #15,Web Dev Talk,38.6,1.83,0.19,0.54,0,0.14,0.84,0,0.5,0,24.1,75.9
+SEG-016,Microservices vs Monoliths Post-Mortem #16,Tech Podcast,37.3,2.71,0.53,0.09,4,1.33,0.73,1,0.85,1,87.2,12.8
+SEG-017,Distributed Systems Raft Consensus #17,Tech Talk,36.6,2.82,0.49,0.14,7,1.17,0.54,1,0.85,1,87.8,12.2
+SEG-018,Why LLMs Fail at Tabular Math #18,Tech Breakdown,22.4,2.18,0.28,0.25,0,0.21,0.11,0,0.62,0,47.8,52.2
+SEG-019,Indie SaaS Zero-Burn Architecture #19,Founder Interview,26.8,3.57,0.46,0.04,6,1.38,0.11,0,0.93,1,96.3,3.7
+SEG-020,Kernel Context Switches & Page Faults #20,CS Lecture,23.9,3.19,0.52,0.08,7,0.85,0.22,1,0.98,1,85.5,14.5
+SEG-021,Database B-Tree Indexing in PostgreSQL #21,Engineering Deep Dive,28.8,2.61,0.22,0.31,1,0.17,0.41,0,0.41,0,35.9,64.1
+SEG-022,Analog Synth Filter Resonance & Harmonics #22,Music Breakdown,23.5,3.79,0.64,0.03,7,1.8,0.84,0,0.97,1,98.1,1.9
+SEG-023,Frontend Performance & INP Optimization #23,Web Dev Talk,25.3,3.28,0.46,0.07,2,0.96,0.81,0,0.98,1,88.0,12.0
+SEG-024,Microservices vs Monoliths Post-Mortem #24,Tech Podcast,31.1,1.99,0.34,0.58,1,0.18,0.76,0,0.44,0,51.1,48.9
+SEG-025,Distributed Systems Raft Consensus #25,Tech Talk,32.8,3.7,0.42,0.09,6,1.72,0.57,1,0.79,1,98.6,1.4
+SEG-026,Why LLMs Fail at Tabular Math #26,Tech Breakdown,25.7,3.45,0.59,0.05,2,1.74,0.12,1,0.81,1,93.0,7.0
+SEG-027,Indie SaaS Zero-Burn Architecture #27,Founder Interview,30.4,2.22,0.27,0.56,0,0.43,0.61,0,0.44,0,30.0,70.0
+SEG-028,Kernel Context Switches & Page Faults #28,CS Lecture,34.9,3.23,0.66,0.13,2,1.26,0.17,1,0.98,1,85.1,14.9
+SEG-029,Database B-Tree Indexing in PostgreSQL #29,Engineering Deep Dive,27.3,3.99,0.65,0.13,4,1.08,0.24,1,0.94,1,94.7,5.3
+SEG-030,Analog Synth Filter Resonance & Harmonics #30,Music Breakdown,41.7,2.32,0.18,0.52,1,0.57,0.6,0,0.38,0,48.3,51.7
+SEG-031,Frontend Performance & INP Optimization #31,Web Dev Talk,39.8,3.69,0.44,0.05,3,1.52,0.29,0,0.91,1,97.0,3.0
+SEG-032,Microservices vs Monoliths Post-Mortem #32,Tech Podcast,27.0,3.95,0.41,0.1,4,0.84,0.5,1,0.93,1,93.7,6.3
+SEG-033,Distributed Systems Raft Consensus #33,Tech Talk,36.8,2.17,0.25,0.25,0,0.57,0.29,0,0.56,0,26.5,73.5
+SEG-034,Why LLMs Fail at Tabular Math #34,Tech Breakdown,29.4,3.38,0.52,0.03,4,1.7,0.08,0,0.96,1,87.2,12.8
+SEG-035,Indie SaaS Zero-Burn Architecture #35,Founder Interview,24.1,3.75,0.65,0.07,6,1.55,0.27,0,0.95,1,98.8,1.2
+SEG-036,Kernel Context Switches & Page Faults #36,CS Lecture,39.6,1.43,0.31,0.36,1,0.5,0.78,0,0.61,0,46.3,53.7
+SEG-037,Database B-Tree Indexing in PostgreSQL #37,Engineering Deep Dive,37.7,2.67,0.64,0.12,3,1.0,0.29,1,0.83,1,96.5,3.5
+SEG-038,Analog Synth Filter Resonance & Harmonics #38,Music Breakdown,26.5,3.56,0.51,0.05,2,1.77,0.83,1,0.83,1,91.7,8.3
+SEG-039,Frontend Performance & INP Optimization #39,Web Dev Talk,38.9,1.86,0.18,0.54,1,0.19,0.66,0,0.64,0,30.0,70.0
+SEG-040,Microservices vs Monoliths Post-Mortem #40,Tech Podcast,30.7,3.67,0.49,0.09,6,0.92,0.15,1,0.79,1,84.7,15.3
+SEG-041,Distributed Systems Raft Consensus #41,Tech Talk,32.4,3.79,0.59,0.13,7,1.47,0.44,1,0.85,1,98.4,1.6
+SEG-042,Why LLMs Fail at Tabular Math #42,Tech Breakdown,34.5,2.33,0.2,0.55,1,0.43,0.88,0,0.45,0,42.9,57.1
+SEG-043,Indie SaaS Zero-Burn Architecture #43,Founder Interview,25.8,3.56,0.51,0.11,3,1.42,0.55,1,0.84,1,96.7,3.3
+SEG-044,Kernel Context Switches & Page Faults #44,CS Lecture,26.2,3.76,0.57,0.06,5,1.24,0.32,0,0.87,1,96.1,3.9
+SEG-045,Database B-Tree Indexing in PostgreSQL #45,Engineering Deep Dive,36.7,2.32,0.23,0.47,1,0.15,0.91,0,0.64,0,29.0,71.0
+SEG-046,Analog Synth Filter Resonance & Harmonics #46,Music Breakdown,38.1,2.74,0.41,0.14,6,1.65,0.33,0,0.85,1,97.5,2.5
+SEG-047,Frontend Performance & INP Optimization #47,Web Dev Talk,36.4,3.11,0.51,0.04,7,0.81,0.57,0,0.93,1,87.3,12.7
+SEG-048,Microservices vs Monoliths Post-Mortem #48,Tech Podcast,35.9,2.05,0.27,0.55,0,0.33,0.77,0,0.59,0,42.0,58.0
+SEG-049,Distributed Systems Raft Consensus #49,Tech Talk,33.9,2.73,0.33,0.45,1,0.52,0.94,0,0.51,0,48.9,51.1
+SEG-050,Why LLMs Fail at Tabular Math #50,Tech Breakdown,31.5,2.91,0.47,0.1,6,1.28,0.72,0,0.81,1,85.2,14.8
+SEG-051,Indie SaaS Zero-Burn Architecture #51,Founder Interview,27.4,1.85,0.27,0.3,0,0.29,0.31,0,0.4,0,28.4,71.6
+SEG-052,Kernel Context Switches & Page Faults #52,CS Lecture,28.6,3.25,0.42,0.12,5,1.7,0.42,1,0.97,1,84.3,15.7
+SEG-053,Database B-Tree Indexing in PostgreSQL #53,Engineering Deep Dive,33.5,3.26,0.66,0.06,5,1.65,0.84,1,0.87,1,95.2,4.8
+SEG-054,Analog Synth Filter Resonance & Harmonics #54,Music Breakdown,40.0,2.08,0.23,0.41,1,0.27,0.77,0,0.55,0,34.1,65.9
+SEG-055,Frontend Performance & INP Optimization #55,Web Dev Talk,31.3,2.7,0.57,0.02,5,1.39,0.2,1,0.76,1,93.8,6.2
+SEG-056,Microservices vs Monoliths Post-Mortem #56,Tech Podcast,31.2,2.58,0.51,0.05,4,1.14,0.17,1,0.81,1,98.5,1.5
+SEG-057,Distributed Systems Raft Consensus #57,Tech Talk,38.7,2.06,0.31,0.27,1,0.21,0.43,0,0.37,0,50.7,49.3
+SEG-058,Why LLMs Fail at Tabular Math #58,Tech Breakdown,22.6,2.9,0.63,0.09,3,0.93,0.09,1,0.78,1,98.4,1.6
+SEG-059,Indie SaaS Zero-Burn Architecture #59,Founder Interview,27.1,3.09,0.57,0.14,7,0.91,0.47,0,0.97,1,85.6,14.4
+SEG-060,Kernel Context Switches & Page Faults #60,CS Lecture,28.2,2.35,0.34,0.38,0,0.14,0.07,0,0.56,0,40.8,59.2
+SEG-061,Database B-Tree Indexing in PostgreSQL #61,Engineering Deep Dive,37.4,3.86,0.57,0.03,6,1.58,0.14,1,0.87,1,94.1,5.9
+SEG-062,Analog Synth Filter Resonance & Harmonics #62,Music Breakdown,35.0,2.52,0.52,0.08,5,1.76,0.11,1,0.96,1,91.0,9.0
+SEG-063,Frontend Performance & INP Optimization #63,Web Dev Talk,25.5,2.13,0.29,0.45,1,0.33,0.19,0,0.6,0,39.8,60.2
+SEG-064,Microservices vs Monoliths Post-Mortem #64,Tech Podcast,26.9,4.0,0.48,0.07,5,1.37,0.34,1,0.84,1,84.4,15.6
+SEG-065,Distributed Systems Raft Consensus #65,Tech Talk,25.6,2.84,0.62,0.06,6,1.5,0.82,1,0.88,1,91.9,8.1
+SEG-066,Why LLMs Fail at Tabular Math #66,Tech Breakdown,26.8,1.97,0.27,0.33,1,0.42,0.22,0,0.5,0,45.8,54.2
+SEG-067,Indie SaaS Zero-Burn Architecture #67,Founder Interview,26.4,3.61,0.49,0.09,5,1.35,0.13,1,0.85,1,95.3,4.7
+SEG-068,Kernel Context Switches & Page Faults #68,CS Lecture,36.1,2.93,0.47,0.03,3,1.12,0.35,1,0.87,1,95.6,4.4
+SEG-069,Database B-Tree Indexing in PostgreSQL #69,Engineering Deep Dive,26.3,2.08,0.3,0.57,1,0.59,0.22,0,0.6,0,30.9,69.1
+SEG-070,Analog Synth Filter Resonance & Harmonics #70,Music Breakdown,28.0,3.63,0.44,0.03,2,1.35,0.37,1,0.97,1,93.7,6.3
+SEG-071,Frontend Performance & INP Optimization #71,Web Dev Talk,24.1,2.52,0.48,0.08,4,0.98,0.73,0,0.81,1,97.1,2.9
+SEG-072,Microservices vs Monoliths Post-Mortem #72,Tech Podcast,23.3,2.09,0.28,0.48,0,0.17,0.15,0,0.52,0,31.1,68.9
+SEG-073,Distributed Systems Raft Consensus #73,Tech Talk,24.4,2.47,0.28,0.51,0,0.49,0.94,0,0.46,0,49.3,50.7
+SEG-074,Why LLMs Fail at Tabular Math #74,Tech Breakdown,33.8,3.19,0.56,0.03,7,0.9,0.32,0,0.89,1,88.0,12.0
+SEG-075,Indie SaaS Zero-Burn Architecture #75,Founder Interview,26.8,2.17,0.21,0.38,1,0.25,0.12,0,0.42,0,43.2,56.8
+SEG-076,Kernel Context Switches & Page Faults #76,CS Lecture,31.1,3.6,0.66,0.11,7,1.39,0.68,0,0.85,1,92.3,7.7
+SEG-077,Database B-Tree Indexing in PostgreSQL #77,Engineering Deep Dive,40.2,3.82,0.42,0.04,4,1.4,0.63,1,0.96,1,90.7,9.3
+SEG-078,Analog Synth Filter Resonance & Harmonics #78,Music Breakdown,28.1,1.96,0.23,0.43,1,0.14,0.47,0,0.36,0,35.0,65.0
+SEG-079,Frontend Performance & INP Optimization #79,Web Dev Talk,27.0,2.65,0.67,0.12,6,1.39,0.34,0,0.98,1,94.2,5.8
+SEG-080,Microservices vs Monoliths Post-Mortem #80,Tech Podcast,22.8,3.71,0.53,0.1,4,0.98,0.29,1,0.85,1,96.4,3.6
+SEG-081,Distributed Systems Raft Consensus #81,Tech Talk,31.4,1.97,0.23,0.28,0,0.26,0.92,0,0.56,0,30.6,69.4
+SEG-082,Why LLMs Fail at Tabular Math #82,Tech Breakdown,38.3,3.38,0.53,0.06,4,0.92,0.9,1,0.95,1,96.5,3.5
+SEG-083,Indie SaaS Zero-Burn Architecture #83,Founder Interview,39.4,2.05,0.19,0.42,1,0.41,0.05,0,0.58,0,28.1,71.9
+SEG-084,Kernel Context Switches & Page Faults #84,CS Lecture,40.6,2.01,0.3,0.29,0,0.45,0.54,0,0.44,0,22.4,77.6
+SEG-085,Database B-Tree Indexing in PostgreSQL #85,Engineering Deep Dive,26.5,3.85,0.43,0.13,7,1.63,0.42,1,0.96,1,88.4,11.6
+SEG-086,Analog Synth Filter Resonance & Harmonics #86,Music Breakdown,30.3,3.27,0.53,0.07,3,1.18,0.68,1,0.87,1,97.4,2.6
+SEG-087,Frontend Performance & INP Optimization #87,Web Dev Talk,27.5,2.51,0.25,0.56,1,0.51,0.83,0,0.43,0,31.0,69.0
+SEG-088,Microservices vs Monoliths Post-Mortem #88,Tech Podcast,42.0,3.28,0.44,0.08,4,1.13,0.58,1,0.84,1,98.2,1.8

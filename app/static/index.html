@@ -11,6 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
   
+  <!-- YouTube IFrame Player API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <!-- Lenis Smooth Scroll -->
   <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
@@ -52,6 +55,9 @@
           <span class="pulse-dot"></span>
           <span>TabPFN-v2 & Gemma 4 Zero-Burn Dual-Brain</span>
         </div>
+        <button class="btn-tactile btn-stone" id="btn-open-crate" title="Open Saved AudioBite Crate">
+          <span>📦 Crate (<strong id="nav-crate-count">0</strong>)</span>
+        </button>
         <button class="btn-tactile btn-brass" id="btn-open-pro">
           <span>Unlock Pro $4.99</span>
         </button>
@@ -117,6 +123,7 @@
           <!-- Mode Tabs -->
           <div class="track-picker-row" style="margin-bottom: 0.75rem;">
             <button class="track-pill is-active" id="tab-cassette" data-mode="cassette">📼 3 Pre-Loaded Cassettes</button>
+            <button class="track-pill" id="tab-youtube" data-mode="youtube">📺 YouTube &amp; Video Link</button>
             <button class="track-pill" id="tab-mic" data-mode="mic">🎙️ Record Live Mic</button>
             <button class="track-pill" id="tab-upload" data-mode="upload">📂 Drop Audio File</button>
           </div>
@@ -139,6 +146,31 @@
                 <span class="cassette-title">The Zero-Burn AI Stack (01:30)</span>
                 <span class="cassette-desc">Indie Hacker soundbite on $0.00 margins and TabPFN</span>
               </button>
+            </div>
+          </div>
+
+          <!-- Input Panel D: YouTube & Video Link -->
+          <div id="panel-youtube" style="display: none;">
+            <div class="youtube-input-box">
+              <label for="youtube-url-input" class="panel-label" style="display: block; margin-bottom: 0.35rem;">YOUTUBE OR YTM LINK</label>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="text" id="youtube-url-input" class="tactile-input" placeholder="https://www.youtube.com/watch?v=... or youtu.be/..." value="https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="flex: 1;">
+                <button class="btn-tactile btn-stone" id="btn-load-youtube" style="white-space: nowrap;">
+                  <span>🔍 Scan &amp; Load</span>
+                </button>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+                <input type="text" id="youtube-query-input" class="tactile-input" placeholder="Optional: Focus topic (e.g. dopamine, leader election, pricing)" style="flex: 1; font-size: 0.8rem;">
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="preset-links-row">
+                <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-muted); font-weight: 700;">PRESETS:</span>
+                <button class="btn-tactile-xs" id="btn-preset-huberman" data-url="https://www.youtube.com/watch?v=Kmms5i_qQyE" data-title="Dr. Huberman • Dopamine &amp; Focus Deep Work" data-query="focus protocol dopamine">🎙️ Huberman Focus</button>
+                <button class="btn-tactile-xs" id="btn-preset-resonance" data-url="https://www.youtube.com/watch?v=H30R_Y9bK44" data-title="HOME — Resonance (Synthwave Studio)" data-query="bass drop hook">🎵 Resonance (YTM)</button>
+                <button class="btn-tactile-xs" id="btn-preset-indie" data-url="https://www.youtube.com/watch?v=r6tHKSNneCc" data-title="YC Startup School • Finding Product Market Fit" data-query="first ten customers">💡 YC Startup PMF</button>
+              </div>
             </div>
           </div>
 
@@ -181,14 +213,59 @@
               <span class="player-tag">LIVE STUDIO MONITOR</span>
               <span class="player-time" id="player-time-display">00:00 / 02:00</span>
             </div>
+
+            <!-- YouTube Iframe Monitor Housing -->
+            <div class="youtube-player-housing" id="youtube-player-housing" style="display: none;">
+              <div class="youtube-monitor-frame">
+                <div id="youtube-iframe-player"></div>
+              </div>
+            </div>
+
             <audio id="main-audio-player" src="/static/audio/sample_a_client.wav" preload="metadata"></audio>
             
-            <div class="player-controls-row">
+            <div class="player-controls-row" id="html5-player-controls">
               <button class="btn-tactile btn-play" id="btn-play-pause">
                 <span id="play-icon">▶</span> <span id="play-label">PLAY AUDIO</span>
               </button>
               <div class="seek-bar-wrap">
                 <input type="range" min="0" max="100" value="0" class="tactile-slider seek-slider" id="audio-seek-slider" aria-label="Audio seeker">
+              </div>
+            </div>
+
+            <!-- A-B Studio Looper Module -->
+            <div class="looper-module" id="looper-module">
+              <div class="looper-top-row">
+                <span style="font-weight: 800; color: var(--ink-deep); letter-spacing: 0.05em;">A–B STUDIO LOOPER &amp; SOUNDBITE CLIPPER</span>
+                <span class="loop-status-pill" id="loop-status-pill">LOOP STANDBY</span>
+              </div>
+              <div class="looper-controls-grid">
+                <div class="loop-point-block">
+                  <div class="loop-point-label">POINT [A] START</div>
+                  <div class="loop-time-readout" id="loop-point-a-val">00:00</div>
+                  <div class="loop-btn-row">
+                    <button class="btn-tactile-xs" id="btn-set-a" title="Set Point A to current playhead">Set [A]</button>
+                    <button class="btn-tactile-xs" id="btn-a-minus">-1s</button>
+                    <button class="btn-tactile-xs" id="btn-a-plus">+1s</button>
+                  </div>
+                </div>
+
+                <div class="loop-center-action">
+                  <button class="btn-loop-toggle" id="btn-toggle-loop" title="Toggle continuous A–B loop">
+                    <span id="loop-btn-icon">🔁</span>
+                    <span id="loop-btn-label">Engage A–B Loop</span>
+                  </button>
+                  <span class="loop-duration-text" id="loop-duration-display">Span: 00:30</span>
+                </div>
+
+                <div class="loop-point-block">
+                  <div class="loop-point-label">POINT [B] END</div>
+                  <div class="loop-time-readout" id="loop-point-b-val">00:30</div>
+                  <div class="loop-btn-row">
+                    <button class="btn-tactile-xs" id="btn-set-b" title="Set Point B to current playhead">Set [B]</button>
+                    <button class="btn-tactile-xs" id="btn-b-minus">-1s</button>
+                    <button class="btn-tactile-xs" id="btn-b-plus">+1s</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -209,10 +286,16 @@
             </div>
           </div>
 
-          <button class="btn-tactile btn-generate" id="btn-generate-sheet">
-            <span id="btn-spinner" style="display: none;">⏳</span>
-            <span id="btn-label">Stamp AudioBite Action Card</span>
-          </button>
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+            <button class="btn-tactile btn-generate" id="btn-generate-sheet" style="flex: 1;">
+              <span id="btn-spinner" style="display: none;">⏳</span>
+              <span id="btn-label">Stamp Action Card</span>
+            </button>
+            <button class="btn-tactile btn-brass" id="btn-extract-bites" style="flex: 1; justify-content: center;">
+              <span id="extract-spinner" style="display: none;">⏳</span>
+              <span id="extract-label">✂️ Extract AudioBites</span>
+            </button>
+          </div>
         </div>
 
         <!-- Right: Telemetry Display -->
@@ -275,6 +358,28 @@
         </div>
       </div>
     </main>
+
+    <!-- EXTRACTED AUDIOBITES DECK (SOUNDBITES & CITATION CLIPS) -->
+    <section class="audiobites-deck-section" id="audiobites-deck-section" style="display: none;">
+      <div class="deck-header-row">
+        <div>
+          <h3 class="deck-title" id="deck-track-title">VERIFIED AUDIOBITES &amp; SOUNDBITES</h3>
+          <p class="deck-subtitle" id="deck-track-meta">TabPFN-v2 Scored Windows • Guardrail-Verified Timestamps</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <button class="btn-tactile btn-stone" id="btn-stamp-all-pdf">
+            <span>📄 Stamp Citation PDF</span>
+          </button>
+          <button class="btn-tactile btn-stone" id="btn-copy-deck-markdown">
+            <span>📋 Copy Markdown</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="audiobites-grid" id="audiobites-grid">
+        <!-- Dynamically populated AudioBite cards -->
+      </div>
+    </section>
 
     <!-- STAMPED PARCHMENT SHEET RESULTS (REVEALED ON GENERATION) -->
     <section class="parchment-sheet-wrapper" id="parchment-sheet">
@@ -472,6 +577,43 @@
         <span>Dual-Brain Architecture: TabPFN-v2 on CPU + Google AI Studio Gemma 4</span>
       </div>
     </footer>
+
+    <!-- PERSISTENT CRATE FLOATING BUTTON -->
+    <button class="crate-floating-btn" id="btn-floating-crate" title="View Saved AudioBites Crate">
+      <span>📦 Saved Crate</span>
+      <span class="crate-badge-count" id="crate-badge-count">0</span>
+    </button>
+
+    <!-- PERSISTENT CRATE DRAWER OVERLAY -->
+    <div class="crate-drawer-overlay" id="crate-drawer-overlay" aria-hidden="true">
+      <aside class="crate-drawer" role="dialog" aria-label="Saved AudioBites Crate">
+        <div class="crate-header">
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 800;">SAVED AUDIOBITE CRATE</h3>
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-amber);">Archival Slices &amp; Citations</span>
+          </div>
+          <button class="modal-close" id="btn-close-crate" aria-label="Close Crate">&times;</button>
+        </div>
+
+        <div class="crate-items-list" id="crate-items-list">
+          <div class="crate-empty-msg" id="crate-empty-msg">
+            Your crate is empty.<br>Click "Save to Crate" on any AudioBite card to save it here.
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--paper-stone); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <button class="btn-tactile btn-brass" id="btn-stamp-crate-pdf" style="width: 100%; justify-content: center;">
+            <span>📄 Stamp Citation Dossier PDF</span>
+          </button>
+          <button class="btn-tactile btn-stone" id="btn-copy-crate-md" style="width: 100%; justify-content: center;">
+            <span>📋 Copy Markdown Dossier</span>
+          </button>
+          <button class="btn-tactile-xs" id="btn-clear-crate" style="align-self: center; margin-top: 0.25rem;">
+            Clear Crate
+          </button>
+        </div>
+      </aside>
+    </div>
 
   </div>
 
