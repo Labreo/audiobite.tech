@@ -26,7 +26,8 @@ I didn’t want to build another sterile, flat-design SaaS dashboard with generi
 
 Meet **[AudioBite.tech](https://audiobite.tech)**: the tactile voice-note, audio-to-action, and soundbite studio.
 
-- 🌐 **Live Studio**: [audiobite.tech](https://audiobite.tech)
+- 🌐 **Live Studio**: [audiobite.tech](https://audiobite.tech) (Live on Render: [audiobite-ai-companion.onrender.com](https://audiobite-ai-companion.onrender.com))
+- 🤖 **Telegram Forwarding Bot**: [@AudioBiteStudioBot](https://t.me/AudioBiteStudioBot) (Forward any voice note for instant briefs + PDF)
 - 🐙 **Source Code**: [GitHub - Labreo/audiobite.tech](https://github.com/Labreo/audiobite.tech)
 - ☕ **Side-Hustle Monetization**: [Buy Me a Coffee — $4.99 Studio Supporter](https://www.buymeacoffee.com/kakeroth)
 
@@ -195,8 +196,8 @@ I shared the studio link with 14 freelance developers, college peers, and YouTub
   - `34.8%`: *"Yes — if it had direct WhatsApp / Telegram bot forwarding"*
   - `13.0%`: *"I'll use the free tier / local Ollama mode"*
 
-### What Real Users Asked For Next:
-1. *"Can I forward voice notes directly to a WhatsApp or Telegram bot instead of downloading the audio?"* (Top requested feature!)
+### What Real Users Asked For Next (And What I Shipped):
+1. *"Can I forward voice notes directly to a Telegram bot instead of downloading the audio?"* (Top requested feature — **Shipped live**: [@AudioBiteStudioBot](https://t.me/AudioBiteStudioBot) powered by fast transcription and Render webhooks!)
 2. *"Can you export the deliverables directly into Notion and Linear?"*
 
 ---
@@ -226,10 +227,11 @@ Because fixed infrastructure costs are exactly **$0.00**, every single $4.99 Buy
 
 ---
 
-## 10. Verification Suite (51 Pytest Tests Passing)
+## 10. Verification Suite (58 Pytest Tests Passing)
 
-Every component is locked under 51 automated tests with zero pure-black/white violations and zero timestamp hallucinations:
+Every component is locked under 58 automated tests with zero pure-black/white violations and zero timestamp hallucinations:
 - `tests/test_api_endpoints.py` (15 tests: health, backtest, predict-signal, upload, telemetry, checkout, YouTube metadata scanning, AudioBite soundbite extraction, and citation stamping)
+- `tests/test_bot_router.py` (7 tests: Telegram /start webhook, WhatsApp challenge verification, end-to-end voice note pipeline execution with PDF stamping)
 - `tests/test_gemma_brain.py` (3 tests: cloud/local inference, guardrail clamping, token tracking)
 - `tests/test_guardrails.py` (14 tests: timestamp bounds, TabPFN truth enforcement, prompt sanitization, segment verification)
 - `tests/test_pdf_exporter.py` (6 tests: parchment styles, deliverables table, citation card layout, vector brass seals)
