@@ -59,14 +59,19 @@ graph TD
     H --> I[Stamped Parchment PDF + Clickable Audio Player]
 ```
 
-### The 3 Zero-Friction Input Modes
+### The 4 Zero-Friction Input Modes
 Anyone visiting `audiobite.tech` can immediately test with real audio in under 10 seconds:
-1. **🎙️ Record Live Voice Bite (In-Browser Mic)**: Click the tactile brass REC toggle to speak a rambling 15–60 second voice note transcribed live in the browser via `MediaRecorder`.
-2. **📂 Drop Audio File / Paste Transcript**: Upload a `.mp3`, `.wav`, or `.ogg` WhatsApp voice note, or paste a messy transcript / YouTube link (`?ref=ytm-mini-mode`).
-3. **📼 3 Pre-Loaded Cassette Samples (1-Click Judge Demo)**:
-   - *Sample A (Freelancer / B2B)*: **"The 2-Minute Chaotic Client WhatsApp Voice Note"** (Client rambles about checkout flows, dark mode, and database migrations with 62% filler tangents).
+1. **📺 YouTube & Podcast Clipper**: Paste any YouTube link, podcast URL, or music track (e.g. Huberman Lab, YC PMF lecture, or Resonance). AudioBite scans the caption windows, scores segment retention with TabPFN, and isolates verified soundbites with clickable `?t=XXs` deep citations.
+2. **🎙️ Record Live Voice Bite (In-Browser Mic)**: Click the tactile brass REC toggle to speak a rambling 15–60 second voice note transcribed live in the browser via `MediaRecorder`.
+3. **📂 Drop Audio File / Local WAV Slicer**: Upload a `.mp3`, `.wav`, or `.ogg` WhatsApp voice note. The built-in Web Audio API 16-bit PCM WAV slicer lets you export clean sub-clips to disk with zero cloud latency.
+4. **📼 3 Pre-Loaded Cassette Samples (1-Click Judge Demo)**:
+   - *Sample A (Freelancer / B2B)*: **"The 2-Minute Chaotic Client WhatsApp Voice Note"** (Client rambles about checkout flows, dark mode, and database migrations with 58% filler tangents).
    - *Sample B (Student / Technical)*: **"Distributed Systems Lecture Clip"** (Dense technical explanation on Raft consensus needing timestamped exam AudioBites).
    - *Sample C (Creator / YouTube)*: **"Podcast / Interview Soundbite"** (Extracting high-retention hooks with clickable jump timestamps).
+
+### A–B Studio Looper & Persistent Crate
+- **Physical A–B Studio Looper**: Set Point `[A]` and Point `[B]`, nudge -1s/+1s, and engage continuous looping directly inside the live monitor.
+- **Persistent AudioBite Crate**: Save high-signal soundbites across multiple sessions in localStorage, then click **"Stamp Citation Dossier PDF"** to generate an archival ReportLab PDF complete with deep audio citations and vector brass seals.
 
 ---
 
@@ -221,15 +226,15 @@ Because fixed infrastructure costs are exactly **$0.00**, every single $4.99 Buy
 
 ---
 
-## 10. Verification Suite (47 Pytest Tests Passing)
+## 10. Verification Suite (51 Pytest Tests Passing)
 
-Every component is locked under 47 automated tests:
-- `tests/test_api_endpoints.py` (11 tests: health, backtest, predict-signal, upload, telemetry, checkout)
+Every component is locked under 51 automated tests with zero pure-black/white violations and zero timestamp hallucinations:
+- `tests/test_api_endpoints.py` (15 tests: health, backtest, predict-signal, upload, telemetry, checkout, YouTube metadata scanning, AudioBite soundbite extraction, and citation stamping)
 - `tests/test_gemma_brain.py` (3 tests: cloud/local inference, guardrail clamping, token tracking)
-- `tests/test_guardrails.py` (14 tests: timestamp bounds, TabPFN truth enforcement, prompt sanitization)
-- `tests/test_pdf_exporter.py` (6 tests: parchment styles, deliverables table, client reply box)
-- `tests/test_tabpfn_engine.py` (6 tests: 88-session training, backtest metrics, fader monotonicity)
-- `tests/test_tactile_ui_compliance.py` (7 tests: zero pure black/white, film grain, 3D hardware cutouts, haptic clicks)
+- `tests/test_guardrails.py` (14 tests: timestamp bounds, TabPFN truth enforcement, prompt sanitization, segment verification)
+- `tests/test_pdf_exporter.py` (6 tests: parchment styles, deliverables table, citation card layout, vector brass seals)
+- `tests/test_tabpfn_engine.py` (6 tests: 88-session training, segment scoring, backtest metrics, fader monotonicity)
+- `tests/test_tactile_ui_compliance.py` (7 tests: zero pure black/white, film grain, 3D hardware cutouts, Web Audio haptics, Lenis scroll)
 
 ---
 
