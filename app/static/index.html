@@ -29,19 +29,6 @@
 
   <div class="workbench-canvas">
 
-    <!-- STAGE 4: DRAGGABLE 3D HARDWARE CUTOUTS ON WORKBENCH -->
-    <div class="cutout" id="cutout-vu" title="Drag to tilt in 3D • Calibrated to TabPFN Brier Score" role="region" aria-label="Vintage Analog VU Meter">
-      <img src="/static/cutouts/vu-meter.svg" alt="Analog VU Calibration Meter" class="cutout-visual" draggable="false">
-    </div>
-
-    <div class="cutout" id="cutout-fork" title="Drag to inspect • 440Hz Brass Tuning Fork" role="region" aria-label="Brass Tuning Fork">
-      <img src="/static/cutouts/tuning-fork.svg" alt="Brass 440Hz Tuning Fork" class="cutout-visual" draggable="false">
-    </div>
-
-    <div class="cutout" id="cutout-badge" title="Drag to inspect • 440+ Extension Users Telemetry Badge" role="region" aria-label="Cassette Splice Block">
-      <img src="/static/cutouts/splice-badge.svg" alt="Tape Splice Telemetry Badge" class="cutout-visual" draggable="false">
-    </div>
-
     <!-- SITE NAVIGATION HEADER -->
     <header class="site-nav">
       <a href="/" class="brand-mark">
@@ -53,10 +40,10 @@
       <div class="nav-controls">
         <div class="runtime-badge">
           <span class="pulse-dot"></span>
-          <span>TabPFN-v2 & Gemma 4 Zero-Burn Dual-Brain</span>
+          <span>TabPFN-v2 &amp; Gemma 4 Zero-Burn Dual-Brain</span>
         </div>
         <button class="btn-tactile btn-stone" id="btn-open-crate" title="Open Saved AudioBite Crate">
-          <span>📦 Crate (<strong id="nav-crate-count">0</strong>)</span>
+          <span>Crate (<strong id="nav-crate-count">0</strong>)</span>
         </button>
         <button class="btn-tactile btn-brass" id="btn-open-pro">
           <span>Unlock Pro $4.99</span>
@@ -64,8 +51,11 @@
       </div>
     </header>
 
-    <!-- STAGE 3: HERO SECTION WITH TYPOGRAPHIC STAGGER & MORPHING REEL -->
+    <!-- HERO SECTION WITH EDITORIAL TYPOGRAPHY & TELEMETRY -->
     <section class="hero-section">
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-amber); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem;">
+        TACTILE AUDIO-TO-ACTION WORKBENCH • TABPFN-V2 + GEMMA 4
+      </div>
       <h1 class="editorial-hero-title">
         <span class="hero-word">
           <span class="hero-char" style="--char-idx: 0">S</span>
@@ -75,18 +65,7 @@
           <span class="hero-char" style="--char-idx: 4">A</span>
           <span class="hero-char" style="--char-idx: 5">L</span>
         </span>
-        <!-- Morphing Typographic Reel Slot -->
-        <span class="morphing-reel-slot" id="hero-reel-slot" role="button" tabindex="0" aria-label="Toggle live studio telemetry reel">
-          <span class="reel-glyph">&amp;</span>
-          <span class="reel-viewport">
-            <span class="reel-strip">
-              <span class="reel-frame">TabPFN: 100% Calibrated</span>
-              <span class="reel-frame">Gemma 4: $0.00 Zero-Burn</span>
-              <span class="reel-frame">Clickable [MM:SS] Proofs</span>
-              <span class="reel-frame">440+ Extension Users</span>
-            </span>
-          </span>
-        </span>
+        <span class="reel-glyph" style="margin: 0 0.35rem;">&amp;</span>
         <span class="hero-word">
           <span class="hero-char" style="--char-idx: 6">B</span>
           <span class="hero-char" style="--char-idx: 7">I</span>
@@ -96,16 +75,31 @@
       </h1>
 
       <p class="hero-narrative">
-        Turn rambling voice notes, chaotic WhatsApp audio, lectures, and client recordings into <strong>timestamp-locked AudioBites</strong>, engineering scope quotes, and clickable action cards. <strong>TabPFN-v2</strong> predicts signal purity and effort from 88 logged recordings, while <strong>Gemma 4</strong> strips the fluff with deterministic timestamp verification.
+        Turn rambling voice notes, chaotic WhatsApp audio, lectures, and client recordings into <strong>timestamp-locked AudioBites</strong>, engineering scope quotes, and clickable action cards. <strong>TabPFN-v2</strong> predicts signal purity and effort from 88 logged recordings, while <strong>Gemma 4</strong> strips conversational fluff with deterministic timestamp verification.
       </p>
+
+      <div class="hero-telemetry-strip" style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; align-items: center;">
+        <span class="morphing-reel-slot" id="hero-reel-slot" role="region" aria-label="Live studio telemetry reel" style="padding: 0; background: none;">
+          <span class="reel-viewport" style="height: 1.9rem; border-radius: 4px; padding: 0 0.6rem;">
+            <span class="reel-strip">
+              <span class="reel-frame" style="height: 1.9rem; line-height: 1.9rem; font-size: 0.75rem;">TabPFN: 100% Calibrated</span>
+              <span class="reel-frame" style="height: 1.9rem; line-height: 1.9rem; font-size: 0.75rem;">Gemma 4: Zero-Burn Engine</span>
+              <span class="reel-frame" style="height: 1.9rem; line-height: 1.9rem; font-size: 0.75rem;">Clickable [MM:SS] Loops</span>
+              <span class="reel-frame" style="height: 1.9rem; line-height: 1.9rem; font-size: 0.75rem;">440+ Extension Users</span>
+            </span>
+          </span>
+        </span>
+        <span class="telemetry-pill" style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--paper-parchment); border: 1px solid var(--paper-stone); padding: 0.35rem 0.75rem; border-radius: 4px; color: var(--ink-graphite);"><strong>Dual-Brain:</strong> TabPFN-v2 + Gemma 4</span>
+        <span class="telemetry-pill" style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--paper-parchment); border: 1px solid var(--paper-stone); padding: 0.35rem 0.75rem; border-radius: 4px; color: var(--ink-graphite);"><strong>Citation Proofs:</strong> Exact Audio Loops</span>
+      </div>
     </section>
 
-    <!-- STAGE 6: CONTINUOUS SVG SIGNAL THREAD -->
-    <svg class="signal-thread" viewBox="0 0 1200 60" preserveAspectRatio="none">
-      <path d="M 0,30 Q 300,5 600,30 T 1200,30" pathLength="1"></path>
+    <!-- SUBTLE WAVEFORM SIGNAL THREAD DIVIDER -->
+    <svg class="signal-thread" viewBox="0 0 1200 24" preserveAspectRatio="none" style="width: 100%; height: 1.5rem; margin: 0.5rem 0 1.5rem; opacity: 0.35;">
+      <path d="M 0,12 Q 300,2 600,12 T 1200,12" pathLength="1" stroke="var(--accent-amber)" stroke-width="1.5" fill="none"></path>
     </svg>
 
-    <!-- STAGE 1 & 5: THE ANALOG MASTERING DESK & TABPFN ATTENUATOR -->
+    <!-- THE ANALOG MASTERING DESK & TABPFN ATTENUATOR -->
     <main class="analog-desk">
       <div class="desk-header">
         <div>
@@ -122,10 +116,10 @@
           
           <!-- Mode Tabs -->
           <div class="track-picker-row" style="margin-bottom: 0.75rem;">
-            <button class="track-pill is-active" id="tab-cassette" data-mode="cassette">📼 3 Pre-Loaded Cassettes</button>
-            <button class="track-pill" id="tab-youtube" data-mode="youtube">📺 YouTube &amp; Video Link</button>
-            <button class="track-pill" id="tab-mic" data-mode="mic">🎙️ Record Live Mic</button>
-            <button class="track-pill" id="tab-upload" data-mode="upload">📂 Drop Audio File</button>
+            <button class="track-pill is-active" id="tab-cassette" data-mode="cassette">Sample Cassettes</button>
+            <button class="track-pill" id="tab-youtube" data-mode="youtube">YouTube / Video URL</button>
+            <button class="track-pill" id="tab-mic" data-mode="mic">Live Microphone</button>
+            <button class="track-pill" id="tab-upload" data-mode="upload">Upload Audio File</button>
           </div>
 
           <!-- Input Panel A: 3 Pre-loaded Cassettes -->
@@ -156,7 +150,7 @@
               <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                 <input type="text" id="youtube-url-input" class="tactile-input" placeholder="https://www.youtube.com/watch?v=... or youtu.be/..." value="https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="flex: 1;">
                 <button class="btn-tactile btn-stone" id="btn-load-youtube" style="white-space: nowrap;">
-                  <span>🔍 Scan &amp; Load</span>
+                  <span>Scan &amp; Load</span>
                 </button>
               </div>
 
@@ -167,9 +161,9 @@
               <!-- Quick Presets -->
               <div class="preset-links-row">
                 <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-muted); font-weight: 700;">PRESETS:</span>
-                <button class="btn-tactile-xs" id="btn-preset-huberman" data-url="https://www.youtube.com/watch?v=Kmms5i_qQyE" data-title="Dr. Huberman • Dopamine &amp; Focus Deep Work" data-query="focus protocol dopamine">🎙️ Huberman Focus</button>
-                <button class="btn-tactile-xs" id="btn-preset-resonance" data-url="https://www.youtube.com/watch?v=H30R_Y9bK44" data-title="HOME — Resonance (Synthwave Studio)" data-query="bass drop hook">🎵 Resonance (YTM)</button>
-                <button class="btn-tactile-xs" id="btn-preset-indie" data-url="https://www.youtube.com/watch?v=r6tHKSNneCc" data-title="YC Startup School • Finding Product Market Fit" data-query="first ten customers">💡 YC Startup PMF</button>
+                <button class="btn-tactile-xs" id="btn-preset-huberman" data-url="https://www.youtube.com/watch?v=Kmms5i_qQyE" data-title="Dr. Huberman • Dopamine &amp; Focus Deep Work" data-query="focus protocol dopamine">Huberman Focus</button>
+                <button class="btn-tactile-xs" id="btn-preset-resonance" data-url="https://www.youtube.com/watch?v=H30R_Y9bK44" data-title="HOME — Resonance (Synthwave Studio)" data-query="bass drop hook">Resonance (YTM)</button>
+                <button class="btn-tactile-xs" id="btn-preset-indie" data-url="https://www.youtube.com/watch?v=r6tHKSNneCc" data-title="YC Startup School • Finding Product Market Fit" data-query="first ten customers">YC Startup PMF</button>
               </div>
             </div>
           </div>
@@ -183,14 +177,14 @@
                 <span class="mic-timer" id="mic-timer">00:00</span>
               </div>
               <p style="font-size: 0.85rem; color: var(--ink-graphite); margin: 0.5rem 0 1rem 0;">
-                Click REC to speak a rambling 15–60s voice note. In-browser Web Audio records directly to RAM without cloud leaks.
+                Click Record to capture a 15–60s voice note. In-browser Web Audio records directly to memory without server leaks.
               </p>
               <div style="display: flex; gap: 0.75rem;">
                 <button class="btn-tactile btn-rec" id="btn-toggle-rec">
-                  <span id="rec-icon">🔴</span> <span id="rec-label">RECORD VOICE NOTE</span>
+                  <span id="rec-label">RECORD VOICE NOTE</span>
                 </button>
                 <button class="btn-tactile" id="btn-stop-rec" style="display: none;">
-                  <span>⏹️ Stop & Load</span>
+                  <span>Stop & Load</span>
                 </button>
               </div>
             </div>
@@ -200,7 +194,7 @@
           <div id="panel-upload" style="display: none;">
             <div class="upload-dropzone" id="upload-dropzone">
               <input type="file" id="file-input" accept=".mp3,.wav,.ogg,.webm,.m4a" style="display: none;">
-              <div style="font-size: 2rem; margin-bottom: 0.5rem;">📂</div>
+              <div style="font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; color: var(--accent-amber); margin-bottom: 0.5rem;">[AUDIO IMPORT FILE]</div>
               <div style="font-weight: 700; margin-bottom: 0.25rem;">Drop WhatsApp .ogg / .mp3 or Click to Browse</div>
               <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-muted);">Supports .mp3, .wav, .ogg, .webm, .m4a (up to 25MB)</div>
               <div id="upload-filename" style="margin-top: 0.5rem; font-weight: 700; color: var(--accent-amber);"></div>
@@ -225,7 +219,7 @@
             
             <div class="player-controls-row" id="html5-player-controls">
               <button class="btn-tactile btn-play" id="btn-play-pause">
-                <span id="play-icon">▶</span> <span id="play-label">PLAY AUDIO</span>
+                <span id="play-icon"></span> <span id="play-label">PLAY AUDIO</span>
               </button>
               <div class="seek-bar-wrap">
                 <input type="range" min="0" max="100" value="0" class="tactile-slider seek-slider" id="audio-seek-slider" aria-label="Audio seeker">
@@ -251,7 +245,6 @@
 
                 <div class="loop-center-action">
                   <button class="btn-loop-toggle" id="btn-toggle-loop" title="Toggle continuous A–B loop">
-                    <span id="loop-btn-icon">🔁</span>
                     <span id="loop-btn-label">Engage A–B Loop</span>
                   </button>
                   <span class="loop-duration-text" id="loop-duration-display">Span: 00:30</span>
@@ -288,12 +281,12 @@
 
           <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
             <button class="btn-tactile btn-generate" id="btn-generate-sheet" style="flex: 1;">
-              <span id="btn-spinner" style="display: none;">⏳</span>
+              <span id="btn-spinner" style="display: none;"></span>
               <span id="btn-label">Stamp Action Card</span>
             </button>
             <button class="btn-tactile btn-brass" id="btn-extract-bites" style="flex: 1; justify-content: center;">
-              <span id="extract-spinner" style="display: none;">⏳</span>
-              <span id="extract-label">✂️ Extract AudioBites</span>
+              <span id="extract-spinner" style="display: none;"></span>
+              <span id="extract-label">Extract AudioBites</span>
             </button>
           </div>
         </div>
@@ -368,10 +361,10 @@
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <button class="btn-tactile btn-stone" id="btn-stamp-all-pdf">
-            <span>📄 Stamp Citation PDF</span>
+            <span>Export Citation PDF</span>
           </button>
           <button class="btn-tactile btn-stone" id="btn-copy-deck-markdown">
-            <span>📋 Copy Markdown</span>
+            <span>Copy Markdown</span>
           </button>
         </div>
       </div>
@@ -415,19 +408,19 @@
           </thead>
           <tbody id="harmonic-table-body">
             <tr>
-              <td><button class="ts-jump-btn" data-sec="18">▶ [00:18]</button></td>
+              <td><button class="ts-jump-btn" data-sec="18">[00:18]</button></td>
               <td>Refactor checkout modal state to support UPI & Card tabs</td>
               <td>Frontend SWE</td>
               <td><span class="badge-p0">P0</span></td>
             </tr>
             <tr>
-              <td><button class="ts-jump-btn" data-sec="45">▶ [00:45]</button></td>
+              <td><button class="ts-jump-btn" data-sec="45">[00:45]</button></td>
               <td>Add localStorage / cookie persistence for dark mode preference</td>
               <td>Frontend SWE</td>
               <td><span class="badge-p1">P1</span></td>
             </tr>
             <tr>
-              <td><button class="ts-jump-btn" data-sec="85">▶ [01:25]</button></td>
+              <td><button class="ts-jump-btn" data-sec="85">[01:25]</button></td>
               <td>Write backward-compatible database migration script with rollback</td>
               <td>Backend SWE</td>
               <td><span class="badge-p0">P0</span></td>
@@ -441,7 +434,7 @@
         <div class="deliverable-box">
           <div class="deliverable-header">
             <span>READY-TO-SEND CLIENT CONFIRMATION</span>
-            <button class="btn-copy" id="btn-copy-reply">📋 Copy Reply</button>
+            <button class="btn-copy" id="btn-copy-reply">Copy Reply</button>
           </div>
           <div class="deliverable-content" id="sheet-client-reply">
             Hi! Thanks for sending over the voice note. I've broken down your requests into 3 key deliverables (checkout UPI tab, dark mode persistence, and database migration). Based on the scope adjustments, estimated implementation is 5.5 hours ($220 @ $40/hr). Let me know if you'd like me to start on this today!
@@ -451,7 +444,7 @@
         <div class="deliverable-box">
           <div class="deliverable-header">
             <span>GITHUB ISSUES CHECKLIST</span>
-            <button class="btn-copy" id="btn-copy-github">📋 Copy Checklist</button>
+            <button class="btn-copy" id="btn-copy-github">Copy Checklist</button>
           </div>
           <pre class="deliverable-code" id="sheet-github-checklist">- [ ] [00:18] Refactor checkout modal state (P0)
 - [ ] [00:45] Add dark mode preference persistence (P1)
@@ -461,13 +454,13 @@
 
       <!-- Deterministic Guardrail Status -->
       <div class="guardrail-audit-box" id="guardrail-audit-status">
-        <span>🛡️ <strong>100% Deterministic Match</strong> — Zero timestamp hallucinations, TabPFN numbers locked</span>
+        <span><strong>100% Deterministic Match</strong> — Zero timestamp hallucinations, TabPFN numbers locked</span>
       </div>
 
       <!-- Export & Download Bar -->
       <div style="margin-top: 1.75rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
         <button class="btn-tactile btn-brass" id="btn-download-pdf">
-          <span>📄 Download Stamped Parchment PDF</span>
+          <span>Download Archival PDF</span>
         </button>
         <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--ink-muted);">ReportLab archival layout with vector brass tokens</span>
       </div>
@@ -476,28 +469,25 @@
     <!-- SECTION 3: WILLINGNESS-TO-PAY POLL DRAWER (HACKTOBERFEST DEV CHALLENGE FEEDBACK LOOP) -->
     <section class="feedback-poll-section">
       <div class="panel-label">WEEK 2 DEV CHALLENGE USER FEEDBACK LOOP</div>
-      <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">Quick 5-Second Poll: Would You Pay $4.99 For This?</h3>
+      <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">User Feedback: Would You Pay $4.99 For This?</h3>
       <p style="font-size: 0.95rem; color: var(--ink-graphite); margin-bottom: 1rem;">
-        We built this for developers, freelancers, and students dealing with voice-note chaos. Tell us how you'd use it:
+        Engineered for developers, freelancers, and students dealing with voice-note chaos. Select your preferred tier:
       </p>
 
       <div class="poll-options-grid">
         <button class="poll-btn" data-poll="poll_whatsapp">
-          <span class="poll-icon">💬</span>
           <span class="poll-text"><strong>Yes ($4.99)</strong> — For chaotic WhatsApp voice notes & client calls</span>
         </button>
         <button class="poll-btn" data-poll="poll_bot">
-          <span class="poll-icon">🤖</span>
-          <span class="poll-text"><strong>Yes ($4.99)</strong> — If it had direct Telegram / WhatsApp forwarding bot</span>
+          <span class="poll-text"><strong>Yes ($4.99)</strong> — If integrated with direct Telegram / WhatsApp bot</span>
         </button>
         <button class="poll-btn" data-poll="poll_free">
-          <span class="poll-icon">⚡</span>
-          <span class="poll-text"><strong>Free Tier</strong> — I'll stick to the free daily limit or local Ollama</span>
+          <span class="poll-text"><strong>Free Tier</strong> — Continue with standard tier or local Ollama</span>
         </button>
       </div>
 
       <div id="poll-feedback-status" style="margin-top: 0.75rem; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--accent-amber); display: none;">
-        ✓ Thank you! Your feedback has been recorded into our live telemetry.
+        Thank you. Your feedback has been recorded into live telemetry.
       </div>
     </section>
 
@@ -521,7 +511,7 @@
         </thead>
         <tbody>
           <tr class="winner-row">
-            <td>👑 TabPFN-v2 (Prior Labs)</td>
+            <td>TabPFN-v2 (Prior Labs) [Top Benchmark]</td>
             <td>0.0000</td>
             <td>1.0000</td>
             <td>100.0%</td>
@@ -555,15 +545,15 @@
         <p style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-amber);">ONE-TIME PURCHASE • BUY ONCE, OWN FOREVER</p>
 
         <ul class="modal-features">
-          <li>✓ Unlimited batch voice-note and client brief processing</li>
-          <li>✓ 100% offline private Ollama mode (gemma4:e2b) on your laptop</li>
-          <li>✓ Multi-page archival PDF Scope & AudioBite booklet export</li>
-          <li>✓ Priority access to upcoming WhatsApp & Telegram forwarding bot</li>
-          <li>✓ Directly supports indie maintenance for 440+ extension users</li>
+          <li>Unlimited batch voice-note and client brief processing</li>
+          <li>100% offline private Ollama mode (gemma4:e2b) on your laptop</li>
+          <li>Multi-page archival PDF Scope & AudioBite booklet export</li>
+          <li>Priority access to upcoming WhatsApp & Telegram forwarding bot</li>
+          <li>Directly supports indie maintenance for 440+ extension users</li>
         </ul>
 
         <button class="btn-tactile btn-brass" id="btn-buy-coffee" style="width: 100%; justify-content: center; padding: 0.9rem;">
-          <span>☕ Buy Me a Coffee ($4.99)</span>
+          <span>Support Creator ($4.99)</span>
         </button>
       </div>
     </div>
@@ -580,7 +570,7 @@
 
     <!-- PERSISTENT CRATE FLOATING BUTTON -->
     <button class="crate-floating-btn" id="btn-floating-crate" title="View Saved AudioBites Crate">
-      <span>📦 Saved Crate</span>
+      <span>Saved Crate</span>
       <span class="crate-badge-count" id="crate-badge-count">0</span>
     </button>
 
@@ -603,10 +593,10 @@
 
         <div style="border-top: 1px solid var(--paper-stone); padding-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
           <button class="btn-tactile btn-brass" id="btn-stamp-crate-pdf" style="width: 100%; justify-content: center;">
-            <span>📄 Stamp Citation Dossier PDF</span>
+            <span>Stamp Citation Dossier PDF</span>
           </button>
           <button class="btn-tactile btn-stone" id="btn-copy-crate-md" style="width: 100%; justify-content: center;">
-            <span>📋 Copy Markdown Dossier</span>
+            <span>Copy Markdown Dossier</span>
           </button>
           <button class="btn-tactile-xs" id="btn-clear-crate" style="align-self: center; margin-top: 0.25rem;">
             Clear Crate

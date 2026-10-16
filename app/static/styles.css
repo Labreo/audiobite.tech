@@ -318,16 +318,20 @@ body {
 
 .hero-char {
   display: inline-block;
-  opacity: 0;
-  transform: translateY(1.2rem) rotate(1.5deg);
-  animation: charStagger 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(var(--char-idx, 0) * 0.035s + 0.1s);
+  opacity: 1;
+  transform: none;
+  animation: charStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--char-idx, 0) * 0.02s);
 }
 
 @keyframes charStagger {
+  from {
+    opacity: 0.6;
+    transform: translateY(0.4rem);
+  }
   to {
     opacity: 1;
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0);
   }
 }
 
@@ -859,12 +863,28 @@ body {
 }
 
 .modal-features {
+  list-style: none;
   text-align: left;
   margin: 1.5rem 0;
+  padding: 0;
   font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--ink-charcoal);
   line-height: 1.8;
+}
+
+.modal-features li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+
+.modal-features li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--accent-amber);
+  font-weight: 700;
 }
 
 /* ------------------------------------------------------------------------------
@@ -1047,10 +1067,37 @@ body {
 
 .seek-bar-wrap {
   flex-grow: 1;
+  display: flex;
+  align-items: center;
 }
 
 .seek-slider {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
+  height: 0.4rem;
+  background: #111413;
+  border: 1px solid #333a36;
+  border-radius: 0.2rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.seek-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0.85rem;
+  height: 1.1rem;
+  border-radius: 0.15rem;
+  background: linear-gradient(180deg, #d4b47d 0%, #b8863b 60%, #7d5921 100%);
+  border: 1px solid #4a3617;
+  box-shadow: 0 0.15rem 0.35rem rgba(0, 0, 0, 0.4), inset 0 1px 0 #fff8e8;
+  cursor: ew-resize;
+  transition: transform 0.1s ease;
+}
+
+.seek-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
 }
 
 /* TabPFN Scope Quote Box */

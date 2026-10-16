@@ -582,13 +582,13 @@ document.addEventListener('DOMContentLoaded', () => {
       loopStatusPill.textContent = 'LOOP ENGAGED';
       loopStatusPill.classList.add('is-active');
       btnToggleLoop.classList.add('is-looping');
-      loopBtnIcon.textContent = '⏹️';
+      loopBtnIcon.textContent = '';
       loopBtnLabel.textContent = 'Release Loop';
     } else {
       loopStatusPill.textContent = 'LOOP STANDBY';
       loopStatusPill.classList.remove('is-active');
       btnToggleLoop.classList.remove('is-looping');
-      loopBtnIcon.textContent = '🔁';
+      loopBtnIcon.textContent = '';
       loopBtnLabel.textContent = 'Engage A–B Loop';
     }
   }
@@ -673,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!url) return;
     haptics.playClick(260, 0.04);
     btnLoadYoutube.disabled = true;
-    btnLoadYoutube.innerHTML = '<span>⏳ Scanning Captions...</span>';
+    btnLoadYoutube.innerHTML = '<span>Scanning Captions...</span>';
 
     try {
       const res = await fetch('/api/youtube-metadata', {
@@ -710,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLooperUI();
 
         triggerSignalPrediction();
-        alert(`✓ Loaded YouTube Audio: "${currentAudioState.title}" (${formatSec(data.duration_sec)}). Extracted ${data.windows_count} candidate soundbites!`);
+        alert(`Loaded YouTube Audio: "${currentAudioState.title}" (${formatSec(data.duration_sec)}). Extracted ${data.windows_count} candidate soundbites.`);
       } else {
         alert(`Could not load YouTube audio: ${data.detail || 'Caption extraction failed'}`);
       }
@@ -718,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert(`Error scanning YouTube audio: ${e.message}`);
     } finally {
       btnLoadYoutube.disabled = false;
-      btnLoadYoutube.innerHTML = '<span>🔍 Scan &amp; Load</span>';
+      btnLoadYoutube.innerHTML = '<span>Scan &amp; Load</span>';
     }
   }
 
@@ -878,7 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await res.json();
       if (res.ok) {
-        uploadFilename.textContent = `✓ Loaded: ${data.filename} (${data.duration_formatted})`;
+        uploadFilename.textContent = `Loaded: ${data.filename} (${data.duration_formatted})`;
         currentAudioState = {
           title: data.filename,
           source: 'Uploaded Audio File',
@@ -1010,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert(`Error extracting soundbites: ${err.message}`);
     } finally {
       extractSpinner.style.display = 'none';
-      extractLabel.textContent = '✂️ Extract AudioBites';
+      extractLabel.textContent = 'Extract AudioBites';
       btnExtractBites.disabled = false;
     }
   });
@@ -1040,16 +1040,16 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="bite-actions-row">
           <button class="btn-bite-action btn-bite-primary btn-play-loop-bite" data-idx="${idx}">
-            ▶ Play &amp; Loop Bite
+            Play &amp; Loop Bite
           </button>
           <button class="btn-bite-action btn-slice-wav" data-idx="${idx}">
-            ✂️ Slice .WAV
+            Slice .WAV
           </button>
           <button class="btn-bite-action btn-add-to-crate" data-idx="${idx}">
-            📦 Save to Crate
+            Save to Crate
           </button>
           <button class="btn-bite-action btn-stamp-single-pdf" data-idx="${idx}">
-            📄 Citation Card PDF
+            Citation Card PDF
           </button>
         </div>
       `;
@@ -1086,24 +1086,24 @@ document.addEventListener('DOMContentLoaded', () => {
           // For YouTube, generate clickable deep-link snippet
           const deepUrl = bite.deep_link_url || `${currentAudioState.audio_url}&t=${bite.start_sec}s`;
           navigator.clipboard.writeText(deepUrl).then(() => {
-            alert(`✓ YouTube deep citation copied:\n${deepUrl}\n\n(YouTube terms restrict client-side raw .WAV byte downloads; use deep citation link or local audio/mic mode for .WAV slicing).`);
+            alert(`YouTube deep citation copied:\n${deepUrl}\n\n(YouTube terms restrict client-side raw .WAV byte downloads; use deep citation link or local audio/mic mode for .WAV slicing).`);
           });
           return;
         }
 
         btn.disabled = true;
-        btn.textContent = '⏳ Slicing...';
+        btn.textContent = 'Slicing...';
         try {
           const wavBlob = await sliceAudioBuffer(currentAudioState.audio_url, bite.start_sec, bite.end_sec);
           const link = document.createElement('a');
           link.href = URL.createObjectURL(wavBlob);
           link.download = `AudioBite_${formatSec(bite.start_sec).replace(':', 'm')}s_${formatSec(bite.end_sec).replace(':', 'm')}s.wav`;
           link.click();
-          btn.textContent = '✓ Downloaded!';
-          setTimeout(() => { btn.textContent = '✂️ Slice .WAV'; btn.disabled = false; }, 2000);
+          btn.textContent = 'Downloaded';
+          setTimeout(() => { btn.textContent = 'Slice .WAV'; btn.disabled = false; }, 2000);
         } catch (err) {
           alert(`Could not slice audio buffer: ${err.message}`);
-          btn.textContent = '✂️ Slice .WAV';
+          btn.textContent = 'Slice .WAV';
           btn.disabled = false;
         }
       });
@@ -1125,8 +1125,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         saveCrate(crate);
 
-        btn.textContent = '✓ Saved in Crate!';
-        setTimeout(() => { btn.textContent = '📦 Save to Crate'; }, 2000);
+        btn.textContent = 'Saved in Crate';
+        setTimeout(() => { btn.textContent = 'Save to Crate'; }, 2000);
       });
     });
 
@@ -1138,7 +1138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!bite) return;
 
         btn.disabled = true;
-        btn.textContent = '⏳ Stamping...';
+        btn.textContent = 'Stamping...';
         try {
           const res = await fetch('/api/stamp-citation', {
             method: 'POST',
@@ -1160,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
           alert(`Error stamping PDF: ${e.message}`);
         } finally {
-          btn.textContent = '📄 Citation Card PDF';
+          btn.textContent = 'Citation Card PDF';
           btn.disabled = false;
         }
       });
@@ -1179,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       haptics.playClick(300, 0.04);
       btnStampAllPdf.disabled = true;
-      btnStampAllPdf.innerHTML = '<span>⏳ Stamping PDF...</span>';
+      btnStampAllPdf.innerHTML = '<span>Stamping PDF...</span>';
 
       try {
         const res = await fetch('/api/stamp-citation', {
@@ -1203,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(`Error stamping PDF: ${e.message}`);
       } finally {
         btnStampAllPdf.disabled = false;
-        btnStampAllPdf.innerHTML = '<span>📄 Stamp Citation PDF</span>';
+        btnStampAllPdf.innerHTML = '<span>Stamp Citation PDF</span>';
       }
     });
   }
@@ -1231,7 +1231,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       navigator.clipboard.writeText(md).then(() => {
-        alert('✓ AudioBite Markdown dossier copied to clipboard!');
+        alert('AudioBite Markdown dossier copied to clipboard.');
       });
     });
   }
@@ -1297,7 +1297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-muted);">
           <span>${item.source_title || 'Audio Source'}</span>
-          <button class="btn-tactile-xs btn-play-crate-item" data-idx="${idx}">▶ Loop</button>
+          <button class="btn-tactile-xs btn-play-crate-item" data-idx="${idx}">Loop</button>
         </div>
       `;
       crateItemsList.appendChild(el);
@@ -1352,7 +1352,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       haptics.playClick(320, 0.04);
       btnStampCratePdf.disabled = true;
-      btnStampCratePdf.innerHTML = '<span>⏳ Stamping Crate Dossier...</span>';
+      btnStampCratePdf.innerHTML = '<span>Stamping Crate Dossier...</span>';
 
       try {
         const res = await fetch('/api/stamp-citation', {
@@ -1376,7 +1376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(`Error stamping dossier: ${e.message}`);
       } finally {
         btnStampCratePdf.disabled = false;
-        btnStampCratePdf.innerHTML = '<span>📄 Stamp Citation Dossier PDF</span>';
+        btnStampCratePdf.innerHTML = '<span>Stamp Citation Dossier PDF</span>';
       }
     });
   }
@@ -1402,7 +1402,7 @@ document.addEventListener('DOMContentLoaded', () => {
         md += `\n`;
       });
       navigator.clipboard.writeText(md).then(() => {
-        alert('✓ Crate Markdown dossier copied to clipboard!');
+        alert('Crate Markdown dossier copied to clipboard.');
       });
     });
   }
@@ -1463,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const priority = item.priority || item.chords || 'P1';
 
           row.innerHTML = `
-            <td><button class="ts-jump-btn" data-sec="${sec}">▶ [${rawTs}]</button></td>
+            <td><button class="ts-jump-btn" data-sec="${sec}">[${rawTs}]</button></td>
             <td>${item.task || item.notes || 'Deliverable'}</td>
             <td>${item.assignee_role || 'Engineer'}</td>
             <td><span class="${priority === 'P0' ? 'badge-p0' : 'badge-p1'}">${priority}</span></td>
@@ -1492,9 +1492,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const guardrailBox = document.getElementById('guardrail-audit-status');
         const gStatus = data.guardrail_status;
         if (gStatus && gStatus.passed_clean) {
-          guardrailBox.innerHTML = `<span>🛡️ <strong>100% Deterministic Match</strong> — Zero timestamp hallucinations, TabPFN numbers locked.</span>`;
+          guardrailBox.innerHTML = `<span><strong>100% Deterministic Match</strong> — Zero timestamp hallucinations, TabPFN numbers locked.</span>`;
         } else {
-          guardrailBox.innerHTML = `<span>⚠️ <strong>Guardrail Intervened</strong> — Clamped ${gStatus.interventions_count} anomalies to ensure exact audio duration bounds.</span>`;
+          guardrailBox.innerHTML = `<span><strong>Guardrail Intervened</strong> — Clamped ${gStatus.interventions_count} anomalies to ensure exact audio duration bounds.</span>`;
         }
 
         parchmentSheet.style.display = 'block';
@@ -1517,7 +1517,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = document.getElementById('sheet-client-reply').textContent;
     navigator.clipboard.writeText(text).then(() => {
       haptics.playClick(240, 0.03);
-      alert('✓ Client reply copied to clipboard!');
+      alert('Client reply copied to clipboard.');
     });
   });
 
@@ -1525,7 +1525,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const text = document.getElementById('sheet-github-checklist').textContent;
     navigator.clipboard.writeText(text).then(() => {
       haptics.playClick(240, 0.03);
-      alert('✓ GitHub checklist copied to clipboard!');
+      alert('GitHub checklist copied to clipboard.');
     });
   });
 
