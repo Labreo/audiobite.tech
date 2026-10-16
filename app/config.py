@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     groq_whisper_model: str = "whisper-large-v3-turbo"
 
     # Telegram Forwarding Bot Integration
-    telegram_bot_token: str = ""
+    telegram_bot_token: str = "8921939042:AAGmwSfBApr1Q_oPfhJKvWLPLYYOhfIKBOI"
     telegram_webhook_secret: str = ""
 
     # WhatsApp Cloud Webhook Integration

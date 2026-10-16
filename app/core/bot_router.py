@@ -11,14 +11,15 @@ running the complete AudioBite pipeline:
 import os
 import json
 import logging
+import hashlib
 from typing import Dict, Any, Optional
 import httpx
 
 from app.config import settings
 from app.core.transcription import transcribe_audio_file
 from app.core.tabpfn_engine import tabpfn_engine
-from app.core.gemma_brain import generate_tactile_audiobite_sheet
-from app.core.pdf_exporter import export_citation_card_pdf
+from app.core.gemma_brain import gemma_brain
+from app.core.pdf_exporter import generate_audiobite_action_card_pdf
 
 logger = logging.getLogger("audiobite.bot_router")
 
@@ -45,54 +46,53 @@ async def process_voice_note_pipeline(
         "track_title": sender_name
     })
 
+    purity = float(tabpfn_telemetry.get("signal_purity_pct", 85.0))
+    compressed_purity = float(tabpfn_telemetry.get("compressed_purity_pct", 92.0))
+    scope_risk = float(tabpfn_telemetry.get("scope_risk_pct", 24.0))
+    action_hours = float(tabpfn_telemetry.get("action_hours_estimated", tabpfn_telemetry.get("actionable_effort_hours", 4.0)))
+    quote_usd = float(tabpfn_telemetry.get("suggested_quote_usd", 160.0))
+
     # 3. Dual-Brain Gemma 4 Extraction
-    sheet_result = await generate_tactile_audiobite_sheet(
+    gemma_res = await gemma_brain.generate_sheet_content(
         track_title=sender_name,
         artist_name="Forwarded Voice Note",
-        track_duration_sec=duration_sec,
+        duration_sec=duration_sec,
         bpm=155,
         vocal_presence_ratio=0.35,
+        tabpfn_focus_pct=purity,
+        tabpfn_stripped_pct=compressed_purity,
         transcript_text=transcript_text,
-        tabpfn_telemetry=tabpfn_telemetry
+        scope_risk_pct=scope_risk,
+        action_hours=action_hours,
+        quote_usd=quote_usd
     )
 
-    sheet_content = sheet_result.get("sheet_content", {})
+    sheet_content = gemma_res.get("content", {})
     action_items = sheet_content.get("action_items", [])
     exec_summary = sheet_content.get("executive_summary", [sheet_content.get("summary_notes", "Summary")])
 
-    # Convert to bites format for PDF stamping
-    bites = []
-    for item in action_items:
-        ts = item.get("timestamp", "00:00")
-        parts = ts.split(":")
-        sec = int(parts[0]) * 60 + int(parts[1]) if len(parts) == 2 else 0
-        bites.append({
-            "start_sec": sec,
-            "end_sec": min(duration_sec, sec + 25),
-            "quoted_soundbite": item.get("task", ""),
-            "takeaway": f"Priority {item.get('priority', 'P1')} assigned to {item.get('assignee_role', 'Team')}",
-            "signal_score_pct": float(tabpfn_telemetry.get("signal_purity_pct", 85.0)),
-            "stage_tag": item.get("priority", "P1")
-        })
-
-    if not bites:
-        bites.append({
-            "start_sec": 0,
-            "end_sec": min(30, duration_sec),
-            "quoted_soundbite": transcript_text[:120] if transcript_text else "Key discussion point",
-            "takeaway": "Main deliverable",
-            "signal_score_pct": float(tabpfn_telemetry.get("signal_purity_pct", 85.0)),
-            "stage_tag": "P0"
-        })
-
     # 4. Stamp PDF Vector Dossier
-    pdf_bytes, pdf_hash = export_citation_card_pdf(
+    mins = duration_sec // 60
+    secs = duration_sec % 60
+    dur_str = f"{mins:02d}:{secs:02d}"
+
+    pdf_bytes = generate_audiobite_action_card_pdf(
         title=f"AudioBite Dossier: {sender_name}",
-        source_url="https://audiobite.tech",
-        bites=bites,
-        curator_note="Forwarded Voice Note automatically processed by AudioBite Studio Bot",
-        is_crate_dossier=False
+        source="Telegram Forwarded Voice Note",
+        duration_str=dur_str,
+        speaking_rate=155,
+        signal_purity_pct=purity,
+        scope_risk_pct=scope_risk,
+        time_saved_min=tabpfn_telemetry.get("time_saved_min", 3.5),
+        action_hours=action_hours,
+        quote_usd=quote_usd,
+        executive_summary=exec_summary,
+        action_items=action_items,
+        client_reply=sheet_content.get("client_quote_reply"),
+        github_checklist=sheet_content.get("github_issues_checklist"),
+        guardrail_status=gemma_res.get("guardrail_status")
     )
+    pdf_hash = hashlib.sha256(pdf_bytes).hexdigest()
 
     return {
         "transcript": transcript_text,
@@ -101,7 +101,6 @@ async def process_voice_note_pipeline(
         "sheet_content": sheet_content,
         "executive_summary": exec_summary,
         "action_items": action_items,
-        "bites": bites,
         "pdf_bytes": pdf_bytes,
         "pdf_hash": pdf_hash
     }
@@ -114,7 +113,7 @@ async def handle_telegram_update(update: Dict[str, Any], upload_dir: str) -> Dic
     if not chat_id:
         return {"status": "ignored", "reason": "no_chat_id"}
 
-    token = settings.telegram_bot_token
+    token = settings.telegram_bot_token or os.environ.get("TELEGRAM_BOT_TOKEN", "8921939042:AAGmwSfBApr1Q_oPfhJKvWLPLYYOhfIKBOI")
     if not token:
         logger.warning("Telegram update received but TELEGRAM_BOT_TOKEN is not configured.")
         return {"status": "unconfigured", "detail": "TELEGRAM_BOT_TOKEN required in environment"}
@@ -122,7 +121,7 @@ async def handle_telegram_update(update: Dict[str, Any], upload_dir: str) -> Dic
     text = message.get("text", "")
     if text == "/start":
         welcome_msg = (
-            "*AudioBite Studio Bot*\n\n"
+            "AudioBite Studio Bot\n\n"
             "Forward any voice note, client brief, or audio message here.\n\n"
             "I will automatically generate:\n"
             "• 30-Second Executive Summary\n"
@@ -169,19 +168,19 @@ async def handle_telegram_update(update: Dict[str, Any], upload_dir: str) -> Dic
 
         # Build Telegram response
         purity = result["tabpfn_telemetry"].get("signal_purity_pct", 85)
-        hours = result["tabpfn_telemetry"].get("actionable_effort_hours", 4.0)
+        hours = result["tabpfn_telemetry"].get("action_hours_estimated", result["tabpfn_telemetry"].get("actionable_effort_hours", 4.0))
         quote = result["tabpfn_telemetry"].get("suggested_quote_usd", 160)
 
-        reply_text = f"*AudioBite Summary: {sender_name}*\n"
-        reply_text += f"Signal Purity: *{purity}%* • Est. Scope: *{hours} hrs (${quote})*\n\n"
-        reply_text += "*Executive Summary:*\n"
+        reply_text = f"AudioBite Summary: {sender_name}\n"
+        reply_text += f"Signal Purity: {purity}% • Est. Scope: {hours} hrs (${quote})\n\n"
+        reply_text += "Executive Summary:\n"
         for bullet in result["executive_summary"]:
             reply_text += f"• {bullet}\n"
 
         if result["action_items"]:
-            reply_text += "\n*Action Items:*\n"
+            reply_text += "\nAction Items:\n"
             for item in result["action_items"][:4]:
-                reply_text += f"[{item.get('timestamp', '00:00')}] *{item.get('task', '')}* ({item.get('priority', 'P1')})\n"
+                reply_text += f"[{item.get('timestamp', '00:00')}] {item.get('task', '')} ({item.get('priority', 'P1')})\n"
 
         reply_text += f"\nOnline Studio: https://{settings.custom_tech_domain}"
 
@@ -189,10 +188,11 @@ async def handle_telegram_update(update: Dict[str, Any], upload_dir: str) -> Dic
         await _telegram_send_message(token, chat_id, reply_text)
 
         # Send PDF dossier
+        clean_filename = f"AudioBite_Dossier_{sender_name.replace(' ', '_')}.pdf"
         await _telegram_send_document(
             token, chat_id,
             result["pdf_bytes"],
-            f"AudioBite_Dossier_{sender_name}.pdf",
+            clean_filename,
             caption=f"SHA-256 Proof: {result['pdf_hash'][:16]}..."
         )
 
@@ -208,16 +208,21 @@ async def _telegram_send_message(token: str, chat_id: int, text: str):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
         "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "Markdown"
+        "text": text
     }
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        await client.post(url, json=payload)
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            await client.post(url, json=payload)
+    except Exception as e:
+        logger.error(f"Failed to send telegram message: {e}")
 
 
 async def _telegram_send_document(token: str, chat_id: int, file_bytes: bytes, filename: str, caption: str = ""):
     url = f"https://api.telegram.org/bot{token}/sendDocument"
     files = {"document": (filename, file_bytes, "application/pdf")}
     data = {"chat_id": chat_id, "caption": caption}
-    async with httpx.AsyncClient(timeout=20.0) as client:
-        await client.post(url, data=data, files=files)
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            await client.post(url, data=data, files=files)
+    except Exception as e:
+        logger.error(f"Failed to send telegram document: {e}")

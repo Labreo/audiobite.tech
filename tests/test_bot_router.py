@@ -43,7 +43,31 @@ def test_telegram_webhook_start():
     response = client.post("/api/webhooks/telegram", json=payload)
     assert response.status_code == 200
     data = response.json()
-    assert "status" in data
+    assert data["status"] == "ok"
+    assert data["action"] == "welcome_sent"
+
+
+@pytest.mark.asyncio
+async def test_process_voice_note_pipeline_end_to_end(tmp_path):
+    """Verify end-to-end voice note pipeline runs without exceptions and produces PDF bytes."""
+    from app.core.bot_router import process_voice_note_pipeline
+    dummy_wav = tmp_path / "voice_note.wav"
+    dummy_wav.write_bytes(b"RIFF" + b"\x00" * 32000)
+
+    res = await process_voice_note_pipeline(
+        file_path=str(dummy_wav),
+        sender_name="Alice Client",
+        duration_sec=45
+    )
+    assert "transcript" in res
+    assert "tabpfn_telemetry" in res
+    assert "executive_summary" in res
+    assert "action_items" in res
+    assert "pdf_bytes" in res
+    assert len(res["pdf_bytes"]) > 1000  # valid PDF generated
+    assert res["pdf_bytes"][:4] == b"%PDF"
+    assert "pdf_hash" in res
+
 
 
 def test_whatsapp_webhook_verification():
