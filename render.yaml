@@ -33,3 +33,9 @@ services:
         value: "local"
       - key: CHECKOUT_OR_WAITLIST_URL
         value: "https://www.buymeacoffee.com/kakeroth"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        value: "audiobite_verify"

@@ -45,6 +45,18 @@ class Settings(BaseSettings):
     checkout_or_waitlist_url: str = "https://www.buymeacoffee.com/kakeroth"
     enable_micro_checkout: bool = True
 
+    # Fast Speech-to-Text Transcription (Groq Cloud Whisper)
+    groq_api_key: str = ""
+    groq_whisper_model: str = "whisper-large-v3-turbo"
+
+    # Telegram Forwarding Bot Integration
+    telegram_bot_token: str = ""
+    telegram_webhook_secret: str = ""
+
+    # WhatsApp Cloud Webhook Integration
+    whatsapp_verify_token: str = ""
+    whatsapp_api_token: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

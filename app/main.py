@@ -16,11 +16,12 @@ Exposes:
 
 import os
 import re
+import json
 import base64
 import time
 from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Response, Request, UploadFile, File
+from fastapi import FastAPI, HTTPException, Response, Request, UploadFile, File, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
@@ -39,6 +40,7 @@ from app.core.pdf_exporter import (
     generate_practice_cheat_sheet_pdf,
     generate_citation_card_pdf
 )
+from app.core.transcription import transcribe_audio_file
 
 
 # Initialize Sentry
@@ -235,7 +237,7 @@ def get_backtest_metrics():
 
 @app.post("/api/upload-audio")
 async def upload_audio(file: UploadFile = File(...)):
-    """Upload audio file (.mp3, .wav, .ogg, .webm, .m4a) and generate initial telemetry."""
+    """Upload audio file (.mp3, .wav, .ogg, .webm, .m4a) and generate initial telemetry + transcription."""
     allowed_exts = [".mp3", ".wav", ".ogg", ".webm", ".m4a"]
     _, ext = os.path.splitext(file.filename.lower())
     if ext not in allowed_exts:
@@ -247,10 +249,12 @@ async def upload_audio(file: UploadFile = File(...)):
     with open(save_path, "wb") as f:
         f.write(content)
 
-    # Estimate duration based on file size heuristic
-    est_duration = max(30, min(300, int(len(content) / 16000)))
+    # Transcribe via Groq Whisper / Gemini Flash / Acoustic fallback
+    trans_res = await transcribe_audio_file(save_path)
+    est_duration = int(trans_res.get("duration_sec") or max(30, min(300, int(len(content) / 16000))))
     mins = est_duration // 60
     secs = est_duration % 60
+    extracted_text = trans_res.get("text", "")
 
     return {
         "status": "uploaded",
@@ -260,7 +264,10 @@ async def upload_audio(file: UploadFile = File(...)):
         "duration_formatted": f"{mins:02d}:{secs:02d}",
         "estimated_wpm": 155,
         "estimated_filler_ratio": 0.32,
-        "transcript_placeholder": f"Uploaded voice note: {file.filename} (ready for AudioBite stamping)."
+        "transcript": extracted_text,
+        "transcript_placeholder": extracted_text or f"Uploaded voice note: {file.filename}",
+        "transcription_provider": trans_res.get("provider", "Local Acoustic Segmenter"),
+        "segments": trans_res.get("segments", [])
     }
 
 
@@ -611,6 +618,46 @@ def record_checkout_intent(req: CheckoutIntentRequest):
 def get_telemetry_stats():
     """Live conversion & willingness-to-pay telemetry for DEV article."""
     return TELEMETRY_STATS
+
+
+# ------------------------------------------------------------------------------
+# BOT WEBHOOK ENDPOINTS (Telegram & WhatsApp Forwarding Bot)
+# ------------------------------------------------------------------------------
+@app.post("/api/webhooks/telegram")
+async def telegram_webhook(update: Dict[str, Any] = Body(...)):
+    """Telegram Bot Webhook: Processes forwarded voice notes into AudioBite dossiers."""
+    try:
+        from app.core.bot_router import handle_telegram_update
+        res = await handle_telegram_update(update, UPLOAD_DIR)
+        return res
+    except Exception as e:
+        print(f"Telegram webhook error: {e}")
+        return {"status": "error", "detail": str(e)}
+
+
+@app.get("/api/webhooks/whatsapp")
+def whatsapp_verify(
+    request: Request
+):
+    """WhatsApp Cloud API Webhook Subscription Verification."""
+    mode = request.query_params.get("hub.mode")
+    challenge = request.query_params.get("hub.challenge")
+    token = request.query_params.get("hub.verify_token")
+
+    expected_token = settings.whatsapp_verify_token or "audiobite_verify"
+    if mode == "subscribe" and token == expected_token:
+        return Response(content=str(challenge), media_type="text/plain")
+    return Response(content="Verification failed", status_code=403)
+
+
+@app.post("/api/webhooks/whatsapp")
+async def whatsapp_webhook(payload: Dict[str, Any] = Body(...)):
+    """WhatsApp Cloud API Webhook: Ingests incoming voice notes."""
+    try:
+        print(f"[WhatsApp Webhook] Received payload: {json.dumps(payload)[:120]}")
+        return {"status": "received", "app": "audiobite.tech"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
 
 
 # Mount Static Files and Serve HTML
