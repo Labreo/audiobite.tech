@@ -8,7 +8,7 @@
     "tabpfn",
     "render"
   ],
-  "canonical_url": "https://github.com/Labreo/audiobite.tech",
+  "canonical_url": "",
   "main_image": "https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_hero_studio.png?v=1",
   "description": "How I built AudioBite with TabPFN v2 and Gemma 4 to turn chaotic WhatsApp voice notes into structured deliverables and landed my first paying user.",
   "published": false,
