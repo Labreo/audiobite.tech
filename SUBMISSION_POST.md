@@ -88,7 +88,7 @@ audiobite.tech/
 │   └── main.py                   # FastAPI service endpoints
 ├── data/
 │   └── audiobite_sessions_logged.csv # 88 real voice sessions tabular dataset
-├── tests/                        # 58 passing automated tests
+├── tests/                        # 61 passing automated tests
 └── render.yaml                   # Infrastructure-as-code deployment blueprint
 ```
 
@@ -229,10 +229,10 @@ Deploying on Render's 512MB RAM free instance exposed two real production quirks
 - **Memory Ceiling**: Heavy GPU frameworks trigger OOM restarts on 512MB RAM instances. TabPFN runs cleanly on CPU with NumPy and SciPy, completing Bayesian passes in 89ms while consuming under 220MB of RAM.
 - **Uptime Crawler HEAD Requests**: Uptime monitors and bot crawlers probe sites with `HEAD /` requests. FastAPI returned `405 Method Not Allowed` by default on `HEAD /` until I bound `@app.head("/")` to the root handler.
 
-### 4. Automated Test Verification (58 Tests Passing)
+### 4. Automated Test Verification (61 Tests Passing)
 
-AudioBite maintains 58 passing automated tests:
-- `tests/test_api_endpoints.py`: 15 tests (health, backtest, upload, telemetry, checkout)
+AudioBite maintains 61 passing automated tests:
+- `tests/test_api_endpoints.py`: 18 tests (health, backtest, upload, telemetry, checkout, UI contracts)
 - `tests/test_bot_router.py`: 7 tests (Telegram webhooks, WhatsApp challenges, end-to-end PDF export)
 - `tests/test_gemma_brain.py`: 3 tests (open-weight inference, guardrail clamping, token tracking)
 - `tests/test_guardrails.py`: 14 tests (bounds checking, truth enforcement, prompt sanitization)
@@ -242,7 +242,7 @@ AudioBite maintains 58 passing automated tests:
 
 ```bash
 pytest tests/ -v
-# 58 passed in 21.83s
+# 61 passed in 30.88s
 ```
 
 ---
