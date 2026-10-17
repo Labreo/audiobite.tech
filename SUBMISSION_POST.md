@@ -2,12 +2,12 @@
 title: "From $0 to My First $10: How I Built AudioBite with TabPFN and Gemma 4 to End the Voice-Note Chaos Tax"
 published: false
 tags: hf26challenge, devchallenge, tabpfn, render
-canonical_url: https://audiobite.tech
-cover_image: https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_hero_studio.png
+canonical_url: https://github.com/Labreo/audiobite.tech
+cover_image: https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_hero_studio.png?v=1
 description: "How I built AudioBite with TabPFN v2 and Gemma 4 to turn chaotic WhatsApp voice notes into structured deliverables and landed my first paying user."
 ---
 
-*This is a submission for the [Hacktoberfest Open-Source AI Challenge: Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)*
+*This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)*
 
 ---
 
@@ -29,7 +29,7 @@ I wanted to replace sterile dashboards with an analog instrument. I modeled the 
 
 Meet **[AudioBite.tech](https://audiobite.tech)**: the tactile voice-note, audio-to-action studio.
 
-- **Live Studio**: [audiobite.tech](https://audiobite.tech) (Hosted on Render: [audiobite-ai-companion.onrender.com](https://audiobite-ai-companion.onrender.com))
+- **Live Studio**: [https://audiobite.tech](https://audiobite.tech) (Hosted on Render: [audiobite-ai-companion.onrender.com](https://audiobite-ai-companion.onrender.com))
 - **Telegram Forwarding Bot**: [@AudioBiteStudioBot](https://t.me/AudioBiteStudioBot)
 - **Source Code**: [GitHub - Labreo/audiobite.tech](https://github.com/Labreo/audiobite.tech)
 - **Supporter Pass**: [Buy Me a Coffee — Studio Supporter](https://www.buymeacoffee.com/kakeroth)
@@ -40,19 +40,19 @@ Meet **[AudioBite.tech](https://audiobite.tech)**: the tactile voice-note, audio
 
 AudioBite runs live on [https://audiobite.tech](https://audiobite.tech) with four straightforward input workflows. You can test complete audio processing in seconds without recording your voice:
 
-![AudioBite Studio Interface](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_hero_studio.png)
+![AudioBite Studio Interface](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_hero_studio.png?v=1)
 
 ### Four Simple Ingestion Modes
 
 1. **Telegram Forwarding Bot (`@AudioBiteStudioBot`)**: Forward any WhatsApp or Telegram voice message directly from your phone. The bot extracts requirements and replies with an executive brief and an attached stamped PDF dossier.
 2. **Live Microphone Recording**: Tap the brass REC toggle to record audio directly inside your browser.
 3. **Local Audio File Upload**: Upload MP3, WAV, M4A, or OGG files for rapid processing.
-4. **Three Built-in Cassette Samples**: Test realistic audio cases instantly:
+4. **Three Built-in Cassette Samples**: Test realistic audio cases instantly without recording your voice:
    - *Sample A*: Chaotic Client Voice Note (2 minutes, 58% filler tangents)
    - *Sample B*: Distributed Systems Lecture Clip (dense consensus concepts)
    - *Sample C*: Creator Podcast Soundbite (fast interview hooks)
 
-![Analog Audio-to-Action Desk](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_desk_telemetry.png)
+![Analog Audio-to-Action Desk](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_desk_telemetry.png?v=1)
 
 ### Tactile A-B Looper and Crate
 
@@ -132,7 +132,7 @@ TabPFN-v2 analyzes nine tabular features across 88 logged voice-note sessions (`
 - `urgency_flag`: Presence of deadline keywords
 - `category_code`: Client scope, academic lecture, or podcast clip
 
-![TabPFN Backtest Table](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/tabpfn_backtest_table.png)
+![TabPFN Backtest Table](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/tabpfn_backtest_table.png?v=1)
 
 ```python
 class TabPFNEngine:
@@ -232,12 +232,12 @@ AudioBite maintains 58 passing automated tests:
 
 ```bash
 pytest tests/ -v
-# 58 passed in 36.09s
+# 58 passed in 21.83s
 ```
 
 ---
 
-## Why Open Innovation Matters
+## Why Does Open Innovation Matter?
 
 For a micro-SaaS side hustle, **open innovation is not just a philosophical preference—it is an operational necessity**:
 
@@ -247,7 +247,18 @@ For a micro-SaaS side hustle, **open innovation is not just a philosophical pref
 
 ---
 
-## Real-World Feedback & First Paying Supporter
+## My Agent Session
+
+Developing AudioBite involved iterating across Bayesian tabular models on small sample sizes, building deterministic timestamp guardrails, and creating the Telegram bot ingestion pipeline.
+
+I used Gemini CLI to explore mathematical formulation, write the test suites, and validate TabPFN benchmarks:
+
+* **Interactive Session Embed**:
+{% agent_session 925 %}
+
+---
+
+## My First User
 
 Week 2 challenges participants to build something someone would pay for and secure initial users.
 
@@ -264,7 +275,7 @@ My collaborator sent the PDF back to the client. The client approved the scope e
 
 My collaborator bought me two coffees on Buy Me a Coffee on the spot:
 
-![Buy Me A Coffee Supporter Proof](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/first_paying_supporter_buymeacoffee.png)
+![Buy Me A Coffee Supporter Proof](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/first_paying_supporter_buymeacoffee.png?v=1)
 
 ### User Testimonial:
 > "AudioBite turned a chaotic three-minute voice ramble into an airtight scope list with a stamped quote. I sent the PDF to my client and got the budget approved without arguing. I tipped $10 on Buy Me a Coffee because it saved me two hours of unbilled work."
@@ -285,7 +296,7 @@ My collaborator bought me two coffees on Buy Me a Coffee on the spot:
 | **Best Use of TabPFN ($200)** | Foundation model in `app/core/tabpfn_engine.py` trained on 88 voice sessions, achieving a 0.0172 Brier score on CPU. |
 | **Best Use of Gemma ($200)** | Genuine open-weight Gemma 4 models running via Google AI Studio free tier and local Ollama, hardened by deterministic guardrails. |
 | **Best Use of Sentry Agent Tracing ($100)** | Full hierarchical transaction spans (`gen_ai.invoke_agent`, `ai.tabular.tabpfn`, `gen_ai.chat`) and anomaly telemetry in `app/core/sentry_tracing.py`. |
-| **Best Use of a .tech Domain ($100)** | Live production web studio serving authenticated HTTPS traffic at `audiobite.tech`. |
+| **Best Use of a .tech Domain ($100)** | Live production web studio serving authenticated HTTPS traffic at `https://audiobite.tech`. |
 
 ---
 
