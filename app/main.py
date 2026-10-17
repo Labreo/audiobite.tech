@@ -665,5 +665,6 @@ if os.path.exists(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     @app.get("/")
+    @app.head("/")
     def serve_index():
         return FileResponse(os.path.join(STATIC_DIR, "index.html"))
