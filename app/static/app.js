@@ -403,7 +403,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const statHours = document.getElementById('stat-hours');
   const statQuote = document.getElementById('stat-quote');
+  const statQuoteSub = document.getElementById('stat-quote-sub');
   const statSaved = document.getElementById('stat-saved');
+  const hourlyRateSelect = document.getElementById('hourly-rate-select');
+
+  const liveTranscriptInput = document.getElementById('live-transcript-input');
+  const badgeWpm = document.getElementById('badge-wpm');
+  const badgeFiller = document.getElementById('badge-filler');
+  const studioToast = document.getElementById('studio-toast');
+
+  let toastTimer = null;
+  function showStudioToast(msg, durationMs = 3600) {
+    if (!studioToast) return;
+    studioToast.textContent = msg;
+    studioToast.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      studioToast.classList.remove('is-visible');
+    }, durationMs);
+  }
+
+  function syncTranscriptEditorUI() {
+    if (liveTranscriptInput) {
+      liveTranscriptInput.value = currentAudioState.transcript || '';
+    }
+    if (badgeWpm) {
+      badgeWpm.textContent = `${Math.round(currentAudioState.wpm || 150)} WPM`;
+    }
+    if (badgeFiller) {
+      badgeFiller.textContent = `${Math.round((currentAudioState.filler_ratio || 0.25) * 100)}% Filler`;
+    }
+  }
 
   const btnGenerateSheet = document.getElementById('btn-generate-sheet');
   const btnSpinner = document.getElementById('btn-spinner');
@@ -448,8 +478,53 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCopyCrateMd = document.getElementById('btn-copy-crate-md');
   const btnClearCrate = document.getElementById('btn-clear-crate');
 
-  // Initialize crate badge
+  // Initialize crate badge & transcript box
   updateCrateBadgeUI(loadCrate().length);
+  syncTranscriptEditorUI();
+
+  // Playback Speed Controls (1x, 1.25x, 1.5x, 2x)
+  const speedBtns = document.querySelectorAll('.speed-btn');
+  speedBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      haptics.playClick(230, 0.025);
+      speedBtns.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      const speed = parseFloat(btn.dataset.speed || '1');
+      if (audioPlayer) {
+        audioPlayer.playbackRate = speed;
+      }
+      if (ytPlayer && ytPlayerReady && typeof ytPlayer.setPlaybackRate === 'function') {
+        ytPlayer.setPlaybackRate(speed);
+      }
+      showStudioToast(`Playback speed set to ${speed}x`);
+    });
+  });
+
+  // Live Transcript Editor & Hourly Rate Listeners
+  if (liveTranscriptInput) {
+    liveTranscriptInput.addEventListener('input', () => {
+      currentAudioState.transcript = liveTranscriptInput.value;
+      const words = (currentAudioState.transcript || '').trim().split(/\s+/).filter(Boolean);
+      if (words.length > 5) {
+        const fillerSet = new Set(['um', 'uh', 'like', 'wait', 'actually', 'basically', 'literally', 'yeah']);
+        const fCount = words.filter(w => fillerSet.has(w.toLowerCase().replace(/[^a-z]/g, ''))).length;
+        currentAudioState.filler_ratio = Math.min(0.75, Math.max(0.05, parseFloat(((fCount / words.length) * 3.2).toFixed(2))));
+        if (badgeFiller) badgeFiller.textContent = `${Math.round(currentAudioState.filler_ratio * 100)}% Filler`;
+      }
+      triggerSignalPrediction();
+    });
+  }
+
+  if (hourlyRateSelect) {
+    hourlyRateSelect.addEventListener('change', () => {
+      haptics.playClick(250, 0.03);
+      const rate = parseFloat(hourlyRateSelect.value || '40');
+      if (statQuoteSub) {
+        statQuoteSub.textContent = `Suggested Quote (@ $${rate}/hr)`;
+      }
+      triggerSignalPrediction();
+    });
+  }
 
   // 1. Audio Player Event Listeners
   audioPlayer.addEventListener('timeupdate', () => {
@@ -460,8 +535,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   audioPlayer.addEventListener('ended', () => {
-    playIcon.textContent = '▶';
-    playLabel.textContent = 'PLAY AUDIO';
+    if (playIcon) playIcon.textContent = '▶';
+    if (playLabel) playLabel.textContent = 'PLAY AUDIO';
   });
 
   btnPlayPause.addEventListener('click', () => {
@@ -470,12 +545,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const state = ytPlayer.getPlayerState();
       if (state === 1) { // playing
         ytPlayer.pauseVideo();
-        playIcon.textContent = '▶';
-        playLabel.textContent = 'PLAY YOUTUBE';
+        if (playIcon) playIcon.textContent = '▶';
+        if (playLabel) playLabel.textContent = 'PLAY YOUTUBE';
       } else {
         ytPlayer.playVideo();
-        playIcon.textContent = '⏸';
-        playLabel.textContent = 'PAUSE';
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'PAUSE';
       }
       return;
     }
@@ -483,13 +558,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAudioFilters(audioPlayer);
     if (audioPlayer.paused) {
       audioPlayer.play().then(() => {
-        playIcon.textContent = '⏸';
-        playLabel.textContent = 'PAUSE';
+        if (playIcon) playIcon.textContent = '⏸';
+        if (playLabel) playLabel.textContent = 'PAUSE';
       }).catch(() => {});
     } else {
       audioPlayer.pause();
-      playIcon.textContent = '▶';
-      playLabel.textContent = 'PLAY AUDIO';
+      if (playIcon) playIcon.textContent = '▶';
+      if (playLabel) playLabel.textContent = 'PLAY AUDIO';
     }
   });
 
@@ -512,7 +587,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const panelUpload = document.getElementById('panel-upload');
 
   const ytHousing = document.getElementById('youtube-player-housing');
-  const html5Controls = document.getElementById('html5-player-controls');
 
   function switchTab(mode, activeBtn, activePanel) {
     currentInputMode = mode;
@@ -524,13 +598,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mode === 'youtube') {
       if (ytHousing) ytHousing.style.display = 'block';
       audioPlayer.pause();
-      playLabel.textContent = 'PLAY YOUTUBE';
+      if (playLabel) playLabel.textContent = 'PLAY YOUTUBE';
     } else {
       if (ytHousing) ytHousing.style.display = 'none';
       if (ytPlayer && ytPlayerReady && typeof ytPlayer.pauseVideo === 'function') {
         ytPlayer.pauseVideo();
       }
-      playLabel.textContent = 'PLAY AUDIO';
+      if (playLabel) playLabel.textContent = 'PLAY AUDIO';
     }
 
     haptics.playClick(190, 0.03);
@@ -555,8 +629,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       audioPlayer.src = currentAudioState.audio_url;
       audioPlayer.load();
-      playIcon.textContent = '▶';
-      playLabel.textContent = 'PLAY AUDIO';
+      if (playIcon) playIcon.textContent = '▶';
+      if (playLabel) playLabel.textContent = 'PLAY AUDIO';
       timeDisplay.textContent = `00:00 / ${formatSec(currentAudioState.duration_sec)}`;
 
       vocalSlider.value = currentAudioState.filler_ratio;
@@ -565,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loopPointA = 0;
       loopPointB = Math.min(30, currentAudioState.duration_sec);
       updateLooperUI();
+      syncTranscriptEditorUI();
 
       haptics.playClick(210, 0.03);
       triggerSignalPrediction();
@@ -573,23 +648,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. A–B Looper Controls
   function updateLooperUI() {
-    loopPointAVal.textContent = formatSec(loopPointA);
-    loopPointBVal.textContent = formatSec(loopPointB);
+    if (loopPointAVal) loopPointAVal.textContent = formatSec(loopPointA);
+    if (loopPointBVal) loopPointBVal.textContent = formatSec(loopPointB);
     const span = Math.max(1, loopPointB - loopPointA);
-    loopDurationDisplay.textContent = `Span: ${formatSec(span)}`;
+    if (loopDurationDisplay) loopDurationDisplay.textContent = `Span: ${formatSec(span)}`;
 
     if (isLoopEngaged) {
-      loopStatusPill.textContent = 'LOOP ENGAGED';
-      loopStatusPill.classList.add('is-active');
-      btnToggleLoop.classList.add('is-looping');
-      loopBtnIcon.textContent = '';
-      loopBtnLabel.textContent = 'Release Loop';
+      if (loopStatusPill) {
+        loopStatusPill.textContent = 'LOOP ENGAGED';
+        loopStatusPill.classList.add('is-active');
+      }
+      if (btnToggleLoop) btnToggleLoop.classList.add('is-looping');
+      if (loopBtnIcon) loopBtnIcon.textContent = '';
+      if (loopBtnLabel) loopBtnLabel.textContent = 'Release Loop';
     } else {
-      loopStatusPill.textContent = 'LOOP STANDBY';
-      loopStatusPill.classList.remove('is-active');
-      btnToggleLoop.classList.remove('is-looping');
-      loopBtnIcon.textContent = '';
-      loopBtnLabel.textContent = 'Engage A–B Loop';
+      if (loopStatusPill) {
+        loopStatusPill.textContent = 'LOOP STANDBY';
+        loopStatusPill.classList.remove('is-active');
+      }
+      if (btnToggleLoop) btnToggleLoop.classList.remove('is-looping');
+      if (loopBtnIcon) loopBtnIcon.textContent = '';
+      if (loopBtnLabel) loopBtnLabel.textContent = 'Engage A–B Loop';
     }
   }
 
@@ -680,22 +759,23 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: url,
-          focus_query: query || null
+          url: url
         })
       });
       const data = await res.json();
 
       if (res.ok) {
+        const durSec = data.duration_sec || data.total_duration_sec || 240;
+        const winCount = data.windows_count || (data.candidate_windows ? data.candidate_windows.length : 0);
         currentAudioState = {
           title: customTitle || data.title,
           source: `YouTube (${data.youtube_id})`,
-          audio_url: data.clean_url,
-          duration_sec: data.duration_sec,
-          wpm: data.estimated_wpm || 160,
-          filler_ratio: data.estimated_filler_ratio || 0.25,
+          audio_url: data.clean_url || data.deep_link_url,
+          duration_sec: durSec,
+          wpm: data.estimated_wpm || 152,
+          filler_ratio: data.estimated_filler_ratio || 0.16,
           category: 'YouTube & Podcast AudioBite',
-          transcript: (data.candidate_windows || []).map(w => w.text).join(' '),
+          transcript: data.transcript || (data.candidate_windows || []).map(w => w.text).join(' '),
           youtube_id: data.youtube_id,
           candidate_windows: data.candidate_windows
         };
@@ -704,18 +784,19 @@ document.addEventListener('DOMContentLoaded', () => {
           ytPlayer.loadVideoById(data.youtube_id);
         }
 
-        timeDisplay.textContent = `00:00 / ${formatSec(data.duration_sec)}`;
+        timeDisplay.textContent = `00:00 / ${formatSec(durSec)}`;
         loopPointA = 0;
-        loopPointB = Math.min(35, data.duration_sec);
+        loopPointB = Math.min(35, durSec);
         updateLooperUI();
+        syncTranscriptEditorUI();
 
         triggerSignalPrediction();
-        alert(`Loaded YouTube Audio: "${currentAudioState.title}" (${formatSec(data.duration_sec)}). Extracted ${data.windows_count} candidate soundbites.`);
+        showStudioToast(`Loaded "${currentAudioState.title}" (${formatSec(durSec)}) • ${winCount} candidate windows ready`);
       } else {
-        alert(`Could not load YouTube audio: ${data.detail || 'Caption extraction failed'}`);
+        showStudioToast(`Could not load YouTube audio: ${data.detail || 'Caption extraction failed'}`);
       }
     } catch (e) {
-      alert(`Error scanning YouTube audio: ${e.message}`);
+      showStudioToast(`Error scanning YouTube audio: ${e.message}`);
     } finally {
       btnLoadYoutube.disabled = false;
       btnLoadYoutube.innerHTML = '<span>Scan &amp; Load</span>';
@@ -746,7 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 6. In-Browser Live Microphone Recorder
+  // 6. In-Browser Live Microphone Recorder (with Real Auto-Transcription)
   let mediaRecorder = null;
   let micStream = null;
   let recordedChunks = [];
@@ -762,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnToggleRec.addEventListener('click', async () => {
     haptics.playClick(280, 0.04);
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Microphone access is not supported in this browser.');
+      showStudioToast('Microphone access is not supported in this browser.');
       return;
     }
 
@@ -775,34 +856,63 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.data.size > 0) recordedChunks.push(e.data);
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
         const micAudioUrl = URL.createObjectURL(audioBlob);
         audioPlayer.src = micAudioUrl;
         audioPlayer.load();
 
-        currentAudioState = {
-          title: `Live Voice Note (${formatSec(recordSeconds)})`,
-          source: 'Live In-Browser Recording',
-          audio_url: micAudioUrl,
-          duration_sec: Math.max(10, recordSeconds),
-          wpm: 155,
-          filler_ratio: 0.35,
-          category: 'Live Voice Note',
-          transcript: `Live mic recording captured in browser (${recordSeconds} seconds). AudioBite distillation ready.`
-        };
-
-        timeDisplay.textContent = `00:00 / ${formatSec(recordSeconds)}`;
-        micStatusText.textContent = `RECORDED (${formatSec(recordSeconds)})`;
+        const recDur = Math.max(5, recordSeconds);
+        timeDisplay.textContent = `00:00 / ${formatSec(recDur)}`;
+        micStatusText.textContent = `TRANSCRIBING (${formatSec(recDur)})...`;
         micLed.classList.remove('is-recording');
         btnToggleRec.style.display = 'inline-flex';
         btnStopRec.style.display = 'none';
         btnToggleRec.querySelector('#rec-label').textContent = 'RE-RECORD VOICE NOTE';
 
+        // Upload recorded blob to /api/upload-audio for real Whisper / Gemini transcription
+        try {
+          const formData = new FormData();
+          formData.append('file', audioBlob, `mic_voice_note_${Date.now()}.webm`);
+          const res = await fetch('/api/upload-audio', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          if (res.ok) {
+            currentAudioState = {
+              title: `Live Voice Note (${formatSec(recDur)})`,
+              source: `Live Mic (${data.transcription_provider || 'Studio ASR'})`,
+              audio_url: data.audio_url || micAudioUrl,
+              duration_sec: recDur,
+              wpm: data.estimated_wpm || 155,
+              filler_ratio: data.estimated_filler_ratio || 0.30,
+              category: 'Live Voice Note',
+              transcript: data.transcript || data.transcript_placeholder
+            };
+            micStatusText.textContent = `TRANSCRIBED (${formatSec(recDur)})`;
+            showStudioToast(`Voice note transcribed via ${data.transcription_provider}`);
+          } else {
+            throw new Error(data.detail || 'Upload failed');
+          }
+        } catch (err) {
+          currentAudioState = {
+            title: `Live Voice Note (${formatSec(recDur)})`,
+            source: 'Live In-Browser Recording',
+            audio_url: micAudioUrl,
+            duration_sec: recDur,
+            wpm: 155,
+            filler_ratio: 0.35,
+            category: 'Live Voice Note',
+            transcript: `Live mic recording captured (${recDur}s). Edit or paste notes below to customize deliverables.`
+          };
+          micStatusText.textContent = `RECORDED (${formatSec(recDur)})`;
+        }
+
         loopPointA = 0;
         loopPointB = Math.min(30, currentAudioState.duration_sec);
         updateLooperUI();
-
+        syncTranscriptEditorUI();
         triggerSignalPrediction();
       };
 
@@ -824,7 +934,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1000);
 
     } catch (err) {
-      alert(`Could not access microphone: ${err.message}`);
+      showStudioToast(`Could not access microphone: ${err.message}`);
     }
   });
 
@@ -866,7 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function handleFileUpload(file) {
     haptics.playClick(240, 0.035);
-    uploadFilename.textContent = `Uploading ${file.name}...`;
+    uploadFilename.textContent = `Uploading & transcribing ${file.name}...`;
 
     const formData = new FormData();
     formData.append('file', file);
@@ -878,16 +988,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await res.json();
       if (res.ok) {
-        uploadFilename.textContent = `Loaded: ${data.filename} (${data.duration_formatted})`;
+        uploadFilename.textContent = `Loaded: ${data.filename} (${data.duration_formatted}) • ${data.transcription_provider}`;
         currentAudioState = {
           title: data.filename,
-          source: 'Uploaded Audio File',
+          source: `Uploaded (${data.transcription_provider || 'Audio File'})`,
           audio_url: data.audio_url,
           duration_sec: data.duration_sec,
           wpm: data.estimated_wpm,
           filler_ratio: data.estimated_filler_ratio,
           category: 'Uploaded Audio',
-          transcript: data.transcript_placeholder
+          transcript: data.transcript || data.transcript_placeholder
         };
         audioPlayer.src = data.audio_url;
         audioPlayer.load();
@@ -896,8 +1006,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loopPointA = 0;
         loopPointB = Math.min(30, data.duration_sec);
         updateLooperUI();
+        syncTranscriptEditorUI();
 
         triggerSignalPrediction();
+        showStudioToast(`Uploaded & transcribed "${data.filename}"`);
       } else {
         uploadFilename.textContent = `Error: ${data.detail || 'Upload failed'}`;
       }
@@ -913,6 +1025,7 @@ document.addEventListener('DOMContentLoaded', () => {
     predictDebounce = setTimeout(async () => {
       const cutThreshold = parseFloat(vocalSlider.value);
       sliderValDisplay.textContent = `${Math.round(cutThreshold * 100)}%`;
+      const selectedRate = hourlyRateSelect ? parseFloat(hourlyRateSelect.value || '40') : 40.0;
 
       if (highPassFilter && presenceFilter) {
         const hpFreq = 80 + cutThreshold * 160;
@@ -925,7 +1038,9 @@ document.addEventListener('DOMContentLoaded', () => {
           audio_duration_sec: currentAudioState.duration_sec,
           wpm_speaking_rate: currentAudioState.wpm,
           filler_tangent_ratio: currentAudioState.filler_ratio,
-          compression_threshold: cutThreshold
+          compression_threshold: cutThreshold,
+          hourly_rate_usd: selectedRate,
+          transcript_text: currentAudioState.transcript || null
         };
         const res = await fetch('/api/predict-signal', {
           method: 'POST',
@@ -947,6 +1062,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           statHours.textContent = `${data.action_hours_estimated} hrs`;
           statQuote.textContent = `$${data.suggested_quote_usd.toFixed(0)}`;
+          if (statQuoteSub) {
+            statQuoteSub.textContent = `Suggested Quote (@ $${selectedRate}/hr)`;
+          }
           statSaved.textContent = `${data.time_saved_min} min`;
 
           if (cutThreshold > 0.3) {
@@ -980,6 +1098,7 @@ document.addEventListener('DOMContentLoaded', () => {
         source_url: currentAudioState.audio_url || 'https://audiobite.tech',
         total_duration_sec: currentAudioState.duration_sec,
         candidate_windows: currentAudioState.candidate_windows || [],
+        transcript_text: currentAudioState.transcript || null,
         search_query: queryVal || null,
         youtube_id: currentAudioState.youtube_id || null
       };
@@ -992,8 +1111,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (res.ok) {
-        activeAudioBites = data.audiobites || [];
-        activeTraceId = data.trace_id;
+        activeAudioBites = data.bites || data.audiobites || [];
+        activeTraceId = data.trace_id || 'local-trace';
 
         document.getElementById('deck-track-title').textContent = `AUDIOBITES: ${currentAudioState.title}`;
         document.getElementById('deck-track-meta').textContent =
@@ -1003,11 +1122,12 @@ document.addEventListener('DOMContentLoaded', () => {
         audiobitesDeckSection.style.display = 'block';
         audiobitesDeckSection.scrollIntoView({ behavior: 'smooth' });
         haptics.playClick(380, 0.06);
+        showStudioToast(`Extracted ${activeAudioBites.length} guardrail-verified AudioBites`);
       } else {
-        alert(`Extraction failed: ${data.detail || 'Server error'}`);
+        showStudioToast(`Extraction failed: ${data.detail || 'Server error'}`);
       }
     } catch (err) {
-      alert(`Error extracting soundbites: ${err.message}`);
+      showStudioToast(`Error extracting soundbites: ${err.message}`);
     } finally {
       extractSpinner.style.display = 'none';
       extractLabel.textContent = 'Extract AudioBites';
@@ -1026,17 +1146,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const card = document.createElement('div');
       card.className = 'audiobite-card';
       const timeTag = `[${formatSec(bite.start_sec)} – ${formatSec(bite.end_sec)}]`;
+      const quoteText = bite.quoted_soundbite || bite.verbatim_quote || 'Verified studio soundbite';
+      const takeawayText = bite.takeaway || bite.key_takeaway || 'High-density segment identified by TabPFN';
+      const stageTag = bite.stage_tag || (bite.tags && bite.tags[0]) || 'HIGH_SIGNAL';
+      const audioCue = bite.audio_cue || bite.loop_recommendation || 'Clear voice';
+      const sigScore = typeof bite.signal_score_pct === 'number' ? bite.signal_score_pct : 88.0;
 
       card.innerHTML = `
         <div class="bite-card-top">
-          <span class="bite-time-tag">${timeTag} (${bite.duration_sec}s)</span>
-          <span class="bite-purity-tag">TabPFN Signal: ${bite.signal_score_pct.toFixed(1)}%</span>
+          <span class="bite-time-tag">${timeTag} (${bite.duration_sec || (bite.end_sec - bite.start_sec)}s)</span>
+          <span class="bite-purity-tag">TabPFN Signal: ${sigScore.toFixed(1)}%</span>
         </div>
-        <blockquote class="bite-quote">“${bite.quoted_soundbite}”</blockquote>
-        <div class="bite-takeaway"><strong>Takeaway:</strong> ${bite.takeaway}</div>
+        <blockquote class="bite-quote">“${quoteText}”</blockquote>
+        <div class="bite-takeaway"><strong>Takeaway:</strong> ${takeawayText}</div>
         <div class="bite-cue-row">
-          <span>Stage: <strong>${bite.stage_tag}</strong></span> • 
-          <span>Audio Cue: ${bite.audio_cue || 'Clear voice'}</span>
+          <span>Stage: <strong>${stageTag}</strong></span> • 
+          <span>Audio Cue: ${audioCue}</span>
         </div>
         <div class="bite-actions-row">
           <button class="btn-bite-action btn-bite-primary btn-play-loop-bite" data-idx="${idx}">
@@ -1072,6 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startLoopChecker();
 
         document.querySelector('.analog-desk').scrollIntoView({ behavior: 'smooth' });
+        showStudioToast(`Looping AudioBite [${formatSec(loopPointA)} – ${formatSec(loopPointB)}]`);
       });
     });
 
@@ -1083,10 +1209,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!bite) return;
 
         if (currentInputMode === 'youtube') {
-          // For YouTube, generate clickable deep-link snippet
-          const deepUrl = bite.deep_link_url || `${currentAudioState.audio_url}&t=${bite.start_sec}s`;
+          const deepUrl = bite.deep_link_url || `${currentAudioState.audio_url}?t=${bite.start_sec}`;
           navigator.clipboard.writeText(deepUrl).then(() => {
-            alert(`YouTube deep citation copied:\n${deepUrl}\n\n(YouTube terms restrict client-side raw .WAV byte downloads; use deep citation link or local audio/mic mode for .WAV slicing).`);
+            showStudioToast(`Copied YouTube deep citation link: ${deepUrl}`);
           });
           return;
         }
@@ -1100,9 +1225,10 @@ document.addEventListener('DOMContentLoaded', () => {
           link.download = `AudioBite_${formatSec(bite.start_sec).replace(':', 'm')}s_${formatSec(bite.end_sec).replace(':', 'm')}s.wav`;
           link.click();
           btn.textContent = 'Downloaded';
+          showStudioToast(`Sliced 16-bit PCM .WAV (${formatSec(bite.start_sec)}–${formatSec(bite.end_sec)})`);
           setTimeout(() => { btn.textContent = 'Slice .WAV'; btn.disabled = false; }, 2000);
         } catch (err) {
-          alert(`Could not slice audio buffer: ${err.message}`);
+          showStudioToast(`Could not slice audio buffer: ${err.message}`);
           btn.textContent = 'Slice .WAV';
           btn.disabled = false;
         }
@@ -1119,6 +1245,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const crate = loadCrate();
         crate.push({
           ...bite,
+          quoted_soundbite: bite.quoted_soundbite || bite.verbatim_quote,
+          takeaway: bite.takeaway || bite.key_takeaway,
           source_title: currentAudioState.title,
           source_url: currentAudioState.audio_url,
           added_at: new Date().toISOString()
@@ -1126,6 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveCrate(crate);
 
         btn.textContent = 'Saved in Crate';
+        showStudioToast('Saved AudioBite to persistent Crate');
         setTimeout(() => { btn.textContent = 'Save to Crate'; }, 2000);
       });
     });
@@ -1154,11 +1283,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await res.json();
           if (res.ok) {
             downloadPdfFromBase64(data.pdf_base64, `Citation_${formatSec(bite.start_sec).replace(':', 'm')}s.pdf`);
+            showStudioToast('Stamped archival Citation Card PDF');
           } else {
-            alert(`Stamping failed: ${data.detail}`);
+            showStudioToast(`Stamping failed: ${data.detail}`);
           }
         } catch (e) {
-          alert(`Error stamping PDF: ${e.message}`);
+          showStudioToast(`Error stamping PDF: ${e.message}`);
         } finally {
           btn.textContent = 'Citation Card PDF';
           btn.disabled = false;
@@ -1174,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnStampAllPdf) {
     btnStampAllPdf.addEventListener('click', async () => {
       if (!activeAudioBites || activeAudioBites.length === 0) {
-        alert('Please extract AudioBites first!');
+        showStudioToast('Please extract AudioBites first!');
         return;
       }
       haptics.playClick(300, 0.04);
@@ -1196,14 +1326,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         if (res.ok) {
           downloadPdfFromBase64(data.pdf_base64, `AudioBites_Citation_${currentAudioState.title.replace(/\s+/g, '_')}.pdf`);
+          showStudioToast('Downloaded session Citation PDF');
         } else {
-          alert(`PDF stamping failed: ${data.detail}`);
+          showStudioToast(`PDF stamping failed: ${data.detail}`);
         }
       } catch (e) {
-        alert(`Error stamping PDF: ${e.message}`);
+        showStudioToast(`Error stamping PDF: ${e.message}`);
       } finally {
         btnStampAllPdf.disabled = false;
-        btnStampAllPdf.innerHTML = '<span>Stamp Citation PDF</span>';
+        btnStampAllPdf.innerHTML = '<span>Export Citation PDF</span>';
       }
     });
   }
@@ -1211,7 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCopyDeckMarkdown) {
     btnCopyDeckMarkdown.addEventListener('click', () => {
       if (!activeAudioBites || activeAudioBites.length === 0) {
-        alert('Please extract AudioBites first!');
+        showStudioToast('Please extract AudioBites first!');
         return;
       }
       haptics.playClick(240, 0.03);
@@ -1220,10 +1351,13 @@ document.addEventListener('DOMContentLoaded', () => {
       md += `**Duration**: ${formatSec(currentAudioState.duration_sec)}\n\n`;
 
       activeAudioBites.forEach((b, i) => {
-        md += `### ${i + 1}. [${formatSec(b.start_sec)} – ${formatSec(b.end_sec)}] (${b.stage_tag})\n`;
-        md += `> "${b.quoted_soundbite}"\n\n`;
-        md += `- **Takeaway**: ${b.takeaway}\n`;
-        md += `- **TabPFN Signal Purity**: ${b.signal_score_pct.toFixed(1)}%\n`;
+        const quote = b.quoted_soundbite || b.verbatim_quote || '';
+        const take = b.takeaway || b.key_takeaway || '';
+        const stg = b.stage_tag || (b.tags && b.tags[0]) || 'HIGH_SIGNAL';
+        md += `### ${i + 1}. [${formatSec(b.start_sec)} – ${formatSec(b.end_sec)}] (${stg})\n`;
+        md += `> "${quote}"\n\n`;
+        md += `- **Takeaway**: ${take}\n`;
+        md += `- **TabPFN Signal Purity**: ${(b.signal_score_pct || 88.0).toFixed(1)}%\n`;
         if (b.deep_link_url) {
           md += `- **Deep Audio Citation**: [Listen at ${formatSec(b.start_sec)}](${b.deep_link_url})\n`;
         }
@@ -1231,7 +1365,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       navigator.clipboard.writeText(md).then(() => {
-        alert('AudioBite Markdown dossier copied to clipboard.');
+        showStudioToast('AudioBite Markdown dossier copied to clipboard');
       });
     });
   }
@@ -1282,6 +1416,8 @@ document.addEventListener('DOMContentLoaded', () => {
     crate.forEach((item, idx) => {
       const el = document.createElement('div');
       el.className = 'crate-item';
+      const quote = item.quoted_soundbite || item.verbatim_quote || '';
+      const take = item.takeaway || item.key_takeaway || '';
       el.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem;">
           <strong style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-amber);">
@@ -1290,10 +1426,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn-tactile-xs btn-delete-crate-item" data-idx="${idx}" style="color: #b33939;">✕ Remove</button>
         </div>
         <div style="font-family: var(--font-serif); font-size: 0.95rem; font-style: italic; margin-bottom: 0.35rem;">
-          "${item.quoted_soundbite}"
+          "${quote}"
         </div>
         <div style="font-size: 0.75rem; color: var(--ink-graphite); margin-bottom: 0.4rem;">
-          ${item.takeaway}
+          ${take}
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-muted);">
           <span>${item.source_title || 'Audio Source'}</span>
@@ -1335,11 +1471,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnClearCrate) {
     btnClearCrate.addEventListener('click', () => {
-      if (confirm('Clear all saved AudioBites from crate?')) {
-        haptics.playClick(180, 0.03);
-        saveCrate([]);
-        renderCrateItems();
-      }
+      haptics.playClick(180, 0.03);
+      saveCrate([]);
+      renderCrateItems();
+      showStudioToast('Cleared saved AudioBites Crate');
     });
   }
 
@@ -1347,7 +1482,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStampCratePdf.addEventListener('click', async () => {
       const crate = loadCrate();
       if (crate.length === 0) {
-        alert('Your crate is empty. Save some AudioBites first!');
+        showStudioToast('Your crate is empty. Save some AudioBites first!');
         return;
       }
       haptics.playClick(320, 0.04);
@@ -1369,11 +1504,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         if (res.ok) {
           downloadPdfFromBase64(data.pdf_base64, `AudioBite_Crate_Dossier_${crate.length}_Slices.pdf`);
+          showStudioToast('Downloaded Crate Dossier PDF');
         } else {
-          alert(`Failed to stamp dossier: ${data.detail}`);
+          showStudioToast(`Failed to stamp dossier: ${data.detail}`);
         }
       } catch (e) {
-        alert(`Error stamping dossier: ${e.message}`);
+        showStudioToast(`Error stamping dossier: ${e.message}`);
       } finally {
         btnStampCratePdf.disabled = false;
         btnStampCratePdf.innerHTML = '<span>Stamp Citation Dossier PDF</span>';
@@ -1385,24 +1521,26 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyCrateMd.addEventListener('click', () => {
       const crate = loadCrate();
       if (crate.length === 0) {
-        alert('Your crate is empty!');
+        showStudioToast('Your crate is empty!');
         return;
       }
       haptics.playClick(240, 0.03);
       let md = `# AudioBite Curated Crate Dossier\n\n`;
       md += `*Generated by AudioBite.tech — ${crate.length} Curated Soundbites*\n\n`;
       crate.forEach((b, i) => {
+        const quote = b.quoted_soundbite || b.verbatim_quote || '';
+        const take = b.takeaway || b.key_takeaway || '';
         md += `### ${i + 1}. [${formatSec(b.start_sec)} – ${formatSec(b.end_sec)}] from *${b.source_title || 'Audio'}*\n`;
-        md += `> "${b.quoted_soundbite}"\n\n`;
-        md += `- **Takeaway**: ${b.takeaway}\n`;
-        md += `- **Signal Purity**: ${b.signal_score_pct.toFixed(1)}%\n`;
+        md += `> "${quote}"\n\n`;
+        md += `- **Takeaway**: ${take}\n`;
+        md += `- **Signal Purity**: ${(b.signal_score_pct || 88.0).toFixed(1)}%\n`;
         if (b.deep_link_url) {
           md += `- **Link**: [Listen on YouTube](${b.deep_link_url})\n`;
         }
         md += `\n`;
       });
       navigator.clipboard.writeText(md).then(() => {
-        alert('Crate Markdown dossier copied to clipboard.');
+        showStudioToast('Crate Markdown dossier copied to clipboard');
       });
     });
   }
@@ -1415,13 +1553,15 @@ document.addEventListener('DOMContentLoaded', () => {
     btnGenerateSheet.disabled = true;
 
     try {
+      const selectedRate = hourlyRateSelect ? parseFloat(hourlyRateSelect.value || '40') : 40.0;
       const payload = {
         track_title: currentAudioState.title,
         artist_name: currentAudioState.source,
         track_duration_sec: currentAudioState.duration_sec,
         bpm: currentAudioState.wpm,
         vocal_presence_ratio: parseFloat(vocalSlider.value),
-        transcript_text: currentAudioState.transcript
+        transcript_text: currentAudioState.transcript,
+        hourly_rate_usd: selectedRate
       };
 
       const res = await fetch('/api/generate-sheet', {
@@ -1438,7 +1578,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('sheet-track-title').textContent = currentAudioState.title;
         document.getElementById('sheet-track-meta').textContent =
-          `Source: ${currentAudioState.source} • Duration: ${data.track.duration} • Speaking Rate: ${currentAudioState.wpm} WPM`;
+          `Source: ${currentAudioState.source} • Duration: ${data.track.duration} • Speaking Rate: ${currentAudioState.wpm} WPM • Billing Rate: $${selectedRate}/hr`;
 
         // Render 30-Second Executive AudioBite
         const bulletsContainer = document.getElementById('sheet-executive-bullets');
@@ -1477,6 +1617,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sec = parseFloat(btn.dataset.sec || 0);
             seekToPlayheadTime(sec, audioPlayer, true);
             haptics.playClick(260, 0.035);
+            showStudioToast(`Jumped audio playhead to [${formatSec(sec)}]`);
           });
         });
 
@@ -1492,7 +1633,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const guardrailBox = document.getElementById('guardrail-audit-status');
         const gStatus = data.guardrail_status;
         if (gStatus && gStatus.passed_clean) {
-          guardrailBox.innerHTML = `<span><strong>100% Deterministic Match</strong> — Zero timestamp hallucinations, TabPFN numbers locked.</span>`;
+          guardrailBox.innerHTML = `<span><strong>100% Deterministic Match</strong> — Zero timestamp hallucinations, TabPFN numbers locked (@ $${selectedRate}/hr).</span>`;
         } else {
           guardrailBox.innerHTML = `<span><strong>Guardrail Intervened</strong> — Clamped ${gStatus.interventions_count} anomalies to ensure exact audio duration bounds.</span>`;
         }
@@ -1500,11 +1641,12 @@ document.addEventListener('DOMContentLoaded', () => {
         parchmentSheet.style.display = 'block';
         parchmentSheet.scrollIntoView({ behavior: 'smooth' });
         haptics.playClick(360, 0.06);
+        showStudioToast('Stamped Action Card & Archival PDF ready');
       } else {
-        alert(`Generation failed: ${data.detail || 'Server error'}`);
+        showStudioToast(`Generation failed: ${data.detail || 'Server error'}`);
       }
     } catch (err) {
-      alert(`Error calling studio engine: ${err.message}`);
+      showStudioToast(`Error calling studio engine: ${err.message}`);
     } finally {
       btnSpinner.style.display = 'none';
       btnLabel.textContent = 'Stamp Action Card';
@@ -1514,18 +1656,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 13. Copy Buttons
   document.getElementById('btn-copy-reply').addEventListener('click', () => {
-    const text = document.getElementById('sheet-client-reply').textContent;
+    const text = document.getElementById('sheet-client-reply').textContent.trim();
     navigator.clipboard.writeText(text).then(() => {
       haptics.playClick(240, 0.03);
-      alert('Client reply copied to clipboard.');
+      showStudioToast('Client quote reply copied to clipboard');
     });
   });
 
   document.getElementById('btn-copy-github').addEventListener('click', () => {
-    const text = document.getElementById('sheet-github-checklist').textContent;
+    const text = document.getElementById('sheet-github-checklist').textContent.trim();
     navigator.clipboard.writeText(text).then(() => {
       haptics.playClick(240, 0.03);
-      alert('GitHub checklist copied to clipboard.');
+      showStudioToast('GitHub issues checklist copied to clipboard');
     });
   });
 
@@ -1533,10 +1675,11 @@ document.addEventListener('DOMContentLoaded', () => {
   btnDownloadPdf.addEventListener('click', () => {
     haptics.playClick(260, 0.04);
     if (!activePdfBase64) {
-      alert('Please stamp an action card first!');
+      showStudioToast('Please stamp an action card first!');
       return;
     }
     downloadPdfFromBase64(activePdfBase64, `AudioBite_${currentAudioState.title.replace(/\s+/g, '_')}.pdf`);
+    showStudioToast('Downloaded Archival Action Card PDF');
   });
 
   // 15. Willingness-to-Pay Poll Buttons

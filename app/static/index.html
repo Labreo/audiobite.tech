@@ -92,6 +92,22 @@
         <span class="telemetry-pill" style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--paper-parchment); border: 1px solid var(--paper-stone); padding: 0.35rem 0.75rem; border-radius: 4px; color: var(--ink-graphite);"><strong>Dual-Brain:</strong> TabPFN-v2 + Gemma 4</span>
         <span class="telemetry-pill" style="font-family: var(--font-mono); font-size: 0.75rem; background: var(--paper-parchment); border: 1px solid var(--paper-stone); padding: 0.35rem 0.75rem; border-radius: 4px; color: var(--ink-graphite);"><strong>Citation Proofs:</strong> Exact Audio Loops</span>
       </div>
+
+      <!-- Physical 3D Workbench Cutout Badges (Grab & Tilt Enabled) -->
+      <div class="workbench-cutouts-tray" aria-label="Interactive studio instruments">
+        <div class="cutout cutout-chip" title="Drag to inspect studio VU calibration">
+          <img src="/static/assets/vu-meter.svg" alt="Analog VU Meter" class="cutout-visual" width="28" height="28">
+          <span>VU CALIBRATED • -14 LUFS</span>
+        </div>
+        <div class="cutout cutout-chip" title="Drag to inspect 440Hz harmonic reference">
+          <img src="/static/assets/tuning-fork.svg" alt="440Hz Tuning Fork" class="cutout-visual" width="26" height="26">
+          <span>VOICE CLARITY • 120Hz HPF</span>
+        </div>
+        <div class="cutout cutout-chip" title="Drag to inspect magnetic tape splice lock">
+          <img src="/static/assets/splice-badge.svg" alt="Magnetic Tape Splice" class="cutout-visual" width="26" height="26">
+          <span>GUARDRAIL LOCK • [MM:SS]</span>
+        </div>
+      </div>
     </section>
 
     <!-- SUBTLE WAVEFORM SIGNAL THREAD DIVIDER -->
@@ -148,7 +164,7 @@
             <div class="youtube-input-box">
               <label for="youtube-url-input" class="panel-label" style="display: block; margin-bottom: 0.35rem;">YOUTUBE OR YTM LINK</label>
               <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                <input type="text" id="youtube-url-input" class="tactile-input" placeholder="https://www.youtube.com/watch?v=... or youtu.be/..." value="https://www.youtube.com/watch?v=dQw4w9WgXcQ" style="flex: 1;">
+                <input type="text" id="youtube-url-input" class="tactile-input" placeholder="https://www.youtube.com/watch?v=... or youtu.be/..." value="https://www.youtube.com/watch?v=Kmms5i_qQyE" style="flex: 1;">
                 <button class="btn-tactile btn-stone" id="btn-load-youtube" style="white-space: nowrap;">
                   <span>Scan &amp; Load</span>
                 </button>
@@ -161,9 +177,9 @@
               <!-- Quick Presets -->
               <div class="preset-links-row">
                 <span style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-muted); font-weight: 700;">PRESETS:</span>
-                <button class="btn-tactile-xs" id="btn-preset-huberman" data-url="https://www.youtube.com/watch?v=Kmms5i_qQyE" data-title="Dr. Huberman • Dopamine &amp; Focus Deep Work" data-query="focus protocol dopamine">Huberman Focus</button>
-                <button class="btn-tactile-xs" id="btn-preset-resonance" data-url="https://www.youtube.com/watch?v=H30R_Y9bK44" data-title="HOME — Resonance (Synthwave Studio)" data-query="bass drop hook">Resonance (YTM)</button>
-                <button class="btn-tactile-xs" id="btn-preset-indie" data-url="https://www.youtube.com/watch?v=r6tHKSNneCc" data-title="YC Startup School • Finding Product Market Fit" data-query="first ten customers">YC Startup PMF</button>
+                <button class="btn-tactile-xs" id="btn-preset-huberman" data-url="https://www.youtube.com/watch?v=Kmms5i_qQyE" data-title="System Design • Raft Leader Election &amp; Replication" data-query="leader election log replication">Raft Consensus</button>
+                <button class="btn-tactile-xs" id="btn-preset-resonance" data-url="https://www.youtube.com/watch?v=H30R_Y9bK44" data-title="Indie SaaS • Zero-Burn AI Unit Economics" data-query="unit economics pricing">Zero-Burn SaaS</button>
+                <button class="btn-tactile-xs" id="btn-preset-indie" data-url="https://www.youtube.com/watch?v=r6tHKSNneCc" data-title="FastAPI &amp; Guardrail Audio Engineering" data-query="guardrails schema latency">FastAPI Guardrails</button>
               </div>
             </div>
           </div>
@@ -177,14 +193,14 @@
                 <span class="mic-timer" id="mic-timer">00:00</span>
               </div>
               <p style="font-size: 0.85rem; color: var(--ink-graphite); margin: 0.5rem 0 1rem 0;">
-                Click Record to capture a 15–60s voice note. In-browser Web Audio records directly to memory without server leaks.
+                Click Record to capture a 15–60s voice note. Automatically transcribed via Whisper / Gemini Flash upon completion.
               </p>
               <div style="display: flex; gap: 0.75rem;">
                 <button class="btn-tactile btn-rec" id="btn-toggle-rec">
                   <span id="rec-label">RECORD VOICE NOTE</span>
                 </button>
                 <button class="btn-tactile" id="btn-stop-rec" style="display: none;">
-                  <span>Stop & Load</span>
+                  <span>Stop &amp; Transcribe</span>
                 </button>
               </div>
             </div>
@@ -205,7 +221,15 @@
           <div class="audio-player-module">
             <div class="player-top-row">
               <span class="player-tag">LIVE STUDIO MONITOR</span>
-              <span class="player-time" id="player-time-display">00:00 / 02:00</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div class="speed-pill-group" role="group" aria-label="Playback speed">
+                  <button type="button" class="btn-tactile-xs speed-btn is-active" data-speed="1">1x</button>
+                  <button type="button" class="btn-tactile-xs speed-btn" data-speed="1.25">1.25x</button>
+                  <button type="button" class="btn-tactile-xs speed-btn" data-speed="1.5">1.5x</button>
+                  <button type="button" class="btn-tactile-xs speed-btn" data-speed="2">2x</button>
+                </div>
+                <span class="player-time" id="player-time-display">00:00 / 02:00</span>
+              </div>
             </div>
 
             <!-- YouTube Iframe Monitor Housing -->
@@ -219,7 +243,7 @@
             
             <div class="player-controls-row" id="html5-player-controls">
               <button class="btn-tactile btn-play" id="btn-play-pause">
-                <span id="play-icon"></span> <span id="play-label">PLAY AUDIO</span>
+                <span id="play-icon">▶</span> <span id="play-label">PLAY AUDIO</span>
               </button>
               <div class="seek-bar-wrap">
                 <input type="range" min="0" max="100" value="0" class="tactile-slider seek-slider" id="audio-seek-slider" aria-label="Audio seeker">
@@ -266,11 +290,11 @@
           <!-- The Fluff & Tangent Cut Fader -->
           <div class="attenuator-slot">
             <div class="attenuator-header">
-              <span>FLUFF & TANGENT CUT FADER (VOICE CLARITY)</span>
-              <span class="slider-val" id="slider-val-display">50%</span>
+              <span>FLUFF &amp; TANGENT CUT FADER (VOICE CLARITY)</span>
+              <span class="slider-val" id="slider-val-display">58%</span>
             </div>
             <div class="fader-track-wrap">
-              <input type="range" min="0.00" max="0.80" step="0.01" value="0.50" class="tactile-slider" id="vocal-slider" aria-label="Fluff and tangent cut threshold">
+              <input type="range" min="0.00" max="0.80" step="0.01" value="0.58" class="tactile-slider" id="vocal-slider" aria-label="Fluff and tangent cut threshold">
             </div>
             <div class="scale-ticks">
               <span>0% (Raw Audio)</span>
@@ -279,8 +303,19 @@
             </div>
           </div>
 
+          <!-- Live Transcript & Text Brain-Dump Editor -->
+          <div class="transcript-editor-box">
+            <div class="transcript-editor-header">
+              <label for="live-transcript-input" class="panel-label" style="margin-bottom: 0;">LIVE TRANSCRIPT &amp; CLIENT BRIEF EDITOR</label>
+              <span class="transcript-telemetry-badges" id="transcript-telemetry-badges">
+                <span id="badge-wpm">165 WPM</span> • <span id="badge-filler">58% Filler</span>
+              </span>
+            </div>
+            <textarea id="live-transcript-input" class="tactile-textarea" rows="3" placeholder="Inspect or edit the transcribed voice note here, or paste any chaotic WhatsApp / Slack client message to re-score scope &amp; extract deliverables..."></textarea>
+          </div>
+
           <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
-            <button class="btn-tactile btn-generate" id="btn-generate-sheet" style="flex: 1;">
+            <button class="btn-tactile btn-generate" id="btn-generate-sheet" style="flex: 1; margin-top: 0;">
               <span id="btn-spinner" style="display: none;"></span>
               <span id="btn-label">Stamp Action Card</span>
             </button>
@@ -294,7 +329,7 @@
         <!-- Right: Telemetry Display -->
         <div class="telemetry-display">
           <div>
-            <div class="panel-label">2. TABPFN-V2 PREDICTED SIGNAL & EFFORT</div>
+            <div class="panel-label">2. TABPFN-V2 PREDICTED SIGNAL &amp; EFFORT</div>
             <div class="score-hero">
               <span class="score-num" id="score-num">84.5</span>
               <span class="score-unit">% SIGNAL</span>
@@ -327,7 +362,18 @@
 
             <!-- TabPFN Scope Quote Box -->
             <div class="quote-preview-box">
-              <div class="quote-title">TABPFN SCOPE & QUOTE ESTIMATOR</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.65rem;">
+                <div class="quote-title" style="margin-bottom: 0;">TABPFN SCOPE &amp; QUOTE ESTIMATOR</div>
+                <div class="rate-selector-wrap">
+                  <label for="hourly-rate-select" style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-muted); font-weight: 700;">BILLING RATE:</label>
+                  <select id="hourly-rate-select" class="tactile-select" aria-label="Freelance hourly billing rate">
+                    <option value="40" selected>$40/hr (Indie)</option>
+                    <option value="75">$75/hr (Mid SWE)</option>
+                    <option value="100">$100/hr (Senior)</option>
+                    <option value="150">$150/hr (Agency)</option>
+                  </select>
+                </div>
+              </div>
               <div class="quote-numbers">
                 <div>
                   <div class="quote-metric" id="stat-hours">5.5 hrs</div>
@@ -335,7 +381,7 @@
                 </div>
                 <div>
                   <div class="quote-metric" id="stat-quote">$220</div>
-                  <div class="quote-sub">Suggested Quote (@ $40/hr)</div>
+                  <div class="quote-sub" id="stat-quote-sub">Suggested Quote (@ $40/hr)</div>
                 </div>
                 <div>
                   <div class="quote-metric" id="stat-saved">3.5 min</div>
@@ -346,7 +392,7 @@
           </div>
 
           <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink-muted); border-top: 1px solid var(--paper-stone); padding-top: 0.75rem;">
-            Calibrated on 88 real logged voice notes (TabPFN Brier Score: <strong>0.0000</strong>)
+            Calibrated on 88 real logged voice notes (TabPFN Brier Score: <strong>0.0270</strong> • 80% CI Coverage: <strong>85.2%</strong>)
           </div>
         </div>
       </div>
@@ -512,23 +558,23 @@
         <tbody>
           <tr class="winner-row">
             <td>TabPFN-v2 (Prior Labs) [Top Benchmark]</td>
-            <td>0.0000</td>
-            <td>1.0000</td>
-            <td>100.0%</td>
+            <td>0.0270</td>
+            <td>0.9953</td>
+            <td>95.5%</td>
             <td>Accurately captures subtle filler-to-reversal non-linearities</td>
           </tr>
           <tr>
             <td>Logistic Regression Baseline</td>
-            <td>0.0003</td>
-            <td>1.0000</td>
-            <td>100.0%</td>
+            <td>0.0572</td>
+            <td>0.9766</td>
+            <td>88.6%</td>
             <td>Linear underfitting on acoustic/scope non-linearities</td>
           </tr>
           <tr>
             <td>Naive Audio Duration Heuristic</td>
-            <td>0.1803</td>
-            <td>0.8106</td>
-            <td>71.6%</td>
+            <td>0.2014</td>
+            <td>0.7769</td>
+            <td>67.0%</td>
             <td>Fails to capture filler reversals and hidden scope creep</td>
           </tr>
         </tbody>
@@ -546,10 +592,10 @@
 
         <ul class="modal-features">
           <li>Unlimited batch voice-note and client brief processing</li>
+          <li>Custom freelance billing rates ($40–$250/hr) on stamped PDF scope cards</li>
           <li>100% offline private Ollama mode (gemma4:e2b) on your laptop</li>
-          <li>Multi-page archival PDF Scope & AudioBite booklet export</li>
-          <li>Priority access to upcoming WhatsApp & Telegram forwarding bot</li>
-          <li>Directly supports indie maintenance for 440+ extension users</li>
+          <li>Multi-page archival PDF Scope &amp; AudioBite Crate dossier export</li>
+          <li>Priority access to Telegram &amp; WhatsApp voice-note forwarding bot</li>
         </ul>
 
         <button class="btn-tactile btn-brass" id="btn-buy-coffee" style="width: 100%; justify-content: center; padding: 0.9rem;">
@@ -573,6 +619,9 @@
       <span>Saved Crate</span>
       <span class="crate-badge-count" id="crate-badge-count">0</span>
     </button>
+
+    <!-- NON-BLOCKING TACTILE STUDIO TOAST -->
+    <div class="studio-toast" id="studio-toast" role="status" aria-live="polite"></div>
 
     <!-- PERSISTENT CRATE DRAWER OVERLAY -->
     <div class="crate-drawer-overlay" id="crate-drawer-overlay" aria-hidden="true">

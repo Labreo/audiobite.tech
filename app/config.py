@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemma_cloud_endpoint: str = "https://generativelanguage.googleapis.com/v1beta/openai"
     gemma_cloud_model: str = "gemma-4-26b-a4b-it"
+    gemini_fast_model: str = "gemini-3.5-flash-lite"
     
     # Secondary Cloud Route: OpenRouter Free Tier ($0.00)
     openrouter_api_key: str = ""
@@ -50,7 +51,7 @@ class Settings(BaseSettings):
     groq_whisper_model: str = "whisper-large-v3-turbo"
 
     # Telegram Forwarding Bot Integration
-    telegram_bot_token: str = "8921939042:AAGmwSfBApr1Q_oPfhJKvWLPLYYOhfIKBOI"
+    telegram_bot_token: str = ""
     telegram_webhook_secret: str = ""
 
     # WhatsApp Cloud Webhook Integration

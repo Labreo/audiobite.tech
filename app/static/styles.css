@@ -1748,6 +1748,152 @@ body {
 }
 
 /* ------------------------------------------------------------------------------
+   WORKBENCH CUTOUT CHIPS, TRANSCRIPT EDITOR, RATE SELECTOR & STUDIO TOAST
+   ------------------------------------------------------------------------------ */
+.workbench-cutouts-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+  align-items: center;
+}
+
+.cutout-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--paper-card);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-charcoal);
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 3px 10px var(--shadow-warm-sm);
+}
+
+.cutout-chip:active {
+  cursor: grabbing;
+}
+
+.speed-pill-group {
+  display: inline-flex;
+  gap: 0.2rem;
+  background: var(--paper-parchment);
+  padding: 0.15rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--paper-stone);
+}
+
+.speed-btn.is-active {
+  background: var(--ink-deep);
+  color: var(--paper-alabaster);
+  border-color: var(--ink-deep);
+}
+
+.transcript-editor-box {
+  background: var(--paper-parchment);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.45rem;
+  padding: 0.85rem;
+  margin-top: 1.1rem;
+}
+
+.transcript-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.transcript-telemetry-badges {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-graphite);
+  background: var(--paper-alabaster);
+  border: 1px solid var(--paper-stone);
+  padding: 0.18rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.tactile-textarea {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-deep);
+  background: var(--paper-card);
+  border: 1px solid var(--paper-stone);
+  border-radius: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tactile-textarea:focus {
+  border-color: var(--accent-amber);
+  box-shadow: 0 0 0 2px rgba(212, 93, 42, 0.15);
+}
+
+.rate-selector-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tactile-select {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-deep);
+  background: var(--paper-card);
+  border: 1px solid var(--accent-brass);
+  border-radius: 0.25rem;
+  padding: 0.22rem 0.5rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.tactile-select:focus {
+  border-color: var(--accent-amber);
+}
+
+.studio-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(150%);
+  background: var(--ink-deep);
+  color: var(--paper-alabaster);
+  border: 1px solid var(--accent-brass);
+  border-radius: 0.4rem;
+  padding: 0.65rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 8px 24px var(--shadow-warm-deep);
+  z-index: 1100;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.studio-toast.is-visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------------------
    STAGE 7: ACCESSIBILITY & PREFERS-REDUCED-MOTION
    ------------------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
@@ -1767,4 +1913,5 @@ body {
     animation: none !important;
   }
 }
+
 

@@ -169,7 +169,8 @@ class TabPFNEngine:
         self,
         features: Dict[str, Any],
         compression_threshold: Optional[float] = None,
-        filler_override: Optional[float] = None
+        filler_override: Optional[float] = None,
+        hourly_rate_usd: Optional[float] = None
     ) -> Dict[str, Any]:
         """
         Predict Signal-to-Noise Purity, Ambiguity/Scope Risk, and Time Saved.
@@ -180,9 +181,22 @@ class TabPFNEngine:
 
         t0 = time.perf_counter()
 
-        # Handle backward-compatible or forward feature mapping
+        # Optional live transcript telemetry enrichment when raw text is provided
+        transcript_text = features.get("transcript_text")
+        derived_tel: Dict[str, Any] = {}
         duration = _safe_float(features, 'audio_duration_sec', _safe_float(features, 'track_duration_sec', 180.0))
-        wpm = _safe_float(features, 'wpm_speaking_rate', _safe_float(features, 'bpm', 145.0))
+        if transcript_text and isinstance(transcript_text, str) and transcript_text.strip():
+            try:
+                from app.core.transcription import analyze_transcript_telemetry
+                derived_tel = analyze_transcript_telemetry(transcript_text, duration)
+            except Exception:
+                derived_tel = {}
+
+        wpm = _safe_float(
+            features,
+            'wpm_speaking_rate',
+            _safe_float(features, 'bpm', float(derived_tel.get('wpm_speaking_rate', 145.0)))
+        )
 
         if filler_override is not None:
             filler = float(filler_override)
@@ -190,14 +204,20 @@ class TabPFNEngine:
             filler = _safe_float(features, 'filler_tangent_ratio', 0.40)
         elif features.get('vocal_presence_ratio') is not None:
             filler = _safe_float(features, 'vocal_presence_ratio', 0.25)
+        elif 'filler_tangent_ratio' in derived_tel:
+            filler = float(derived_tel['filler_tangent_ratio'])
         else:
             filler = 0.40
 
-        action_density = _safe_float(features, 'action_verb_density', 0.32)
-        blockers = _safe_float(features, 'blocker_uncertainty_count', _safe_float(features, 'is_lyrics_heavy', 1.0))
-        entities = _safe_float(features, 'technical_entity_count', 6.0)
-        interruptions = _safe_float(features, 'speaker_interruptions', 1.2)
-        urgency = _safe_float(features, 'urgency_flag', 0.0)
+        action_density = _safe_float(features, 'action_verb_density', float(derived_tel.get('action_verb_density', 0.32)))
+        blockers = _safe_float(
+            features,
+            'blocker_uncertainty_count',
+            _safe_float(features, 'is_lyrics_heavy', float(derived_tel.get('blocker_uncertainty_count', 1.0)))
+        )
+        entities = _safe_float(features, 'technical_entity_count', float(derived_tel.get('technical_entity_count', 6.0)))
+        interruptions = _safe_float(features, 'speaker_interruptions', float(derived_tel.get('speaker_interruptions', 1.2)))
+        urgency = _safe_float(features, 'urgency_flag', float(derived_tel.get('urgency_flag', 0.0)))
         category = _safe_float(features, 'category_code', 0.0)
 
         if self.feature_cols == AUDIOBITE_FEATURE_COLS:
@@ -252,10 +272,12 @@ class TabPFNEngine:
         # Scope risk calculation (ambiguity & hidden scope creep)
         scope_risk = max(5.0, min(95.0, round((filler * 60.0) + (blockers * 8.5) + (1.0 - signal_prob) * 20.0, 1)))
 
-        # Estimated engineering action hours and quote ($40/hr)
+        # Estimated engineering action hours and customizable freelance hourly rate ($40/hr default)
+        rate = float(hourly_rate_usd) if hourly_rate_usd is not None else _safe_float(features, 'hourly_rate_usd', 40.0)
+        rate = max(10.0, min(500.0, rate))
         base_hours = 2.0 + (duration / 60.0) * 1.2 + (blockers * 1.1) + (entities * 0.3)
         action_hours = round(max(1.0, base_hours), 1)
-        quote_usd = round(action_hours * 40.0, 2)
+        quote_usd = round(action_hours * rate, 2)
 
         purity_pct = round(signal_prob * 100, 1)
         compressed_purity_pct = round(max(purity_pct, compressed_signal_prob * 100), 1)
@@ -270,6 +292,7 @@ class TabPFNEngine:
             "scope_risk_pct": scope_risk,
             "time_saved_min": time_saved_min,
             "action_hours_estimated": action_hours,
+            "hourly_rate_usd": rate,
             "suggested_quote_usd": quote_usd,
             "confidence_interval_80": {
                 "lower": ci_lower,
@@ -278,6 +301,12 @@ class TabPFNEngine:
             "latency_ms": latency_ms,
             "filler_evaluated": filler,
             "vocal_presence_evaluated": filler,
+            "telemetry_features": {
+                "action_verb_density": action_density,
+                "blocker_uncertainty_count": int(blockers),
+                "technical_entity_count": int(entities),
+                "urgency_flag": int(urgency)
+            },
             # Backward-compatible fields for legacy UI and tests
             "focus_probability_pct": purity_pct,
             "skip_risk_pct": round(100.0 - purity_pct, 1),
@@ -418,9 +447,11 @@ class TabPFNEngine:
         acc_lr = round(float(accuracy_score(y, (lr_preds >= 0.5).astype(int))), 4)
         acc_naive = round(float(accuracy_score(y, (naive_preds >= 0.5).astype(int))), 4)
 
-        # 80% Confidence Interval Empirical Coverage
-        pred_pct = tabpfn_preds * 100
-        inside_ci = np.sum((actual_retention >= (pred_pct - 12.0)) & (actual_retention <= (pred_pct + 12.0)))
+        # 80% Confidence Interval Empirical Coverage (calibrated onto empirical purity range)
+        low_mean = float(np.mean(actual_retention[y == 0])) if np.any(y == 0) else 38.0
+        high_mean = float(np.mean(actual_retention[y == 1])) if np.any(y == 1) else 93.5
+        pred_pct = low_mean + tabpfn_preds * (high_mean - low_mean)
+        inside_ci = np.sum((actual_retention >= (pred_pct - 9.5)) & (actual_retention <= (pred_pct + 9.5)))
         ci_coverage_pct = round(float((inside_ci / len(y)) * 100), 1)
 
         results = {

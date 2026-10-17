@@ -235,3 +235,63 @@ def test_stamp_citation_endpoint():
     assert len(data["pdf_base64"]) > 500
 
 
+def test_custom_hourly_rate_quote_and_sheet_generation():
+    res_40 = client.post("/api/predict-signal", json={
+        "audio_duration_sec": 120,
+        "wpm_speaking_rate": 150,
+        "filler_tangent_ratio": 0.40,
+        "hourly_rate_usd": 40.0
+    }).json()
+    res_100 = client.post("/api/predict-signal", json={
+        "audio_duration_sec": 120,
+        "wpm_speaking_rate": 150,
+        "filler_tangent_ratio": 0.40,
+        "hourly_rate_usd": 100.0
+    }).json()
+    assert res_100["hourly_rate_usd"] == 100.0
+    assert res_100["suggested_quote_usd"] == round(res_40["action_hours_estimated"] * 100.0, 2)
+
+    sheet_res = client.post("/api/generate-sheet", json={
+        "track_title": "Custom Rate Scope Test",
+        "artist_name": "Agency Client",
+        "track_duration_sec": 120,
+        "bpm": 155,
+        "vocal_presence_ratio": 0.45,
+        "hourly_rate_usd": 100.0,
+        "transcript_text": "We need to fix the Stripe checkout modal, persist dark mode state in localStorage, and add a backward-compatible Postgres migration before Friday."
+    })
+    assert sheet_res.status_code == 200
+    sheet_data = sheet_res.json()
+    assert sheet_data["tabpfn_metrics"]["hourly_rate_usd"] == 100.0
+    assert "$100/hr" in sheet_data["sheet_content"]["client_quote_reply"]
+
+
+def test_extract_audiobites_ui_contract_keys():
+    payload = {
+        "title": "Client Architecture Voice Note",
+        "total_duration_sec": 120,
+        "transcript_text": "First we must refactor the checkout modal to support UPI QR payments. Second we need to fix dark mode persistence across page reloads. Third we must run the database migration safely."
+    }
+    res = client.post("/api/extract-audiobites", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "bites" in data and "audiobites" in data
+    assert len(data["audiobites"]) >= 1
+    first_bite = data["audiobites"][0]
+    for required_key in ["quoted_soundbite", "takeaway", "stage_tag", "audio_cue", "verbatim_quote", "key_takeaway", "signal_score_pct"]:
+        assert required_key in first_bite
+        assert first_bite[required_key] is not None
+
+
+def test_youtube_metadata_preset_and_ui_fields():
+    res = client.post("/api/youtube-metadata", json={"url": "https://www.youtube.com/watch?v=Kmms5i_qQyE"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["youtube_id"] == "Kmms5i_qQyE"
+    assert data["duration_sec"] == data["total_duration_sec"]
+    assert data["windows_count"] == len(data["candidate_windows"])
+    assert data["clean_url"] == data["deep_link_url"]
+    assert len(data["transcript"]) > 50
+
+
+

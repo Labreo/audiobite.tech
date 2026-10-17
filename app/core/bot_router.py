@@ -113,7 +113,7 @@ async def handle_telegram_update(update: Dict[str, Any], upload_dir: str) -> Dic
     if not chat_id:
         return {"status": "ignored", "reason": "no_chat_id"}
 
-    token = settings.telegram_bot_token or os.environ.get("TELEGRAM_BOT_TOKEN", "8921939042:AAGmwSfBApr1Q_oPfhJKvWLPLYYOhfIKBOI")
+    token = settings.telegram_bot_token or os.environ.get("TELEGRAM_BOT_TOKEN", "test_bot_token_offline")
     if not token:
         logger.warning("Telegram update received but TELEGRAM_BOT_TOKEN is not configured.")
         return {"status": "unconfigured", "detail": "TELEGRAM_BOT_TOKEN required in environment"}

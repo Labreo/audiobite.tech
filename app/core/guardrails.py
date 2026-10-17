@@ -205,14 +205,16 @@ def enforce_audiobite_guardrails(
     for i, b in enumerate(bites):
         item = dict(b)
 
-        raw_quote = str(item.get("verbatim_quote", ""))
+        raw_quote = str(item.get("verbatim_quote") or item.get("quoted_soundbite") or "")
         clean_quote, tags1 = sanitize_stage_directives(raw_quote)
         item["verbatim_quote"] = clean_quote
+        item["quoted_soundbite"] = clean_quote
         leaked_tags.extend(tags1)
 
-        raw_takeaway = str(item.get("key_takeaway", ""))
+        raw_takeaway = str(item.get("key_takeaway") or item.get("takeaway") or "")
         clean_takeaway, tags2 = sanitize_stage_directives(raw_takeaway)
         item["key_takeaway"] = clean_takeaway
+        item["takeaway"] = clean_takeaway
         leaked_tags.extend(tags2)
 
         start_sec = int(item.get("start_sec", 0))
@@ -242,12 +244,27 @@ def enforce_audiobite_guardrails(
         item["end_mmss"] = seconds_to_timestamp(end_sec)
         item["duration_sec"] = end_sec - start_sec
 
+        speaker_intent = str(item.get("speaker_intent") or item.get("stage_tag") or "Core Requirement")
+        loop_rec = str(
+            item.get("loop_recommendation")
+            or item.get("audio_cue")
+            or f"Loop {item['start_mmss']}–{item['end_mmss']} for rapid review"
+        )
+        item["speaker_intent"] = speaker_intent
+        item["stage_tag"] = speaker_intent
+        item["loop_recommendation"] = loop_rec
+        item["audio_cue"] = loop_rec
+        if "tags" not in item or not isinstance(item["tags"], list):
+            item["tags"] = ["high_signal", "soundbite"]
+
         if verified_scores and i < len(verified_scores):
             tab_score = round(float(verified_scores[i]), 1)
             model_score = round(float(item.get("signal_score_pct", tab_score)), 1)
             if abs(model_score - tab_score) > 2.0:
                 score_drifts.append(f"Bite #{i+1} score drift: {model_score}% -> {tab_score}%")
                 item["signal_score_pct"] = tab_score
+            else:
+                item["signal_score_pct"] = model_score
         else:
             item["signal_score_pct"] = round(float(item.get("signal_score_pct", 88.0)), 1)
 

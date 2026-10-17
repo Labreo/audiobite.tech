@@ -42,6 +42,7 @@ def generate_audiobite_action_card_pdf(
     time_saved_min: float = 3.5,
     action_hours: float = 5.5,
     quote_usd: float = 220.0,
+    hourly_rate_usd: float = 40.0,
     executive_summary: Optional[List[str]] = None,
     action_items: Optional[List[Dict[str, str]]] = None,
     client_reply: Optional[str] = None,
@@ -135,7 +136,7 @@ def generate_audiobite_action_card_pdf(
 
     # Recording Title & Source
     story.append(Paragraph(f"<b>{title}</b>", title_style))
-    story.append(Paragraph(f"SOURCE: {source.upper()} • DURATION: {duration_str} • TEMPO: {speaking_rate} WPM", subtitle_style))
+    story.append(Paragraph(f"SOURCE: {source.upper()} • DURATION: {duration_str} • TEMPO: {speaking_rate} WPM • RATE: ${hourly_rate_usd:.0f}/HR", subtitle_style))
     story.append(Spacer(1, 8))
 
     # TabPFN Telemetry Summary Table
@@ -144,7 +145,7 @@ def generate_audiobite_action_card_pdf(
             Paragraph("<b>SIGNAL PURITY</b>", meta_style),
             Paragraph("<b>SCOPE / AMBIGUITY RISK</b>", meta_style),
             Paragraph("<b>LISTENING TIME SAVED</b>", meta_style),
-            Paragraph("<b>ESTIMATED EFFORT</b>", meta_style)
+            Paragraph(f"<b>ESTIMATED EFFORT (@ ${hourly_rate_usd:.0f}/HR)</b>", meta_style)
         ],
         [
             Paragraph(f"<font size=13 color='#3d5a45'><b>{signal_purity_pct:.1f}%</b></font>", body_style),
@@ -171,7 +172,7 @@ def generate_audiobite_action_card_pdf(
     exec_items = executive_summary or [
         "Audio recording distilled into structured action items with verified timestamps.",
         "Rambling tangents and conversational filler stripped by 65%.",
-        f"Scoped at {action_hours:.1f} engineering hours (${quote_usd:.0f} @ $40/hr)."
+        f"Scoped at {action_hours:.1f} engineering hours (${quote_usd:.0f} @ ${hourly_rate_usd:.0f}/hr)."
     ]
     for bullet in exec_items:
         story.append(Paragraph(f"• {bullet}", body_style))
@@ -418,14 +419,16 @@ def generate_citation_card_pdf(
 
     # Bites Cards
     for i, b in enumerate(bites):
-        s_mmss = b.get("start_mmss", "00:00")
-        e_mmss = b.get("end_mmss", "00:30")
-        dur = b.get("duration_sec", 30)
-        score = b.get("signal_score_pct", 88.0)
-        quote = b.get("verbatim_quote", "")
-        takeaway = b.get("key_takeaway", "")
-        loop_cue = b.get("loop_recommendation", f"Loop {s_mmss}–{e_mmss}")
-        deep_link = b.get("deep_link_url", "https://audiobite.tech")
+        s_sec = int(b.get("start_sec", 0))
+        e_sec = int(b.get("end_sec", s_sec + 30))
+        s_mmss = b.get("start_mmss") or f"{s_sec // 60:02d}:{s_sec % 60:02d}"
+        e_mmss = b.get("end_mmss") or f"{e_sec // 60:02d}:{e_sec % 60:02d}"
+        dur = b.get("duration_sec", max(1, e_sec - s_sec))
+        score = float(b.get("signal_score_pct", 88.0))
+        quote = b.get("verbatim_quote") or b.get("quoted_soundbite") or ""
+        takeaway = b.get("key_takeaway") or b.get("takeaway") or ""
+        loop_cue = b.get("loop_recommendation") or b.get("audio_cue") or f"Loop {s_mmss}–{e_mmss}"
+        deep_link = b.get("deep_link_url") or f"https://audiobite.tech/?t={s_sec}"
 
         bite_top = Table(
             [
