@@ -274,7 +274,9 @@ Week 2 challenges participants to build something someone would pay for and secu
 
 I shared AudioBite with an active freelance collaborator who builds client web applications and struggles with endless audio messages.
 
-During testing, a client forwarded an unstructured two-minute voice note demanding unplanned database updates and UI revisions. My collaborator ran the recording through AudioBite.
+During testing, a client forwarded an unstructured two-minute voice note demanding unplanned database updates and UI revisions. My collaborator forwarded the recording directly into AudioBite's Telegram bot ([@AudioBiteStudioBot](https://t.me/AudioBiteStudioBot)):
+
+![AudioBite Telegram Bot Interface](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_telegram_bot.png?v=1)
 
 Within fifteen seconds, the tool produced:
 - A four-point executive action brief.
