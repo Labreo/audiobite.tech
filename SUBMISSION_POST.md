@@ -1,9 +1,9 @@
 ---
-title: "From $0 to My First $10: How I Built AudioBite with TabPFN and Gemma 4 to End the Voice-Note Chaos Tax"
-published: false
+title: "From $0 to My First $10: How I Built AudioBite.tech to End the Voice-Note Chaos Tax"
+published: true
 tags: hf26challenge, devchallenge, tabpfn, render
-cover_image: https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/cover_tactile_analog_dev_1000x420.jpg
-description: "How I built AudioBite with TabPFN v2 and Gemma 4 to turn chaotic WhatsApp voice notes into structured deliverables and landed my first paying user."
+cover_image: https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/cover_audiobite_tech_1000x420.jpg
+description: "How I built AudioBite.tech to turn chaotic WhatsApp voice notes into structured deliverables and landed my first paying user."
 ---
 
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)*
