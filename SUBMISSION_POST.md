@@ -38,7 +38,12 @@ Meet **[AudioBite.tech](https://audiobite.tech)**: the tactile voice-note, audio
 
 ## Demo
 
-AudioBite runs live on [https://audiobite.tech](https://audiobite.tech) with four straightforward input workflows. You can test complete audio processing in seconds without recording your voice:
+**Live Web Studio: [https://audiobite.tech](https://audiobite.tech)**  
+**Telegram Bot: [@AudioBiteStudioBot](https://t.me/AudioBiteStudioBot)**
+
+![AudioBite Interactive Studio Walkthrough](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_demo.gif?v=1)
+
+AudioBite runs live with four straightforward input workflows. You can test complete audio processing in seconds without recording your voice:
 
 ![AudioBite Studio Interface](https://raw.githubusercontent.com/Labreo/audiobite.tech/main/docs/assets/audiobite_hero_studio.png?v=1)
 
@@ -192,7 +197,7 @@ async def handle_telegram_update(update: Dict[str, Any], upload_dir: str) -> Dic
     return {"status": "ok", "action": "processed"}
 ```
 
-### 3. Real Hurdles Solved: Guardrails and Sentry Tracing
+### 3. Real Hurdles Solved: Guardrails, Sentry, and Render
 
 Early prototypes revealed two major flaws in generative language output:
 1. **Timestamp Bounds Violations**: Gemma cited timestamps past the audio length (for example, citing minute 03:45 on a two-minute clip).
@@ -218,6 +223,11 @@ Under our Sentry DSN, traces record four execution layers:
 2. `ai.tabular.tabpfn` (Rows scored: 88, latency: 89ms)
 3. `gen_ai.chat` (Model: `gemma-4-31b-it`, cost: $0.00)
 4. `guardrail.intervention` (Recorded clamping events)
+
+#### One Real Deploy Surprise on Render's Free Tier
+Deploying on Render's 512MB RAM free instance exposed two real production quirks:
+- **Memory Ceiling**: Heavy GPU frameworks trigger OOM restarts on 512MB RAM instances. TabPFN runs cleanly on CPU with NumPy and SciPy, completing Bayesian passes in 89ms while consuming under 220MB of RAM.
+- **Uptime Crawler HEAD Requests**: Uptime monitors and bot crawlers probe sites with `HEAD /` requests. FastAPI returned `405 Method Not Allowed` by default on `HEAD /` until I bound `@app.head("/")` to the root handler.
 
 ### 4. Automated Test Verification (58 Tests Passing)
 
